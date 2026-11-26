@@ -845,9 +845,11 @@ that names the list in `aria-controls` and goes on being typed in. The active op
 `Menu`'s reason: the caller writes it on one component and `controls` on the other. A key with
 Shift or Alt held, a key an input method is using (`isComposing`, or `keyCode` 229, which is how
 WebKit sends the key that commits a composition), and Enter or an arrow with Control or Command
-are the control's and never the list's. **It never moves the page**: the active option is shown by
-scrolling the nearest box that scrolls it, and an option already active when the list is enhanced
-is left where the page put it. **It chooses nothing**: it says
+are the control's and never the list's. **It moves the page only as far as the active option
+needs**: a move scrolls the box that holds the option and, where the option would otherwise leave
+the window, the page, each the least way, because with the focus held elsewhere the active option
+is the only sign of where the keyboard is. An option already active when the list is enhanced is
+left where the page put it, so a page opens at its top. **It chooses nothing**: it says
 `nd-option-active` and `nd-option-choose`, each with the list's name and the option's value, and
 what is `selected` afterwards is the caller's to render. **And the caller may move the mark
 itself**: an interface that is a view renders `OptionItem { active }`, and the script takes the

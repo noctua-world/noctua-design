@@ -58,9 +58,10 @@
 //    tab stop leaves the focus in the control the reader was typing in.
 // 4. It never filters. The caller holds the matcher's answer and renders the
 //    options it found, with `hits` on each (`NOCTUA.md §12.4`).
-// 5. It never scrolls the page. The active option is shown by moving the
-//    nearest box that scrolls it, and an option already active when the list
-//    is enhanced is left where the page put it.
+// 5. It never moves the page further than the active option needs. A move
+//    scrolls the box that holds the option, and the page only where the
+//    option would otherwise leave the window, each the least way. An option
+//    already active when the list is enhanced is left where the page put it.
 // 6. It never answers a key an input method is using, or a key with Shift or
 //    Alt held on a control that names the list.
 
@@ -211,34 +212,20 @@ function adopt(state, show) {
 }
 
 /**
- * The box that scrolls an option, short of the page: the list, or a drawer or
- * a panel it stands in. `null` where nothing but the page scrolls it.
- */
-function scroller(option) {
-  for (let box = option.parentElement; box && box !== document.body; box = box.parentElement) {
-    if (box === document.documentElement) return null;
-    const { overflowY } = getComputedStyle(box);
-    if ((overflowY === "auto" || overflowY === "scroll") && box.scrollHeight > box.clientHeight) return box;
-  }
-  return null;
-}
-
-/**
- * Brings an option into the view of the box that scrolls it, the least way.
+ * Brings an option that the keyboard or the caller moved to into view, the
+ * least way: the box that scrolls it, and every box around that one, the page
+ * included, each only as far as the option needs.
  *
- * NEVER THE PAGE. `scrollIntoView` scrolls every box around the option up to
- * the document, so a reader walking a list in a drawer had the whole window
- * moved under them, and a list enhanced with an option already active scrolled
- * the page to itself as it loaded. Only the nearest box that scrolls is moved.
+ * THE PAGE MOVES WHEN THE OPTION WOULD LEAVE THE WINDOW. The active option is
+ * the only sign of where the keyboard is, since the focus stays on the list or
+ * the control that names it, so a walk that left it below the window would
+ * leave the reader with nothing to read. An option the window already shows
+ * moves nothing. A move is the only time it is called: the option active when
+ * the list is enhanced is left where the page put it, or a list on a page as it
+ * loaded would scroll the page to itself.
  */
 function reveal(option) {
-  const box = option ? scroller(option) : null;
-  if (!box) return;
-  const at = option.getBoundingClientRect();
-  const top = box.getBoundingClientRect().top + box.clientTop;
-  const bottom = top + box.clientHeight;
-  if (at.top < top) box.scrollTop -= top - at.top;
-  else if (at.bottom > bottom) box.scrollTop += at.bottom - bottom;
+  option?.scrollIntoView({ block: "nearest", inline: "nearest" });
 }
 
 function say(state, type, option) {

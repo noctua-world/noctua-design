@@ -343,7 +343,34 @@ test("a key an input method is using walks nothing and chooses nothing", async (
   ).toEqual([]);
 });
 
-test("walking a list moves the box that scrolls it, and never the page", async ({ page }) => {
+/**
+ * Where the active option of the list `name` is: how far inside its list's own
+ * box and inside the part of the window the site's sticky header leaves, at
+ * each end, and how far the page and the box have scrolled. A negative room is
+ * that much of the option out of sight.
+ */
+const seen = (page, name) =>
+  box(page, name).evaluate((el) => {
+    const option = el.querySelector('[data-nd-active="true"]').getBoundingClientRect();
+    const frame = el.getBoundingClientRect();
+    const header = document.querySelector(".nd-header")?.getBoundingClientRect().bottom ?? 0;
+    return {
+      page: window.scrollY,
+      scrolled: el.scrollTop,
+      box: [option.top - frame.top, frame.bottom - option.bottom],
+      window: [option.top - Math.max(header, 0), window.innerHeight - option.bottom],
+    };
+  });
+
+/** Holds an option inside a box: `room` is `[above, below]`, from `seen`. */
+function inside(room, what) {
+  expect(room[0], `${what}: the option is cut off above`).toBeGreaterThanOrEqual(-0.5);
+  expect(room[1], `${what}: the option is cut off below`).toBeGreaterThanOrEqual(-0.5);
+}
+
+test("walking a list moves the box that scrolls it, and the page only as far as the option needs", async ({
+  page,
+}) => {
   await open(page);
   const items = box(page, "walk");
   // A LIST TALLER THAN ITS BOX, as a command list in a drawer is, and a page
@@ -360,16 +387,66 @@ test("walking a list moves the box that scrolls it, and never the page", async (
   const before = await page.evaluate(() => window.scrollY);
   await page.keyboard.press("End");
   await expect(active(page, "walk")).toHaveCount(1);
-  expect(await page.evaluate(() => window.scrollY), "walking the list scrolled the page").toBe(before);
-  // The box was scrolled to the option instead, and the option is in it.
-  const inside = await items.evaluate((el) => {
-    const frame = el.getBoundingClientRect();
-    const option = el.querySelector('[data-nd-active="true"]').getBoundingClientRect();
-    return { scrolled: el.scrollTop, top: option.top - frame.top, bottom: frame.bottom - option.bottom };
+  const end = await seen(page, "walk");
+  // The box was scrolled to the option, and the option is in it.
+  expect(end.scrolled, "the list's own box did not scroll to the option").toBeGreaterThan(0);
+  inside(end.box, "End, in the list's box");
+  // AND IN THE WINDOW, which the page moved to by the least way: the option's
+  // foot is at the window's.
+  inside(end.window, "End, in the window");
+  expect(end.page, "the option left the window and the page stayed").toBeGreaterThan(before);
+  expect(end.window[1], "the page moved further than the option needed").toBeLessThanOrEqual(1);
+
+  // A MOVE THE WINDOW ALREADY SHOWS moves the box alone.
+  await page.keyboard.press("ArrowUp");
+  const up = await seen(page, "walk");
+  inside(up.box, "the up arrow, in the list's box");
+  inside(up.window, "the up arrow, in the window");
+  expect(up.page, "a move inside the window scrolled the page").toBe(end.page);
+});
+
+test("where only the page scrolls a list, a walk keeps the active option in the window", async ({ page }) => {
+  // The interface's smallest window, and a list as long as a caller's.
+  await page.setViewportSize({ width: 320, height: 240 });
+  await open(page);
+  const items = box(page, "walk");
+  await items.evaluate((el) => {
+    for (let at = 0; at < 9; at += 1) {
+      const option = el.lastElementChild.cloneNode(true);
+      option.removeAttribute("id");
+      option.removeAttribute("data-nd-active");
+      option.dataset.ndValue = `more-${at}`;
+      el.append(option);
+    }
   });
-  expect(inside.scrolled, "the list's own box did not scroll to the option").toBeGreaterThan(0);
-  expect(inside.top).toBeGreaterThanOrEqual(-0.5);
-  expect(inside.bottom).toBeGreaterThanOrEqual(-0.5);
+  const count = await list(page, "walk").locator(".nd-option-item").count();
+  // The list starts half way down the window, so the walk runs off its foot.
+  await items.evaluate((el) => {
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2);
+    el.focus({ preventScroll: true });
+  });
+  await expect(active(page, "walk")).toHaveCount(1);
+  const start = await seen(page, "walk");
+  expect(start.scrolled, "the list has a box of its own that scrolls").toBe(0);
+
+  let moved = false;
+  for (let step = 1; step < count; step += 1) {
+    const from = (await seen(page, "walk")).page;
+    await page.keyboard.press("ArrowDown");
+    const at = await seen(page, "walk");
+    inside(at.window, `down to option ${step + 1} of ${count}`);
+    if (at.page !== from) {
+      moved = true;
+      expect(at.window[1], `down to option ${step + 1}: the page moved further than it needed`).toBeLessThanOrEqual(1);
+    }
+  }
+  expect(moved, "the walk never reached the foot of the window").toBe(true);
+
+  // AND BACK UP, past the header that sticks to the top of the window.
+  await page.keyboard.press("Home");
+  const home = await seen(page, "walk");
+  inside(home.window, "Home, below the header");
+  expect(home.window[0], "Home: the page moved further than it needed").toBeLessThanOrEqual(1);
 });
 
 test("a released list answers no key, and can be enhanced again", async ({ page }) => {
