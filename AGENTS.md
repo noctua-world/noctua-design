@@ -473,10 +473,11 @@ Record the commit in `assets/vendor/nc-fuzzy/ATTRIBUTION.md`, run `cargo xtask d
 and change the section of `search-match.js` named like the module that changed until every row
 passes. The copy, its record and the matcher land in one commit.
 
-**The mirror gate is `noctua-central`'s.** Its own check is to hold its corpus to the checksum
-recorded here, so a row changed there fails there until this copy is refreshed. That gate arrives
-with the desktop interface (`NOCTUA-PLAN.md`, Stage 16). Until it does, a change there is not
-seen here, and this procedure is all that keeps the two files one.
+**The mirror gate is `noctua-central`'s, and neither gate reads the other repository.** Its own
+`cargo xtask check` pins its corpus by its SHA-256 (`FUZZY_CORPUS_SHA256`), so a row changed there
+fails there until the pin is written again, with a sentence saying to refresh this copy. That pin
+is the line `SHA256SUMS` holds here once the copy is refreshed. CI clones each repository alone, so
+nothing compares the two lines, and this procedure is what keeps the two files one.
 
 **A position is a code point, never a UTF-16 unit.** Every index the matcher returns counts what
 spreading a string counts, so a surface slices `[...text]` and never `text.slice()`. A `Hit` is one

@@ -180,6 +180,22 @@ test("the corpus reaches this file at all", () => {
   expect(has("order", "verify", "1")).toBe(true);
   expect(has("match", "verificar zzz", "-")).toBe(true);
   expect(has("match", "ver verificar", "0-2|0-8")).toBe(true);
+  // AND THE FIVE ROWS THIS FILE ONCE ASSERTED ON ITS OWN, whole. Each is the
+  // smallest input on which the matcher and one planted difference answer
+  // apart, and each is replayed by the tests below now, so a corpus that lost
+  // one would lose the only thing holding that part of the rule here.
+  const holds = (...written) =>
+    all.some((row) => shown([row.kind, ...row.columns]) === shown(written));
+  // Earliness counts the characters before a match as written, separators included.
+  expect(holds("order", "x", "-x;x", "1;0")).toBe(true);
+  // A run opening a word wins over an earlier run inside a word.
+  expect(holds("match", "AA", "baAA", "2-3")).toBe(true);
+  // Of two runs inside a word, the one holding a word start, not the first found.
+  expect(holds("match", "AA", "BAaA", "2-3")).toBe(true);
+  // The words' tiers are summed, not the largest taken.
+  expect(holds("order", "xb b", "xaabx;axb", "1;0")).toBe(true);
+  // A title-case letter is no capital, so after a small letter it opens no word.
+  expect(holds("order", "\u{1C5}", "x\u{1C5}; \u{1C5}a", "1;0")).toBe(true);
 });
 
 test("a row the reader cannot read fails naming its line", () => {
@@ -275,45 +291,6 @@ test("every order row ranks as it says", () => {
 // The bounds, the packed score and the two shapes a surface draws from. The
 // crate holds the first two in its own unit tests; the last two exist only
 // here, because only a surface in this language asks for them.
-
-test("five parts of the rule no row of the corpus tells apart yet", () => {
-  // ROWS IN WAITING. Each of these is a claim about the rule itself, so its
-  // place is the corpus, which belongs to `nc-fuzzy` and is never edited here;
-  // until a release of it carries them they are asserted directly, written as
-  // the row each would be. Every one is the smallest input on which the
-  // matcher and one planted difference give different answers, and each was
-  // confirmed by planting that difference in the module this file imports.
-  const matcher = new Matcher();
-  const order = (asked, items) =>
-    matcher.ranked(Query.parse(asked), items.map(item)).map((ranked) => ranked.index);
-  const where = (asked, text) => matcher.matched(Query.parse(asked), item(text)).hits[0].positions;
-
-  // order  x  -x;x  1;0
-  // Earliness counts the characters before the match as they were written,
-  // separators included, and not as the field reads with them taken out.
-  expect(order("x", ["-x", "x"])).toEqual([1, 0]);
-
-  // match  AA  baAA  2-3
-  // Of two runs, the one that opens a word wins wherever it is: the earlier
-  // one, inside a word, has the better earliness and still loses.
-  expect(where("AA", "baAA")).toEqual([2, 3]);
-
-  // match  AA  BAaA  2-3
-  // And of two runs inside a word, the one holding a word start: the tier
-  // ties them, and the first found does not win for being first.
-  expect(where("AA", "BAaA")).toEqual([2, 3]);
-
-  // order  xb b  xaabx;axb  1;0
-  // The words' tiers are summed: two words found as runs outrank one found
-  // as a run and one scattered. By the larger tier alone the two items tie,
-  // and the scattered word's start at the head of its field decides for it.
-  expect(order("xb b", ["xaabx", "axb"])).toEqual([1, 0]);
-
-  // order  \u{1C5}  x\u{1C5};\u{20}\u{1C5}a  1;0
-  // A title-case letter is no capital, so after `x` it opens no word and the
-  // item where it follows a separator is the one matched at a start.
-  expect(order("\u{1C5}", ["x\u{1C5}", " \u{1C5}a"])).toEqual([1, 0]);
-});
 
 test("a query longer than its bound is refused, counted in characters", () => {
   expect(() => Query.parse("a".repeat(QUERY_CHARS_MAX))).not.toThrow();
