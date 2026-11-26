@@ -48,7 +48,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"Drawer { collapsed: true, … }",
+        r#"Drawer { id: "…", collapsed: true, … } beside Button { controls: "…" }"#,
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-window"))],
@@ -70,6 +70,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                                 ("size", Value::Text("small")),
                                 ("icon", Value::Text("panel-bottom")),
                                 ("action", Value::Text("drawer-toggle")),
+                                ("controls", Value::Text("drawer-shut")),
                                 ("label", Value::Message(Key::ExampleDrawerToggle)),
                             ],
                             children: &[],
@@ -80,6 +81,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     name: "Drawer",
                     props: &[
                         ("name", Value::Text("drawer-shut")),
+                        ("id", Value::Text("drawer-shut")),
                         ("label", Value::Message(Key::ExampleDrawerLabel)),
                         ("collapsed", Value::Bool(true)),
                     ],

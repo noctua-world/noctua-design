@@ -1404,6 +1404,7 @@ fn drawer(
     let name_ = scope
         .find(props, "name")
         .expect("Drawer.name is required and this tree does not set it");
+    let id_ = scope.find(props, "id");
     let label_ = scope
         .find(props, "label")
         .expect("Drawer.label is required and this tree does not set it");
@@ -1416,6 +1417,7 @@ fn drawer(
     rsx! {
         Drawer {
             name: name_,
+            id: id_,
             label: label_,
             side: side_,
             collapsed: collapsed_,

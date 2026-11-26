@@ -2165,6 +2165,7 @@ export type MessageKey =
   | "component.drawer.guidance"
   | "component.drawer.a11y-notes"
   | "component.drawer.prop.name.doc"
+  | "component.drawer.prop.id.doc"
   | "component.drawer.prop.label.doc"
   | "component.drawer.prop.side.doc"
   | "component.drawer.prop.collapsed.doc"

@@ -80,7 +80,12 @@ function enhance(drawer) {
   }, { signal });
 
   drawer.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) return;
+    // An input method's Escape cancels its composition and is not the
+    // reader's: `isComposing`, or 229, which WebKit reports for the key that
+    // ends one after `compositionend`, not composing.
+    if (event.key !== "Escape" || event.defaultPrevented || event.isComposing || event.keyCode === 229) {
+      return;
+    }
     // A surface open inside the drawer answers first and stops the key, as
     // every surface in this directory does, so reaching here means nothing
     // inside wanted it. Stopped here for the same reason: a `Dialog` around a

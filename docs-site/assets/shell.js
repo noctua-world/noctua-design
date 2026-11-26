@@ -1886,6 +1886,12 @@ function releaseDialogShows(root = document) {
 // has to be raised again: a control marked `drawer-toggle` turns the drawer in
 // its own window, and the drawer's own event shuts it. What the component owes
 // is in `dist/drawer.js` and is untouched: `inert`, and the focus it gives back.
+//
+// AND THE CONTROL SAYS WHAT IT TURNED. A control that names the drawer in
+// `aria-controls` is told in `aria-expanded` whether the drawer is open, as a
+// caller rendering `Button { expanded }` again would tell it, and from the
+// start: `Button` writes the attribute only when it is true, and a toggle with
+// none says nothing about a drawer that is shut.
 
 /** Every example window already wired, so a subtree can be released. */
 const drawerWindows = new WeakMap();
@@ -1898,12 +1904,21 @@ function enhanceDrawerWindows(root = document) {
     drawerWindows.set(stage, binding);
     // The window this control is in, never the page: two drawers on one page
     // would otherwise each be turned by the other's control.
+    const say = (drawer) => {
+      const open = drawer.getAttribute("data-nd-collapsed") !== "true";
+      for (const control of stage.querySelectorAll('[data-nd-action="drawer-toggle"][aria-controls]')) {
+        control.setAttribute("aria-expanded", String(open));
+      }
+    };
     const turn = (collapsed) => {
       const drawer = stage.querySelector("[data-nd-drawer]");
       if (!drawer) return;
       const next = collapsed ?? drawer.getAttribute("data-nd-collapsed") !== "true";
       drawer.setAttribute("data-nd-collapsed", String(next));
+      say(drawer);
     };
+    const drawer = stage.querySelector("[data-nd-drawer]");
+    if (drawer) say(drawer);
     stage.addEventListener("click", (event) => {
       if (event.target.closest?.('[data-nd-action="drawer-toggle"]')) turn();
     }, { signal: binding.signal });

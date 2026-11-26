@@ -11,6 +11,8 @@ export type DrawerSide = "bottom" | "start" | "end";
 export interface DrawerProps {
   /** What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required. */
   name: string;
+  /** The drawer's id, for the control that opens and shuts it to name in `controls`. */
+  id?: string;
   /** The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required. */
   label: string;
   /** Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in. */

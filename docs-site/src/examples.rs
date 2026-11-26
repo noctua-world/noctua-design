@@ -489,7 +489,7 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
     (
         "drawer",
         example!(
-            r#"Drawer { name: "…", label: "…",
+            r#"Drawer { name: "…", id: "…", label: "…",
     DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }
     …
     DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }
@@ -2417,7 +2417,7 @@ const DRAWER: &[Example] = &[
         Key::ExampleDrawerBasic
     ),
     example!(
-        r"Drawer { collapsed: true, … }",
+        r#"Drawer { id: "…", collapsed: true, … } beside Button { controls: "…" }"#,
         Key::ExampleDrawerCollapsed
     ),
     example!(

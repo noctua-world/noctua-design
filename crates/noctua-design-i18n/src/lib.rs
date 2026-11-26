@@ -4434,6 +4434,8 @@ pub enum Key {
     ComponentDrawerA11yNotes,
     /// `component.drawer.prop.name.doc`
     ComponentDrawerPropNameDoc,
+    /// `component.drawer.prop.id.doc`
+    ComponentDrawerPropIdDoc,
     /// `component.drawer.prop.label.doc`
     ComponentDrawerPropLabelDoc,
     /// `component.drawer.prop.side.doc`
@@ -6922,7 +6924,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3399] = [
+    pub const ALL: [Self; 3400] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -9080,6 +9082,7 @@ impl Key {
         Self::ComponentDrawerGuidance,
         Self::ComponentDrawerA11yNotes,
         Self::ComponentDrawerPropNameDoc,
+        Self::ComponentDrawerPropIdDoc,
         Self::ComponentDrawerPropLabelDoc,
         Self::ComponentDrawerPropSideDoc,
         Self::ComponentDrawerPropCollapsedDoc,
@@ -12731,6 +12734,7 @@ impl Key {
             Self::ComponentDrawerGuidance => "component.drawer.guidance",
             Self::ComponentDrawerA11yNotes => "component.drawer.a11y-notes",
             Self::ComponentDrawerPropNameDoc => "component.drawer.prop.name.doc",
+            Self::ComponentDrawerPropIdDoc => "component.drawer.prop.id.doc",
             Self::ComponentDrawerPropLabelDoc => "component.drawer.prop.label.doc",
             Self::ComponentDrawerPropSideDoc => "component.drawer.prop.side.doc",
             Self::ComponentDrawerPropCollapsedDoc => "component.drawer.prop.collapsed.doc",
@@ -18669,6 +18673,9 @@ impl Locale {
                 }
                 Key::ComponentDrawerPropNameDoc => {
                     "What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required."
+                }
+                Key::ComponentDrawerPropIdDoc => {
+                    "The drawer's id, for the control that opens and shuts it to name in `controls`."
                 }
                 Key::ComponentDrawerPropLabelDoc => {
                     "The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required."
@@ -26404,6 +26411,9 @@ impl Locale {
                 }
                 Key::ComponentDrawerPropNameDoc => {
                     "O que é esta gaveta, como um script a encontra. É o `name` em `nd-drawer-dismiss`. Obrigatório."
+                }
+                Key::ComponentDrawerPropIdDoc => {
+                    "O id da gaveta, para o controle que a abre e fecha nomeá-la em `controls`."
                 }
                 Key::ComponentDrawerPropLabelDoc => {
                     "O nome da gaveta, no idioma da pessoa. Vira `aria-label` no `region`. Obrigatório."
@@ -34287,6 +34297,9 @@ impl Locale {
                 }
                 Key::ComponentDrawerPropNameDoc => {
                     "⟦Whaat thiis draaweer iis, aas aa scriipt fiinds iit. IIt iis thee `naamee` iin `nd-draaweer-diismiiss`. Reequuiireed.⟧"
+                }
+                Key::ComponentDrawerPropIdDoc => {
+                    "⟦Thee draaweer's iid, foor thee coontrool thaat oopeens aand shuuts iit too naamee iin `coontrools`.⟧"
                 }
                 Key::ComponentDrawerPropLabelDoc => {
                     "⟦Thee naamee oof thee draaweer, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee `reegiioon`. Reequuiireed.⟧"

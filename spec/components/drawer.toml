@@ -53,6 +53,14 @@ required = true
 attribute = "data-nd-drawer"
 doc = "What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required."
 
+# AN ID OF ITS OWN, FOR THE CONTROL THAT TURNS IT. A control that opens or
+# shuts a drawer names it in `aria-controls` and says in `aria-expanded`
+# whether it is open, and `aria-controls` takes an id.
+[prop.id]
+type = "text"
+attribute = "id"
+doc = "The drawer's id, for the control that opens and shuts it to name in `controls`."
+
 [prop.label]
 type = "text"
 required = true

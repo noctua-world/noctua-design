@@ -4588,6 +4588,18 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
                 doc: Key::ComponentDrawerPropNameDoc,
             },
             DocProp {
+                name: "id",
+                kind: "text",
+                values: &[],
+                elements: &[],
+                default: None,
+                attribute: Some("id"),
+                required: false,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentDrawerPropIdDoc,
+            },
+            DocProp {
                 name: "label",
                 kind: "text",
                 values: &[],

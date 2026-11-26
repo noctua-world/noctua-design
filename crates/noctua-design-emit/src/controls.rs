@@ -4264,6 +4264,7 @@ const DRAWER_DIOXUS: &str = r#"    let root = format!("nd-drawer {class}");
     rsx! {
         div {
             class: "{root}",
+            id,
             role: "region",
             "aria-label": "{label}",
             "data-nd-drawer": "{name}",
@@ -4281,6 +4282,7 @@ const DRAWER_REACT: &str = r#"  const root = ["nd-drawer", className].filter(Boo
     "div",
     {
       className: root,
+      id,
       role: "region",
       "aria-label": label,
       "data-nd-drawer": name,

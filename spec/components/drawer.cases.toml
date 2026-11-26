@@ -14,6 +14,18 @@ children = "Commands"
 expect = { attrs = { role = "region", "aria-label" = "Drawer", "data-nd-drawer" = "pages", "data-nd-side" = "bottom", "data-nd-collapsed" = "false" }, absent = ["inert"], present = [":scope > .nd-drawer-panel"] }
 
 [[case]]
+name = "a drawer takes the id a control names it by, and writes none of its own"
+note = "The control that opens and shuts a drawer names it in `aria-controls`, which takes an id. Without `id` there is none, because an id two drawers both derived would be one id twice."
+props = { name = "pages", label = "Drawer", id = "pages-drawer" }
+expect = { attrs = { id = "pages-drawer", "data-nd-drawer" = "pages" } }
+
+[[case]]
+name = "a drawer with no id carries none"
+note = "An empty `id` is an invalid one, and a body that wrote one for a missing prop would put it on every drawer."
+props = { name = "pages", label = "Drawer" }
+expect = { absent = ["id"] }
+
+[[case]]
 name = "a collapsed drawer says so, and nothing in it can be reached"
 note = "The stylesheet hides a collapsed drawer by `data-nd-collapsed`. The script writes `inert` beside it, so a control inside cannot take the focus while the drawer slides shut."
 props = { name = "pages", label = "Drawer", collapsed = true }

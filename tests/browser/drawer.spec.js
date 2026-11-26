@@ -277,11 +277,19 @@ test("a collapsed drawer is nothing along its edge, and nothing in it can be rea
   // The walk is not blind to drawers: it went through the open ones.
   expect(stops.some((one) => one.inside === "overview-drawer"), "Tab reached no drawer at all").toBe(true);
 
-  // OPENED, EVERYTHING IN IT IS BACK, and the focus did not move to bring it.
+  // THE CONTROL THAT TURNS IT NAMES IT, AND SAYS WHETHER IT IS OPEN, before
+  // anything was pressed: a toggle that says nothing about a shut drawer is
+  // a button a screen reader cannot tell from any other.
   const toggle = frame.locator('[data-nd-action="drawer-toggle"]').first();
+  await expect(toggle).toHaveAttribute("aria-controls", "drawer-shut");
+  await expect(shut).toHaveAttribute("id", "drawer-shut");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+  // OPENED, EVERYTHING IN IT IS BACK, and the focus did not move to bring it.
   await toggle.focus();
   await page.keyboard.press("Enter");
   await settled(shut);
+  await expect(toggle, "the control did not say the drawer opened").toHaveAttribute("aria-expanded", "true");
   expect((await box(shut)).height, "the drawer did not open").toBeGreaterThan(10);
   expect(await shut.evaluate((one) => one.inert)).toBe(false);
   await expect(shut.locator("button").first()).toBeVisible();
@@ -350,6 +358,48 @@ test("Escape says so once, after a surface inside has had it, and the focus goes
   await expect(from, "the focus was dropped when the drawer shut around it").toBeFocused();
   await settled(whole);
   expect((await box(whole)).height).toBeLessThanOrEqual(0.5);
+});
+
+test("an input method's Escape is not the reader's, and dismisses nothing", async ({ page }) => {
+  await open(page);
+  const whole = drawer(page, "overview-drawer");
+  await page.evaluate(() => {
+    window.said = [];
+    document.addEventListener("nd-drawer-dismiss", (event) => window.said.push(event.detail.name));
+  });
+  // FROM THE CONTENT, where a reader types and no hint of a rail's control
+  // is open to take the key first.
+  const content = whole.locator(".nd-drawer-panel > :not(.nd-drawer-rail)").first();
+  const send = (inits) =>
+    content.evaluate((el, all) => {
+      for (const init of all) {
+        el.dispatchEvent(new KeyboardEvent("keydown", { ...init, bubbles: true, cancelable: true }));
+      }
+    }, inits);
+  // AS AN INPUT METHOD SENDS IT: marked as composing, or with the code an
+  // engine reports for a key the input method took. WebKit sends the key
+  // that cancels a composition after `compositionend`, with that code.
+  await send([{ key: "Escape", keyCode: 229 }, { key: "Escape", isComposing: true }]);
+  expect(await page.evaluate(() => window.said), "an input method's Escape dismissed the drawer").toEqual([]);
+  // The same key from the same place, the reader's own, is heard: the path
+  // is live, and only the input method's key was turned away.
+  await send([{ key: "Escape" }]);
+  expect(await page.evaluate(() => window.said)).toEqual(["overview-drawer"]);
+});
+
+test("the modeline's control names the drawer it turns, and says whether it is open", async ({ page }) => {
+  await open(page);
+  const frame = windowOf(page, "overview-drawer");
+  const whole = drawer(page, "overview-drawer");
+  const toggle = frame.locator('.nd-footer [data-nd-action="drawer-toggle"]');
+  await expect(toggle).toHaveAttribute("aria-controls", "overview-drawer");
+  await expect(whole).toHaveAttribute("id", "overview-drawer");
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await toggle.click();
+  await expect(whole).toHaveAttribute("data-nd-collapsed", "true");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
 });
 
 test("a drawer that shuts with the focus elsewhere leaves the focus alone", async ({ page }) => {

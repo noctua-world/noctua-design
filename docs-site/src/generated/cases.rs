@@ -585,6 +585,31 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         &[Node::Component {
             name: "Drawer",
             props: &[
+                ("id", Value::Data("pages-drawer")),
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-2",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-3",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
                 ("collapsed", Value::Bool(true)),
                 ("label", Value::Data("Drawer")),
                 ("name", Value::Data("pages")),
@@ -598,7 +623,7 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
     ),
     (
         "Drawer",
-        "case-drawer-2",
+        "case-drawer-4",
         &[Node::Component {
             name: "Drawer",
             props: &[
@@ -611,7 +636,7 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
     ),
     (
         "Drawer",
-        "case-drawer-3",
+        "case-drawer-5",
         &[Node::Component {
             name: "Drawer",
             props: &[
@@ -634,7 +659,7 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
     ),
     (
         "Drawer",
-        "case-drawer-4",
+        "case-drawer-6",
         &[Node::Component {
             name: "Drawer",
             props: &[

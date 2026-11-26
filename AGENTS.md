@@ -971,11 +971,15 @@ track to nothing and sets `visibility: hidden`, at the end of the slide on the w
 start on the way open, so a collapsed drawer is out of the tab order and the accessibility tree
 with no script.
 
+**The control that turns it names it.** `id` is the drawer's id, for that control's `controls`,
+and the control says in `aria-expanded` whether the drawer is open. `Button` writes the attribute
+only when it is true, so on this site the page writes it on every example's toggle, open or shut.
+
 **The caller turns it, and `dist/drawer.js` does three things.** It writes `inert` the moment
 `collapsed` is written, for the time the drawer is still drawn. It gives the focus back to where
 it came in from when a drawer collapses around it, and leaves a reader who had left alone. And
 Escape with the focus inside says `nd-drawer-dismiss` with the drawer's `name`, after any surface
-open inside the drawer has had the key. It never opens, shuts or takes the focus in: what Escape
+open inside the drawer has had the key, and never for an Escape an input method is using. It never opens, shuts or takes the focus in: what Escape
 closes is the caller's to decide, and so is where the keyboard goes when a drawer opens.
 
 **A drawer and a rail stand at the side they name, wherever they are written.** `side` is `order`

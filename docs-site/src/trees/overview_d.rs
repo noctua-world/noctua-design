@@ -605,7 +605,7 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
     ),
     (
         "drawer",
-        r#"Drawer { name: "…", label: "…",
+        r#"Drawer { name: "…", id: "…", label: "…",
     DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }
     …
     DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }
@@ -666,6 +666,8 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
                                             ("tone", Value::Text("neutral")),
                                             ("size", Value::Text("small")),
                                             ("action", Value::Text("drawer-toggle")),
+                                            ("expanded", Value::Bool(true)),
+                                            ("controls", Value::Text("overview-drawer")),
                                             ("label", Value::Message(Key::ExampleDrawerToggle)),
                                         ],
                                         children: &[],
@@ -684,6 +686,7 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
                     name: "Drawer",
                     props: &[
                         ("name", Value::Text("overview-drawer")),
+                        ("id", Value::Text("overview-drawer")),
                         ("label", Value::Message(Key::ExampleDrawerLabel)),
                     ],
                     children: &[

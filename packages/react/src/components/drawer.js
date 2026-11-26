@@ -11,13 +11,14 @@
 
 import { createElement as h } from "react";
 
-export function Drawer({ name, label, side, collapsed, className, children, ...rest }) {
+export function Drawer({ name, id, label, side, collapsed, className, children, ...rest }) {
   const root = ["nd-drawer", className].filter(Boolean).join(" ");
 
   return h(
     "div",
     {
       className: root,
+      id,
       role: "region",
       "aria-label": label,
       "data-nd-drawer": name,
