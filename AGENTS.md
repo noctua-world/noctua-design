@@ -198,8 +198,13 @@ cargo xtask release   # prepare a version
 
 **One verb per intent, and the surface does not grow**: new capability goes behind an existing
 verb or it does not ship. `cargo xtask check` is exactly what CI runs — the same command, not a
-reimplementation in YAML, which is how the two would drift apart. `just <verb>` is a one-word
-alias for each, and never the only path.
+reimplementation in YAML, which is how the two would drift apart — and `cargo xtask docs --verify`
+is exactly what its `browser` job runs, on Linux, split into parts by `NOCTUA_SHARD`. `just <verb>`
+is a one-word alias for each, and never the only path.
+
+**Retry a flaky browser spec by rerunning its part of `browser`, never the Linux `check` job.** The
+site's deploy hangs off `check` and nothing else, and rerunning a job reruns its dependents: on
+`main` that redeploys Pages, and a second rerun fails on a duplicate `github-pages` artifact.
 
 > ⚠️ **`cargo xtask dev` runs the code it started with.** It is a long-running
 > `target/debug/xtask`, so editing an emitter does not change the emitter it uses. It watches

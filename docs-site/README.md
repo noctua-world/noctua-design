@@ -93,7 +93,14 @@ prints its own count, and none is written here.
 
 It uses the system's Chrome (`NOCTUA_CHROME` overrides the path) rather than
 Playwright's download, which cannot find its libraries on a Nix system and exits
-before Playwright can say why. Run `pnpm install` first.
+before Playwright can say why. Run `pnpm install` first, and bundle the React
+example: without it the specs that hold React against Dioxus skip or fail for
+want of one of the two.
+
+CI runs the same command in its `browser` job, on Linux, with the runner's Chrome,
+split into parts: `NOCTUA_SHARD=2/4` runs the second quarter, and unset it runs the
+whole suite. The site's deploy does not wait for that job, so a flaky spec is
+retried by rerunning its part alone, and the retry republishes nothing.
 
 **Every colour in the suite is read from screenshot pixels** decoded in a canvas,
 never from `getComputedStyle` — the same rule `color_read_from_dom` imposes on the

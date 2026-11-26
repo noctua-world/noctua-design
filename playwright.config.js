@@ -7,11 +7,30 @@
 
 import { defineConfig, devices } from "@playwright/test";
 
+// ONE PART OF THE SUITE, when NOCTUA_SHARD names one, as `2/4`. CI's `browser`
+// job runs the suite in four parts, because a runner's two workers would take
+// longer over the whole of it than the rest of CI together; unset, the whole
+// suite runs. Parts are cut between test groups, so a serial walk that tallies
+// its pages after the last one is never split across two runners.
+//
+// FAIL CLOSED. A value that is not a part — a typo, `0/4`, `5/4` — stops the
+// run instead of running everything or nothing: either would be a green job
+// that did not run what its name says.
+function shard(value) {
+  if (value === undefined || value === "") return null;
+  const match = /^([1-9][0-9]*)\/([1-9][0-9]*)$/.exec(value);
+  if (!match || Number(match[1]) > Number(match[2])) {
+    throw new Error(`NOCTUA_SHARD is "${value}", which is not a part such as 2/4`);
+  }
+  return { current: Number(match[1]), total: Number(match[2]) };
+}
+
 export default defineConfig({
   // Both suites: the browser tests, and the conformance cases that drive both
   // implementations from `spec/components/<name>.cases.toml`.
   testDir: "tests",
   fullyParallel: true,
+  shard: shard(process.env.NOCTUA_SHARD),
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: process.env.CI ? "github" : [["list"]],
