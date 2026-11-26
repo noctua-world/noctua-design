@@ -177,9 +177,17 @@ test.describe("the model stage", () => {
     await page.mouse.wheel(0, -720);
     // The resolution follows on a deliberate delay — a dead band checked at
     // intervals, so a wheel's worth of notches costs one reallocation.
-    await page.waitForTimeout(900);
-    const after = await canvas.evaluate((c) => c.width);
-    expect(after, "the zoomed canvas kept its resting resolution").toBeGreaterThan(before);
+    //
+    // ASKED UNTIL IT ANSWERS, NOT ONCE AFTER A GUESS. The interval is every
+    // fifteenth frame (`docs-site/assets/model.js`), which is a quarter of a
+    // second at a desk and longer on a runner drawing WebGL with no GPU: a
+    // single look 900 ms after the wheel found the resting 615 there twice
+    // running, on a canvas that does sharpen.
+    await expect
+      .poll(() => canvas.evaluate((c) => c.width), {
+        message: "the zoomed canvas kept its resting resolution",
+      })
+      .toBeGreaterThan(before);
   });
 
   test("`size` doubles the presentation, and the field breathes to hold it", async ({
