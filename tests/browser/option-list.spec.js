@@ -362,10 +362,23 @@ const seen = (page, name) =>
     };
   });
 
-/** Holds an option inside a box: `room` is `[above, below]`, from `seen`. */
+/**
+ * Holds an option inside a box: `room` is `[above, below]`, from `seen`.
+ *
+ * LESS THAN A PIXEL OUT IS IN. At this suite's device scale a scroll offset is
+ * a whole pixel, and Chrome reaches one by dropping the fraction, not by
+ * rounding: an option whose foot fell at 1768.70 in the page was brought to a
+ * window scrolled to 1048, and 0.70 of a pixel of it stayed below the window.
+ * A box at the end of its travel keeps the same kind of remainder, because its
+ * scroll height is a whole pixel too. Where the foot falls depends on every
+ * line above it, so on the face the machine draws them in, and half a pixel
+ * passed here by luck (0.47) and failed on a runner. A whole pixel out is an
+ * option the walk left behind, which is what this asks: before the page moved
+ * at all, the option two arrows down ended 11 pixels below a 240-pixel window.
+ */
 function inside(room, what) {
-  expect(room[0], `${what}: the option is cut off above`).toBeGreaterThanOrEqual(-0.5);
-  expect(room[1], `${what}: the option is cut off below`).toBeGreaterThanOrEqual(-0.5);
+  expect(room[0], `${what}: the option is cut off above`).toBeGreaterThan(-1);
+  expect(room[1], `${what}: the option is cut off below`).toBeGreaterThan(-1);
 }
 
 test("walking a list moves the box that scrolls it, and the page only as far as the option needs", async ({
