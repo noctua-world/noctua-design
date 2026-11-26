@@ -1099,7 +1099,9 @@ cannot reach.
 head and the answers stay put from the `sm` step up, and what is between them scrolls. Below it
 a head and two answers that wrap onto two rows can be taller than the interface's smallest
 window (320 by 240, `NOCTUA.md §12.19`), so the surface scrolls as one, which a surface with no
-radius may. The gap above the surface is the smaller of sixteen steps and a share of the window.
+radius may, and the answers stick to its foot. The platform scrolls a surface to the control it
+focuses, and with the answers at the end of what scrolls a confirmation opened on them with the
+question above its top edge. The gap above the surface is the smaller of sixteen steps and a share of the window.
 
 ### The reading column
 

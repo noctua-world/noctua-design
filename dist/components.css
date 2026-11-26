@@ -11658,8 +11658,19 @@ because a specimen of a `needs_name` component must not render a
 /* THE ANSWERS, UNDER THE SCROLLER AND NEVER IN IT, so a short window scrolls
    the question and keeps them in view. Decline first, at the start of the row:
    content sits to the left (`NOCTUA.md §9.7`). The body's padding is the room
-   above them. */
+   above them.
+
+   BELOW `sm`, WHERE THE SURFACE SCROLLS AS ONE, THEY STICK TO ITS FOOT. The
+   focus opens on the decline control, and the platform scrolls a surface to
+   the control it focuses: with the answers at the end of what scrolls, a
+   window 240 pixels tall opened on them with the question above the top
+   edge. Stuck to the foot they are in view from the first line, so the
+   surface opens at its head and the question is read before the answer. They
+   take the surface's own fill, so what scrolls under them is not read through
+   them. From `sm` up nothing around them scrolls and sticking does nothing. */
 .nd-dialog-actions {
+  position: sticky;
+  inset-block-end: 0;
   display: flex;
   flex: 0 0 auto;
   flex-wrap: wrap;
@@ -11667,6 +11678,7 @@ because a specimen of a `needs_name` component must not render a
   margin: 0;
   padding: var(--noctua-space-4);
   padding-block-start: 0;
+  background: var(--nc-color-surface-raised);
 }
 
 /* --- crates/noctua-design-styles/src/popover.css ---

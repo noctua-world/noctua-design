@@ -558,18 +558,21 @@ test("a dialog its caller shows opens and closes when the caller writes it", asy
   await expect.poll(heard).toEqual(["dialog-confirm:confirm", "dialog-confirm:"]);
 });
 
-for (const locale of ["en", "pt-BR", "qps"]) {
-  test(`the confirmation fits a 320 by 240 window in ${locale}, and nothing in it is cut off`, async ({
+for (const [name, locale] of ["dialog-confirm", "dialog-delete"].flatMap((one) =>
+  ["en", "pt-BR", "qps"].map((locale) => [one, locale]),
+)) {
+  test(`the confirmation ${name} fits a 320 by 240 window in ${locale}, and nothing in it is cut off`, async ({
     page,
   }) => {
     // THE INTERFACE'S SMALLEST WINDOW (`NOCTUA.md §12.19`). A head, a
     // description and two answers that wrap onto two rows are taller than it,
     // so below the `sm` step the surface scrolls as one: a part that does not
-    // scroll is a part cut off.
+    // scroll is a part cut off. One a caller shows and one a reader opens.
     await page.setViewportSize({ width: 320, height: 240 });
     await page.goto(url(PAGE.dialog, locale));
-    const root = named(page, "dialog-confirm");
-    await root.evaluate((el) => el.setAttribute("data-nd-shown", "true"));
+    const root = named(page, name);
+    if (name === "dialog-confirm") await root.evaluate((el) => el.setAttribute("data-nd-shown", "true"));
+    else await root.locator(".nd-dialog-open").click();
     const surface = root.locator(".nd-dialog-surface");
     await expect(surface).toBeVisible();
 
@@ -613,5 +616,17 @@ for (const locale of ["en", "pt-BR", "qps"]) {
     const box = await decline.boundingBox();
     expect(box.y).toBeGreaterThanOrEqual(seen.top - 1);
     expect(box.y + box.height).toBeLessThanOrEqual(seen.bottom + 1);
+
+    // AND SO IS WHAT IT ANSWERS. The platform scrolls a surface to the control
+    // it focuses, and with the answers at the end of what scrolled, the
+    // question opened above the top edge: a reader was shown two answers and
+    // not what they answered. The title is in view, and the first line of the
+    // description stands above the answers.
+    const title = await root.locator(".nd-dialog-title").boundingBox();
+    expect(title.y, "the question opened above the top of the surface").toBeGreaterThanOrEqual(seen.top - 1);
+    expect(title.y + title.height).toBeLessThanOrEqual(box.y + 1);
+    const note = await root.locator(".nd-dialog-note").boundingBox();
+    expect(note.y, "the description opened above the top of the surface").toBeGreaterThanOrEqual(seen.top - 1);
+    expect(note.y, "the description opened under the answers").toBeLessThan(box.y);
   });
 }
