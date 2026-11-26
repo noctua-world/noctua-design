@@ -292,10 +292,19 @@ const loaded = new Set();
 /**
  * Links a palette's stylesheet, once.
  *
- * `blocking="render"` is set BEFORE insertion, because a stylesheet inserted by
- * script is not render-blocking by default — set it after and the page paints
- * in the old palette and snaps over when the file lands. Appended last, which
- * is also what wins the (0,3,0) tie against the base sheet in system mode.
+ * Appended last, which is what wins the (0,3,0) tie against the base sheet in
+ * system mode.
+ *
+ * IT BLOCKS NO PAINT, AND NOTHING HERE CAN MAKE IT. A link added once the body
+ * has been parsed is never render-blocking, whatever its `blocking` says, and
+ * this module runs after the parse: measured, a page drew 61 frames while a
+ * palette's sheet set `blocking="render"` was held back for a second. The
+ * reader's own palette is linked render-blocking by the bootstrap in `<head>`,
+ * which is the one place the attribute works. A scope stamped with a palette
+ * whose sheet has not arrived paints the colours above it until the file
+ * lands. The accent row asks for its chips' sheets as it opens
+ * (`paintSwatches`), so a reader rarely sees it, and a test that reads paint
+ * after choosing waits for the file (`theme-menu.spec.js`).
  */
 function ensureStylesheet(palette) {
   if (loaded.has(palette) || !paletteValues.values.includes(palette)) return;
@@ -303,7 +312,6 @@ function ensureStylesheet(palette) {
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.dataset.ndPalette = palette;
-  link.setAttribute("blocking", "render");
   link.href = base + stylesheetHref(palette);
   document.head.appendChild(link);
 }

@@ -139,6 +139,29 @@ test("the frame's menu offers every setting a scope can carry, and no other", as
 // The ExampleFrame page puts one frame inside another, which is the only place
 // these can be asked. Both of the following were true and both were wrong.
 
+/**
+ * Waits until every palette stylesheet the page has linked has arrived.
+ *
+ * A PALETTE IS A STYLESHEET THIS SITE LINKS ON DEMAND, and a scope stamped with
+ * one paints from it: until the file arrives, `dist/scope.css` resolves that
+ * scope against the colours above it. Choosing an accent writes the attribute
+ * at once, and the file arrives when it arrives, since a link a script adds
+ * after the first paint blocks no rendering. A test that reads paint the
+ * moment it has chosen reads whichever came first, and on a loaded machine
+ * that was the page's own surface: "the outer frame did not actually change".
+ */
+async function palettesArrived(page) {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() =>
+          [...document.querySelectorAll("link[data-nd-palette]")].every((link) => link.sheet),
+        ),
+      { message: "a palette's stylesheet never arrived" },
+    )
+    .toBe(true);
+}
+
 /** One frame's own parts, never the parts of a frame nested inside it. */
 function frameParts(page, index) {
   const frame = page.locator("[data-nd-frame]").nth(index);
@@ -224,6 +247,7 @@ test("a frame reaches the frame inside it, and the page cannot reach past it", a
     await outer.own(`[data-nd-group="${group}"] [data-nd-value="${value}"]`).click();
   }
   await outer.own(".nd-frame-theme > summary").click();
+  await palettesArrived(page);
 
   // The outer stage really did change — otherwise this proves nothing.
   expect(await outer.stage.getAttribute("data-theme")).toBe("dark");
