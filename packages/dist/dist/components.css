@@ -10770,10 +10770,9 @@ figure.nd-image {
   background: color-mix(in oklab, currentColor var(--nd-veil-checked), transparent);
 }
 
-.nd-message-bar-action:is(:focus-visible, [data-nd-seat-focus]) {
-  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
-  outline-offset: var(--noctua-focus-offset);
-}
+/* ITS RING IS THE ONE EVERY FOCUSED ELEMENT IS GIVEN, in `base.css`. A rule of
+   its own here drew the same outline again, and the seats sweep found it
+   could not fail. In a line the ring takes the line's ink, below. */
 
 /* --- The line --------------------------------------------------------------
  *

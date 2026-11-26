@@ -359,6 +359,15 @@ test("a deadline the caller writes again is counted again", async ({ page }) => 
   await expect(clock).toBeHidden();
 });
 
+test("a deadline already passed draws nothing left, and says nothing", async ({ page }) => {
+  // A bar drawn after its deadline has nothing a reader can act on, and the
+  // caller is already doing what the deadline was for.
+  const line = await frozen(page, "en", -5);
+  await expect(line.locator(COUNTDOWN)).toHaveText("Restoring it in 0 seconds");
+  await page.clock.runFor(1000);
+  expect(await said(page)).toEqual([]);
+});
+
 test("with no sentence of the caller's the seconds are the platform's, in the page's language", async ({
   page,
 }) => {

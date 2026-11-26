@@ -36,9 +36,9 @@
 //
 // IT SPEAKS RARELY. The number on the screen is a `role="timer"`, which does
 // not announce, and it changes every second. The polite region beside it is
-// written when the count starts, at every ten seconds left and at five: a
-// screen reader read a number a second cannot get past the message to the
-// control that answers it.
+// written when the count starts, at every ten seconds left and at five, and
+// never at nothing left: a screen reader read a number a second cannot get
+// past the message to the control that answers it.
 //
 // WHAT IT NEVER DOES:
 //
@@ -244,7 +244,10 @@ function count(bar, signal) {
     const text = words(left);
     box.hidden = false;
     box.textContent = text;
-    if (first || (left > 0 && (left % SAY_EVERY === 0 || left === SAY_AT))) say(text);
+    // NOTHING LEFT IS NEVER SAID. A bar drawn after its deadline, or a count
+    // run to its end, has nothing a reader can still act on, and the caller
+    // is already doing what the deadline was for.
+    if (left > 0 && (first || left % SAY_EVERY === 0 || left === SAY_AT)) say(text);
     first = false;
     // Nothing is left to count, and the number stays where it stopped.
     if (left === 0) stop();
