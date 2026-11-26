@@ -136,3 +136,12 @@
   border-inline-end-color: transparent;
   border-inline-start-color: var(--nc-color-accent);
 }
+
+/* And under forced colours, in the system's colours, as the tabs rail is. */
+@media (forced-colors: active) {
+  .nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+  .nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+    border-inline-end-color: Canvas;
+    border-inline-start-color: Highlight;
+  }
+}

@@ -11319,6 +11319,21 @@ because a specimen of a `needs_name` component must not render a
   background: var(--nc-color-surface);
 }
 
+/* UNDER FORCED COLOURS EVERY EDGE OF A RAIL IS DRAWN IN THE TEXT COLOUR, and
+   the chosen tab's shade is gone with every other fill, so the edges are
+   named in the system's colours: the window's own on every tab, and the
+   highlight on the chosen one. */
+@media (forced-colors: active) {
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab {
+    border-inline-color: Canvas;
+  }
+
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+    border-inline-end-color: Highlight;
+  }
+}
+
 /* THE NAME IS KEPT AND NOT DRAWN, where there is an icon to draw instead. The
    label and the count stay in the tab, so they stay its accessible name. A tab
    with no icon keeps its words, cut at the rail's width: a blank square is a
@@ -12158,6 +12173,22 @@ because a specimen of a `needs_name` component must not render a
   border-inline-start-color: var(--nc-color-selected);
 }
 
+/* UNDER FORCED COLOURS THE BAR IS ALL THAT IS LEFT, SO IT IS NAMED IN THE
+ * SYSTEM'S OWN COLOURS. The system paints every fill as the window and every
+ * border as the text, so the room each row keeps for the bar became a bar on
+ * every row, and the active row looked like the rest. A system colour is the
+ * one value forced colours keep: the window's own, where the keyboard is not,
+ * and the highlight where it is. */
+@media (forced-colors: active) {
+  .nd-option-item {
+    border-inline-start-color: Canvas;
+  }
+
+  .nd-option-item[data-nd-active="true"] {
+    border-inline-start-color: Highlight;
+  }
+}
+
 .nd-option-item[aria-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.5; /* allow-literal: a refused option is dimmed, and there is no color token for "the same color, less of it" */
@@ -12773,6 +12804,15 @@ because a specimen of a `needs_name` component must not render a
   border-inline-start-color: var(--nc-color-accent);
 }
 
+/* And under forced colours, in the system's colours, as the tabs rail is. */
+@media (forced-colors: active) {
+  .nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+  .nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+    border-inline-end-color: Canvas;
+    border-inline-start-color: Highlight;
+  }
+}
+
 /* --- crates/noctua-design-styles/src/split.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 /* --- Split, SplitPane and SplitHandle ----------------------------------------
@@ -12854,6 +12894,17 @@ because a specimen of a `needs_name` component must not render a
   flex: none;
   inline-size: var(--noctua-border-hairline);
   background: var(--nc-color-border-strong);
+}
+
+/* UNDER FORCED COLOURS THE LINE IS A BORDER. The system paints every
+   background as the window, so a line drawn as one is gone, and it is all
+   that says a control is there. A border is drawn in the text colour, and the
+   wider line a pointer or the keyboard brings keeps it. */
+@media (forced-colors: active) {
+  .nd-split-handle-line {
+    box-sizing: border-box;
+    border-inline-start: var(--noctua-border-hairline) solid CanvasText;
+  }
 }
 
 /* SIDE BY SIDE, AT EVERY WIDTH, for a split that says it never collapses. The

@@ -289,6 +289,21 @@ because a specimen of a `needs_name` component must not render a
   background: var(--nc-color-surface);
 }
 
+/* UNDER FORCED COLOURS EVERY EDGE OF A RAIL IS DRAWN IN THE TEXT COLOUR, and
+   the chosen tab's shade is gone with every other fill, so the edges are
+   named in the system's colours: the window's own on every tab, and the
+   highlight on the chosen one. */
+@media (forced-colors: active) {
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab {
+    border-inline-color: Canvas;
+  }
+
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+    border-inline-end-color: Highlight;
+  }
+}
+
 /* THE NAME IS KEPT AND NOT DRAWN, where there is an icon to draw instead. The
    label and the count stay in the tab, so they stay its accessible name. A tab
    with no icon keeps its words, cut at the rail's width: a blank square is a

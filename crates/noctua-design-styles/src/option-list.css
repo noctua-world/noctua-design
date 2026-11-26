@@ -88,6 +88,22 @@
   border-inline-start-color: var(--nc-color-selected);
 }
 
+/* UNDER FORCED COLOURS THE BAR IS ALL THAT IS LEFT, SO IT IS NAMED IN THE
+ * SYSTEM'S OWN COLOURS. The system paints every fill as the window and every
+ * border as the text, so the room each row keeps for the bar became a bar on
+ * every row, and the active row looked like the rest. A system colour is the
+ * one value forced colours keep: the window's own, where the keyboard is not,
+ * and the highlight where it is. */
+@media (forced-colors: active) {
+  .nd-option-item {
+    border-inline-start-color: Canvas;
+  }
+
+  .nd-option-item[data-nd-active="true"] {
+    border-inline-start-color: Highlight;
+  }
+}
+
 .nd-option-item[aria-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.5; /* allow-literal: a refused option is dimmed, and there is no color token for "the same color, less of it" */

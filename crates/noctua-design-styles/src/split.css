@@ -79,6 +79,17 @@
   background: var(--nc-color-border-strong);
 }
 
+/* UNDER FORCED COLOURS THE LINE IS A BORDER. The system paints every
+   background as the window, so a line drawn as one is gone, and it is all
+   that says a control is there. A border is drawn in the text colour, and the
+   wider line a pointer or the keyboard brings keeps it. */
+@media (forced-colors: active) {
+  .nd-split-handle-line {
+    box-sizing: border-box;
+    border-inline-start: var(--noctua-border-hairline) solid CanvasText;
+  }
+}
+
 /* SIDE BY SIDE, AT EVERY WIDTH, for a split that says it never collapses. The
    same four rules stand in the query below for every other split, where the
    split's own box is wide enough. */

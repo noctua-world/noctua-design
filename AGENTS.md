@@ -612,6 +612,14 @@ states asked for together, a sibling that is not where its native rule puts it, 
 outside the twin form with no native rule before it.
 `data-nd-seat-drag` stands for no pseudo-class and owes no native rule.
 
+**A state drawn in colour is drawn again under forced colours.** There the system paints every
+fill as the window and every border, a transparent one included, in the text colour, so a state
+told by a fill or by a border kept transparent until it arrives is drawn like no state at all.
+Such a component names the state again inside `@media (forced-colors: active)`, in the system
+colours forced colours keep (`Canvas`, `CanvasText`, `Highlight`): they are the platform's and
+no colour of this system's, and they are written nowhere else. `tests/browser/forced-colors.spec.js`
+asks it of a list's active option, a split's line and a rail's chosen tab, in pixels.
+
 **Two places take no twin at all, and the gate refuses both.** `:focus-within` is never written
 inside `:has(`, twinned or bare: `:has()` does not nest, so an engine drops the
 `:has([data-nd-seat-focus])` branch and a seat's focus stops reaching the ancestor; restructure
