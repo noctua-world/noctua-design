@@ -5,7 +5,7 @@
 // declared. Every test here is that claim or that hazard.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, PAGE, SCOPED, SIDEBAR, url, walker } from "./pages.js";
+import { ANY, LOCALES, PAGE, SCOPED, SIDEBAR, forceColours, url, walker } from "./pages.js";
 
 // Every walk in this file declares its tests through this line, so that a
 // report names this file rather than `pages.js` (`walker` says why).
@@ -193,6 +193,7 @@ test("nothing a page is painted with animates, reduced motion or not", async ({ 
 test("forced colours leaves no ambient image, not even the grain", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   await page.goto(url(SCOPED));
+  await forceColours(page);
   await page.evaluate(() => {
     const root = document.documentElement;
     root.setAttribute("data-noctua-pattern", "mesh");

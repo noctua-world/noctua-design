@@ -492,6 +492,49 @@ export async function stopClock(page) {
   });
 }
 
+// --- Forced colours -----------------------------------------------------------
+
+/**
+ * Puts the page in front of a reader whose system forces the colours, and
+ * holds that the engine forces them. Called once the page is there, after
+ * every navigation a test under forced colours makes.
+ *
+ * THE EMULATION CAN MISS A NEW DOCUMENT. Asked for before a navigation,
+ * Chromium matches `(forced-colors: active)` in the document it loads and yet
+ * leaves every colour the page's own: the media query's rules apply and the
+ * engine's forcing does not. Measured at eight workers, 4 to 9 of 20 first
+ * loads of `/prompt/` were so, as were up to 4 of 20 loads after another in
+ * the same page, and as many with the site's preloads taken out of the page.
+ * A test then passes on whatever the media query alone changes, and a test
+ * that needs the forcing fails for no fault of the page: the prompt's caret,
+ * which the engine draws only in a colour it forces, was drawn transparent
+ * and never seen. Asked again once the document is there, 20 of 20 were
+ * forced.
+ *
+ * So it is asked again here, and then the forcing is read, by what it does
+ * and not by a colour: forced colours take a box's shadow away. One mark is
+ * given a shadow with `forced-color-adjust` left to the engine, and one with
+ * it set to `none`. Forced, the first loses its shadow and the second keeps
+ * it; not forced, both keep it, and the test stops there rather than pass on
+ * the page's own colours.
+ */
+export async function forceColours(page) {
+  await page.emulateMedia({ forcedColors: "active" });
+  const forced = await page.evaluate(() => {
+    const shadowless = (adjust) => {
+      const mark = document.createElement("i");
+      mark.style.boxShadow = "0 0 0 1px"; // allow-literal: a shadow asked to be taken away, never drawn
+      mark.style.forcedColorAdjust = adjust;
+      document.body.append(mark);
+      const shadow = getComputedStyle(mark).boxShadow;
+      mark.remove();
+      return shadow === "none";
+    };
+    return shadowless("auto") && !shadowless("none");
+  });
+  expect(forced, "the page matches forced colours, and the engine does not force them").toBe(true);
+}
+
 // --- Whole-site walks ---------------------------------------------------------
 
 /**

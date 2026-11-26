@@ -18,7 +18,7 @@
 
 import { expect, test } from "@playwright/test";
 
-import { LOCALES, PAGE, showParts, url } from "./pages.js";
+import { LOCALES, PAGE, forceColours, showParts, url } from "./pages.js";
 import { contrast, differing, extremes } from "./pixels.js";
 
 // THE ENGINE'S SCROLLBARS ARE LEFT ON. The runner hides every scrollbar, so
@@ -207,6 +207,7 @@ test("the engine's own caret is not drawn beside the block", async ({ page }) =>
 test("under forced colours there is one cursor, and it is the engine's", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
   await open(page);
+  await forceColours(page);
   await put(page, "hello world", 5);
   // The engine forces a colour onto `caret-color`, so the caret the
   // stylesheet made transparent is drawn again. The block gives way to it.

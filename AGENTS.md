@@ -625,7 +625,9 @@ told by a fill or by a border kept transparent until it arrives is drawn like no
 Such a component names the state again inside `@media (forced-colors: active)`, in the system
 colours forced colours keep (`Canvas`, `CanvasText`, `Highlight`): they are the platform's and
 no colour of this system's, and they are written nowhere else. `tests/browser/forced-colors.spec.js`
-asks it of a list's active option, a split's line and a rail's chosen tab, in pixels.
+asks it of a list's active option, a split's line and a rail's chosen tab, in pixels. Every test
+under forced colours calls `forceColours` (`tests/browser/pages.js`) after each navigation, because
+the emulation can miss the page it loads (see "The platform's silent failures").
 
 **Two places take no twin at all, and the gate refuses both.** `:focus-within` is never written
 inside `:has(`, twinned or bare: `:has()` does not nest, so an engine drops the
@@ -1707,6 +1709,11 @@ anything.
 - **A control whose height is not declared is its font size, line height and padding added up**,
   so two controls side by side agree only by accident, and a screenshot of either one cannot show
   it. Declare the height on the row, and measure the row rather than the control.
+- **Forced colours emulated before a navigation can miss the page it loads.** Chromium then
+  matches `(forced-colors: active)` and forces no colour, in 4 to 9 of 20 loads at eight
+  workers, so a test passes on what the media query alone changes, or fails on a prompt's caret
+  left transparent. Asked again once the page is there, the forcing holds. `forceColours` in
+  `tests/browser/pages.js` asks again and reads that the engine forces.
 
 ## Two rules about proving something
 
