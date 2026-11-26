@@ -102,14 +102,17 @@ are `font-display: optional` and the pages do not preload them, so every test, w
 opens a fresh browser context, paints before they arrive and keeps the system face
 for the page's lifetime. A machine without Noto installed measures whatever its stack
 falls through to: on Ubuntu, DejaVu Sans, which is wide enough to fail a handful of
-geometry specs that pass with Noto installed. Install Noto before reading a geometry
-failure as a defect.
+geometry specs that pass with Noto installed. Install Noto Sans before reading a
+geometry failure as a defect. The scripts are the other way round:
+`scripts.spec.js` measures each one against the browser's fallback, which is tofu
+only on a machine with no face for that script, so a script face installed
+system-wide can fail it for a font the site never served.
 
 CI runs the same command in its `browser` job, on Linux, with the runner's Chrome and
-Ubuntu's `fonts-noto-core`, split into parts: `NOCTUA_SHARD=2/4` runs the second
-quarter, and unset it runs the whole suite. The site's deploy does not wait for that
-job, so a flaky spec is retried by rerunning its part alone, and the retry
-republishes nothing.
+the Latin Noto Sans faces alone, taken from Ubuntu's `fonts-noto-core`. It is split
+into parts: `NOCTUA_SHARD=2/4` runs the second quarter, and unset it runs the whole
+suite. The site's deploy does not wait for that job, so a flaky spec is retried by
+rerunning its part alone, and the retry republishes nothing.
 
 **Every colour in the suite is read from screenshot pixels** decoded in a canvas,
 never from `getComputedStyle` — the same rule `color_read_from_dom` imposes on the
