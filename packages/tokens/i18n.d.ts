@@ -2582,6 +2582,7 @@ export type MessageKey =
   | "component.number-input.prop.prefix.doc"
   | "component.number-input.prop.suffix.doc"
   | "component.number-input.prop.placeholder.doc"
+  | "component.number-input.prop.maxlength.doc"
   | "component.number-input.prop.hint.doc"
   | "component.number-input.prop.error.doc"
   | "component.number-input.prop.required.doc"

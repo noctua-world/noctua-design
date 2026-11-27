@@ -2701,6 +2701,7 @@ fn number_input(
     let prefix_ = scope.find(props, "prefix");
     let suffix_ = scope.find(props, "suffix");
     let placeholder_ = scope.find(props, "placeholder");
+    let maxlength_ = scope.find(props, "maxlength");
     let hint_ = scope.find(props, "hint");
     let error_ = scope.find(props, "error");
     let required_ = scope.flag(props, "required").unwrap_or(false);
@@ -2741,6 +2742,7 @@ fn number_input(
             prefix: prefix_,
             suffix: suffix_,
             placeholder: placeholder_,
+            maxlength: maxlength_,
             hint: hint_,
             error: error_,
             required: required_,

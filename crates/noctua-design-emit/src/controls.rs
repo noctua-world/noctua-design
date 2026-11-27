@@ -8672,6 +8672,11 @@ const NUMBER_INPUT_DIOXUS: &str = r#"    let id = format!("nd-number-input-{name
                     name: "{name}",
                     value,
                     placeholder,
+                    // The real attribute, so the browser stops the keystroke.
+                    // It counts what a reader types and nothing the script
+                    // draws: the separators `group` writes at rest are set by
+                    // the script, which no engine holds to it.
+                    maxlength,
                     required,
                     disabled,
                     readonly,
@@ -8798,6 +8803,8 @@ const NUMBER_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
         name,
         defaultValue: value,
         placeholder,
+        // See the Dioxus half: the real attribute, on what a reader types.
+        maxLength: maxlength,
         required,
         disabled,
         readOnly: readonly,

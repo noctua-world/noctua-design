@@ -108,6 +108,8 @@ pub fn NumberInput(
     suffix: Option<String>,
     /// An example quantity, shown inside the box while it is empty. Never the only name the field has.
     placeholder: Option<String>,
+    /// The most characters the box accepts while a reader types, a sign and a decimal mark among them. It is the real attribute, so the browser stops the keystroke. The steppers and the arrow keys answer to `min` and `max`.
+    maxlength: Option<String>,
     /// What a reader needs before answering. Drawn by `Field`.
     hint: Option<String>,
     /// What is wrong, after a submission. The caller's own sentence, in `role="alert"`.
@@ -233,6 +235,11 @@ pub fn NumberInput(
                     name: "{name}",
                     value,
                     placeholder,
+                    // The real attribute, so the browser stops the keystroke.
+                    // It counts what a reader types and nothing the script
+                    // draws: the separators `group` writes at rest are set by
+                    // the script, which no engine holds to it.
+                    maxlength,
                     required,
                     disabled,
                     readonly,

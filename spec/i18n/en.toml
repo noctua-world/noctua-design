@@ -1316,7 +1316,7 @@ dir = "ltr"
 # three fields called "How many" on one page are three questions a reader
 # cannot tell apart.
 "example.number-input.note-form" = """The box is a `type="text"` input, because `type="number"` drops what it cannot parse. Press Save to see what it posts."""
-"example.number-input.note-bounds" = """A value outside the range is refused with the sentence you wrote, and the number stays exactly as it was typed."""
+"example.number-input.note-bounds" = """A value out of range is refused with your sentence and stays exactly as typed. `maxlength` stops a third digit from being typed."""
 "example.number-input.note-money" = """`group` draws the separators of the page's language. They go while you type, and the form posts the plain number."""
 "example.number-input.note-unit" = """`suffix` draws the unit inside the box. A screen reader hears it with the value, and it is never part of what is submitted."""
 "example.number-input.note-large" = """Turn the steppers off where the numbers are too large to step to. The arrow keys and Page Up still move the value."""

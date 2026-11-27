@@ -5268,6 +5268,8 @@ pub enum Key {
     ComponentNumberInputPropSuffixDoc,
     /// `component.number-input.prop.placeholder.doc`
     ComponentNumberInputPropPlaceholderDoc,
+    /// `component.number-input.prop.maxlength.doc`
+    ComponentNumberInputPropMaxlengthDoc,
     /// `component.number-input.prop.hint.doc`
     ComponentNumberInputPropHintDoc,
     /// `component.number-input.prop.error.doc`
@@ -6924,7 +6926,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3400] = [
+    pub const ALL: [Self; 3401] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -9499,6 +9501,7 @@ impl Key {
         Self::ComponentNumberInputPropPrefixDoc,
         Self::ComponentNumberInputPropSuffixDoc,
         Self::ComponentNumberInputPropPlaceholderDoc,
+        Self::ComponentNumberInputPropMaxlengthDoc,
         Self::ComponentNumberInputPropHintDoc,
         Self::ComponentNumberInputPropErrorDoc,
         Self::ComponentNumberInputPropRequiredDoc,
@@ -13267,6 +13270,9 @@ impl Key {
             Self::ComponentNumberInputPropPlaceholderDoc => {
                 "component.number-input.prop.placeholder.doc"
             }
+            Self::ComponentNumberInputPropMaxlengthDoc => {
+                "component.number-input.prop.maxlength.doc"
+            }
             Self::ComponentNumberInputPropHintDoc => "component.number-input.prop.hint.doc",
             Self::ComponentNumberInputPropErrorDoc => "component.number-input.prop.error.doc",
             Self::ComponentNumberInputPropRequiredDoc => "component.number-input.prop.required.doc",
@@ -16475,7 +16481,7 @@ impl Locale {
                     "The box is a `type=\"text\"` input, because `type=\"number\"` drops what it cannot parse. Press Save to see what it posts."
                 }
                 Key::ExampleNumberInputNoteBounds => {
-                    "A value outside the range is refused with the sentence you wrote, and the number stays exactly as it was typed."
+                    "A value out of range is refused with your sentence and stays exactly as typed. `maxlength` stops a third digit from being typed."
                 }
                 Key::ExampleNumberInputNoteMoney => {
                     "`group` draws the separators of the page's language. They go while you type, and the form posts the plain number."
@@ -19834,6 +19840,9 @@ impl Locale {
                 }
                 Key::ComponentNumberInputPropPlaceholderDoc => {
                     "An example quantity, shown inside the box while it is empty. Never the only name the field has."
+                }
+                Key::ComponentNumberInputPropMaxlengthDoc => {
+                    "The most characters the box accepts while a reader types, a sign and a decimal mark among them. It is the real attribute, so the browser stops the keystroke. The steppers and the arrow keys answer to `min` and `max`."
                 }
                 Key::ComponentNumberInputPropHintDoc => {
                     "What a reader needs before answering. Drawn by `Field`."
@@ -24193,7 +24202,7 @@ impl Locale {
                     "A caixa é um input `type=\"text\"`, porque `type=\"number\"` descarta o que não consegue ler. Aperte Salvar para ver o que ela envia."
                 }
                 Key::ExampleNumberInputNoteBounds => {
-                    "Um valor fora da faixa é recusado com a frase que você escreveu, e o número fica exatamente como foi digitado."
+                    "Um valor fora da faixa é recusado com a sua frase e fica como foi digitado. `maxlength` impede que se digite um terceiro dígito."
                 }
                 Key::ExampleNumberInputNoteMoney => {
                     "`group` desenha os separadores do idioma da página. Eles somem enquanto você digita, e o formulário envia o número puro."
@@ -27572,6 +27581,9 @@ impl Locale {
                 }
                 Key::ComponentNumberInputPropPlaceholderDoc => {
                     "Uma quantidade de exemplo, dentro da caixa enquanto ela está vazia. Nunca o único nome que o campo tem."
+                }
+                Key::ComponentNumberInputPropMaxlengthDoc => {
+                    "O máximo de caracteres que a caixa aceita enquanto o leitor digita, contando o sinal e a marca decimal. É o atributo real, então o navegador para a tecla. Os botões de passo e as setas respondem a `min` e `max`."
                 }
                 Key::ComponentNumberInputPropHintDoc => {
                     "O que a pessoa precisa saber antes de responder. Desenhada pelo `Field`."
@@ -32023,7 +32035,7 @@ impl Locale {
                     "⟦Thee boox iis aa `typee=\"teext\"` iinpuut, beecaauusee `typee=\"nuumbeer\"` droops whaat iit caannoot paarsee. Preess Saavee too seeee whaat iit poosts.⟧"
                 }
                 Key::ExampleNumberInputNoteBounds => {
-                    "⟦AA vaaluuee oouutsiidee thee raangee iis reefuuseed wiith thee seenteencee yoouu wrootee, aand thee nuumbeer staays eexaactly aas iit waas typeed.⟧"
+                    "⟦AA vaaluuee oouut oof raangee iis reefuuseed wiith yoouur seenteencee aand staays eexaactly aas typeed. `maaxleength` stoops aa thiird diigiit froom beeiing typeed.⟧"
                 }
                 Key::ExampleNumberInputNoteMoney => {
                     "⟦`groouup` draaws thee seepaaraatoors oof thee paagee's laanguuaagee. Theey goo whiilee yoouu typee, aand thee foorm poosts thee plaaiin nuumbeer.⟧"
@@ -35470,6 +35482,9 @@ impl Locale {
                 }
                 Key::ComponentNumberInputPropPlaceholderDoc => {
                     "⟦AAn eexaamplee quuaantiity, shoown iinsiidee thee boox whiilee iit iis eempty. Neeveer thee oonly naamee thee fiieeld haas.⟧"
+                }
+                Key::ComponentNumberInputPropMaxlengthDoc => {
+                    "⟦Thee moost chaaraacteers thee boox aacceepts whiilee aa reeaadeer typees, aa siign aand aa deeciimaal maark aamoong theem. IIt iis thee reeaal aattriibuutee, soo thee broowseer stoops thee keeystrookee. Thee steeppeers aand thee aarroow keeys aansweer too `miin` aand `maax`.⟧"
                 }
                 Key::ComponentNumberInputPropHintDoc => {
                     "⟦Whaat aa reeaadeer neeeeds beefooree aansweeriing. Draawn by `Fiieeld`.⟧"

@@ -11,3 +11,10 @@ name = "the bounds are declared where the enhancement and the stylesheet can bot
 note = "The box is `type=\"text\"` with `inputmode=\"numeric\"` and a pattern, NOT `type=\"number\"` — a number field spelt the platform's way cannot show a thousands separator or a comma decimal, which most of the world writes. So the bounds are `data-nd-*` on the root and `dist/inputs.js` enforces them, which is the trade the contract makes deliberately."
 props = { name = "quantity", label = "Quantity", value = "3", min = "1", max = "9", step = "1" }
 expect = { present = ["[data-nd-min='1'][data-nd-max='9'][data-nd-step='1']", "input[inputmode=numeric]"] }
+
+[[case]]
+name = "maxlength is the real attribute, and the browser stops the keystroke"
+note = "An interface drawing an integer input with a longest length had no prop to draw it with, so the box took any number of digits and only the program behind it refused them. The attribute is on the box itself and not on the root: the engine holds a reader's typing to it, and nothing the script writes."
+props = { name = "floor", label = "Floor", maxlength = "2" }
+steps = ["focus:input", "type:1234"]
+expect = { present = ["input[name=floor][maxlength='2']"], value = "12" }

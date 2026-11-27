@@ -8999,6 +8999,18 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
                 doc: Key::ComponentNumberInputPropPlaceholderDoc,
             },
             DocProp {
+                name: "maxlength",
+                kind: "text",
+                values: &[],
+                elements: &[],
+                default: None,
+                attribute: Some("maxlength"),
+                required: false,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentNumberInputPropMaxlengthDoc,
+            },
+            DocProp {
                 name: "hint",
                 kind: "text",
                 values: &[],

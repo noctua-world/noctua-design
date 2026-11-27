@@ -46,6 +46,8 @@ export interface NumberInputProps {
   suffix?: string;
   /** An example quantity, shown inside the box while it is empty. Never the only name the field has. */
   placeholder?: string;
+  /** The most characters the box accepts while a reader types, a sign and a decimal mark among them. It is the real attribute, so the browser stops the keystroke. The steppers and the arrow keys answer to `min` and `max`. */
+  maxlength?: string;
   /** What a reader needs before answering. Drawn by `Field`. */
   hint?: string;
   /** What is wrong, after a submission. The caller's own sentence, in `role="alert"`. */

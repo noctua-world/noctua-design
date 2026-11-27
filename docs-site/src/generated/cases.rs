@@ -1822,6 +1822,19 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "NumberInput",
+        "case-number-input-2",
+        &[Node::Component {
+            name: "NumberInput",
+            props: &[
+                ("label", Value::Data("Floor")),
+                ("maxlength", Value::Data("2")),
+                ("name", Value::Data("floor")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
         "OptionList",
         "case-option-list-0",
         &[Node::Component {

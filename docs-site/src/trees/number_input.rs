@@ -94,7 +94,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
     // sentence under the question is the caller's own. The number stays as it
     // was typed, so a reader can see what was wrong with it.
     (
-        r"NumberInput { name, label, value, min, max, min_label, max_label, invalid_label, increment_label, decrement_label }",
+        r"NumberInput { name, label, value, min, max, maxlength, min_label, max_label, invalid_label, increment_label, decrement_label }",
         &[Node::Component {
             name: "NumberInput",
             props: &[
@@ -103,6 +103,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("value", Value::Text("5")),
                 ("min", Value::Text("1")),
                 ("max", Value::Text("10")),
+                ("maxlength", Value::Text("2")),
                 ("min_label", Value::Message(Key::ExampleInputTooSmall)),
                 ("max_label", Value::Message(Key::ExampleInputTooBig)),
                 ("invalid_label", Value::Message(Key::ExampleInputNotANumber)),
