@@ -27,6 +27,7 @@ pub mod controls;
 pub mod css;
 pub mod dist;
 pub mod docs;
+pub mod faces;
 pub mod fonts;
 pub mod grammar;
 pub mod i18n;
@@ -184,6 +185,9 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(css::emit(spec));
     files.extend(docs::emit(components));
     files.extend(fonts::emit(spec, font_layer, sliced));
+    // The crates that carry the faces `fonts.css` just asked for. The bytes
+    // themselves are copied by the build, which `faces::mirror` directs.
+    files.extend(faces::emit(&faces::carriers(font_layer, sliced)));
     files.extend(grammar::emit(grammars, scanner));
     files.extend(i18n::emit(catalogue));
     files.extend(icons::emit(icons, drawings));

@@ -46,11 +46,13 @@ all**, because this system's default palette is scope-anchored. (A page with no
 theme switcher can write `<body data-palette="blue-balanced" data-theme="dark">`
 instead.)
 
-**The typefaces are the one thing not in here.** `dist/fonts.css` asks for them
-at `../assets/fonts/`, beside the directory you wrote — 16 MB of faces in every <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
-install would be a poor trade. Without them the page uses the system font and
-nothing breaks; the faces and their licences are in the repository under
-`assets/fonts/`.
+**The typefaces are crates of their own.** `dist/fonts.css` asks for each at
+`../assets/fonts/<file>`, beside the directory you wrote, and <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
+`noctua-design-fonts` is those files with their licences:
+`noctua_design_fonts::write_to("static/assets/fonts")`. The three CJK families
+are `noctua-design-fonts-jp`, `-kr` and `-sc`, because a registry refuses a crate
+over 10 MB and the faces together are 17 MB. Without them the page uses the
+system font and nothing breaks.
 
 Each behaviour module is an ES module a page imports directly, exporting
 `enhanceX(root)` and `releaseX(root)`:

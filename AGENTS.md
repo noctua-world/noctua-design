@@ -154,6 +154,8 @@ crates/
   noctua-design-emit/     the emitters. HAND-WRITTEN
   noctua-design-spec/     the contract reader and the prose register
   noctua-design-dist/     dist/ COPIED, so crates.io can carry it. GENERATED
+  noctua-design-fonts/    the faces that ship whole, COPIED from assets/fonts/, and
+  noctua-design-fonts-*/  one crate for each sliced family. GENERATED
   noctua-design-{tokens,theme,i18n,icons,grammars}/   GENERATED, COMMITTED
 packages/
   react/                  the React package. src/theme.js is GENERATED
@@ -161,6 +163,7 @@ packages/
     icons/<name>.js       one module per icon, so one icon costs one
     vendor/               the colour tokens, vendored from noctua-colors
   dist/                   dist/ COPIED again, so npm can carry it. GENERATED
+  fonts/                  every face, COPIED again, so npm can carry them. GENERATED
 dist/                     GENERATED, COMMITTED: the CSS layers, components.css, every shipped
                           behaviour module, the manifests, and tokens/css/ — the colour sheets
                           base.html links, without which a consumer's page has no palette
@@ -307,6 +310,7 @@ of these carries measured rules, not description:
 | glass, the backdrop, any appearance setting | `crates/noctua-design-emit/src/appearance.rs` |
 | the Tailwind bridge, or the name of a utility | `crates/noctua-design-emit/src/tailwind.rs` |
 | a font face or the preload set | `crates/noctua-design-emit/src/fonts.rs` |
+| which package carries a face, or a face's licence | `crates/noctua-design-emit/src/faces.rs` |
 | which page a component is on, a title, the search index | `crates/noctua-design-emit/src/docs.rs` |
 | shipped behaviour — which file does what | `crates/noctua-design-runtime/src/lib.rs` |
 | an enhanced form control, or anything locale-shaped | `crates/noctua-design-runtime/src/inputs.js` |
@@ -1671,8 +1675,9 @@ the one failure each tolerates. `cargo xtask release` prepares the version.
 
 **What is published**: `noctua-design` and the crates it depends on — `noctua-design-tokens`,
 `noctua-design-icons`, `noctua-design-grammars`, `noctua-design-theme` and `noctua-design-lineage`
-— and `noctua-design-dist`; on npm, `@noctua-world/design-tokens`, `@noctua-world/design-dist` and
-`@noctua-world/design-react`. **The compiler is never published**: `noctua-design-emit`, `-spec`,
+— `noctua-design-dist`, and the crates of faces, `noctua-design-fonts` and one
+`noctua-design-fonts-<family>` for each sliced family; on npm, `@noctua-world/design-tokens`,
+`@noctua-world/design-dist`, `@noctua-world/design-fonts` and `@noctua-world/design-react`. **The compiler is never published**: `noctua-design-emit`, `-spec`,
 `-styles`, `-runtime`, `-i18n` and `xtask` stay `publish = false`, because a consumer inherits what
 the system *is*, never what builds it, which is also why the published support crates carry no
 dependencies at all. `grep -L '^publish = false' crates/*/Cargo.toml` lists what publishes.
@@ -1684,6 +1689,28 @@ package directory, and `dist/` sits at the repository root, where a consumer cop
 copy. A component crate does not depend on the assets crate: writing files is the application's
 decision, and a component that wrote one would be making it for them.
 
+**The typefaces ship as packages of their own, and the split is a measurement.**
+`dist/fonts.css` asks for every face at `../assets/fonts/<file>`, and `assets/fonts/` is above
+every package as `dist/` is, so a registry consumer had every `@font-face` and no face. The faces
+are already compressed and come to more than crates.io lets one crate hold, with `dist/` or
+without it (`du -sb assets/fonts`, against the 10 MB a crate may be), so the cut follows the one
+line `spec/fonts.toml` already draws: every `[[face]]` in `noctua-design-fonts`, and each
+`[[sliced]]` family in a crate named by the last word of its family. npm has no such ceiling, so
+`@noctua-world/design-fonts` holds them all and lists them by set in `fonts.json`.
+`crates/noctua-design-emit/src/faces.rs` decides which face goes where and writes each crate's
+library; a face is bytes and an emitted file is text, so `cargo xtask build` copies the bytes and
+`cargo xtask check` holds every copy to its source and fails on a stale one, which a build never
+deletes. Git stores a blob once however many paths name it, so the copies cost a checkout and no
+history. **The path is the contract**: every crate writes flat, by the names the stylesheet uses,
+into `assets/fonts/` beside the directory that holds `dist/`, and `examples/consumer-rust`
+resolves every `url()` the shipped sheet writes against what the crates wrote. **A licence travels
+with its faces**, as the Open Font License requires: each package carries the text for every
+family in it and `ATTRIBUTION.md`, and a test fails on a licence in `assets/fonts/` that no
+package carries. **A new sliced family is a new crate, made by hand**: its `Cargo.toml` and
+`README.md` beside the others', its name in `release-crate.yml` and in `xtask/src/release.rs`,
+and a trusted publisher on crates.io before the tag. The build fails, naming the directory, until
+the manifest is there.
+
 **By hand, the order matters**: a crate cannot be published before the crates it depends on are on
 the index.
 
@@ -1691,7 +1718,8 @@ the index.
 cargo publish -p noctua-design-tokens     # then icons, grammars, theme, lineage
 cargo publish -p noctua-design            # after its dependencies are on the index
 cargo publish -p noctua-design-dist       # independent of the rest
-pnpm --filter @noctua-world/design-tokens publish   # then design-dist, then design-react
+cargo publish -p noctua-design-fonts      # then -jp, -kr, -sc: independent too
+pnpm --filter @noctua-world/design-tokens publish   # then design-dist, design-fonts, design-react
 ```
 
 **Pack with `pnpm`, upload with `npm`.** `pnpm` rewrites `workspace:*` to the real version and

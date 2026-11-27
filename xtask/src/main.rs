@@ -12,6 +12,7 @@
 
 mod build;
 mod check;
+mod faces;
 mod gates;
 mod references;
 mod release;

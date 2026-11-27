@@ -79,6 +79,60 @@ fn main() {
         "base.html linked nothing, so this proves nothing"
     );
 
+    // Every face the stylesheet asks for is one the crates of faces wrote,
+    // where the stylesheet asks for it.
+    //
+    // `fonts.css` names each face by a URL relative to itself,
+    // `../assets/fonts/<file>`, and the package that carries the sheet carried
+    // none of them: a consumer had every `@font-face`, each request was
+    // answered 404, and the page was drawn in the system's fonts. The crates
+    // write flat into one directory, `SERVED` beside the directory that holds
+    // the sheets, and the URLs are resolved here as a browser resolves them.
+    let served = out
+        .parent()
+        .expect("the static directory has a parent")
+        .join(noctua_design_fonts::SERVED);
+    // Emptied first: a face an earlier run wrote would still be found on disk
+    // after the crate that carried it stopped carrying it.
+    let _ = std::fs::remove_dir_all(&served);
+    noctua_design_fonts::write_to(&served).expect("write the faces out");
+    noctua_design_fonts_jp::write_to(&served).expect("write the Japanese slices out");
+    noctua_design_fonts_kr::write_to(&served).expect("write the Korean slices out");
+    noctua_design_fonts_sc::write_to(&served).expect("write the Chinese slices out");
+    let faces = std::fs::read_to_string(out.join("fonts.css")).expect("fonts.css");
+    let preload = std::fs::read_to_string(out.join("preload.html")).expect("preload.html");
+    let mut asked = 0usize;
+    for (text, opens) in [(&faces, "url(\""), (&preload, "href=\"")] {
+        for reference in text.split(opens).skip(1) {
+            let url = reference.split('"').next().expect("a closed reference");
+            let face = std::fs::read(out.join(url))
+                .unwrap_or_else(|_| panic!("the stylesheet asks for {url} and no crate wrote it"));
+            assert!(
+                face.starts_with(b"wOF2"),
+                "{url} is served and is not a WOFF2 face"
+            );
+            asked += 1;
+        }
+    }
+    assert!(
+        asked > 100,
+        "only {asked} faces were asked for, so this proves little"
+    );
+    let carried = noctua_design_fonts::FILES.len()
+        + noctua_design_fonts_jp::FILES.len()
+        + noctua_design_fonts_kr::FILES.len()
+        + noctua_design_fonts_sc::FILES.len();
+    // And each licence travelled with its faces, as the Open Font License asks.
+    for (name, text) in noctua_design_fonts::LICENCES
+        .iter()
+        .chain(noctua_design_fonts_jp::LICENCES)
+        .chain(noctua_design_fonts_kr::LICENCES)
+        .chain(noctua_design_fonts_sc::LICENCES)
+    {
+        assert!(!text.trim().is_empty(), "{name} is carried empty");
+        assert!(served.join(name).is_file(), "{name} was not written out");
+    }
+
     // The Tailwind bridge is in the package, and every semantic colour it maps
     // a utility onto is one `scope.css`, written out beside it, declares.
     //
@@ -216,8 +270,8 @@ fn main() {
         rendered.len()
     );
     println!(
-        "{linked} sheet(s) linked and present, {mapped} colour(s) and {sized} design \
-         token(s) bridged to Tailwind, \
+        "{linked} sheet(s) linked and present, {asked} face request(s) answered by {carried} \
+         carried face(s), {mapped} colour(s) and {sized} design token(s) bridged to Tailwind, \
          {painted} component(s) rendered, every root class painted, \
          {styled} of {} classes styled by the shipped components.css.",
         rendered.len()

@@ -480,6 +480,12 @@ pub(crate) fn run(root: &Path, spec_path: &Path) -> Result<Spec, String> {
         ui::detail(&line);
     }
 
+    // The typefaces, which are bytes and so are copied and not emitted.
+    let (carried, rewritten) = crate::faces::write(root)?;
+    ui::ok(&format!(
+        "{carried} face and licence copy(ies), {rewritten} rewritten"
+    ));
+
     Ok(spec)
 }
 

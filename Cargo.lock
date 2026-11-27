@@ -722,6 +722,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "noctua-design-fonts"
+version = "0.3.0"
+
+[[package]]
+name = "noctua-design-fonts-jp"
+version = "0.3.0"
+
+[[package]]
+name = "noctua-design-fonts-kr"
+version = "0.3.0"
+
+[[package]]
+name = "noctua-design-fonts-sc"
+version = "0.3.0"
+
+[[package]]
 name = "noctua-design-grammars"
 version = "0.3.0"
 

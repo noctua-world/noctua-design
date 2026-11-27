@@ -51,6 +51,7 @@ suite. The Rust half of this repository builds and tests without it, and
 | `crates/noctua-design-styles/` | The component rules, hand-written. `sources()` is the order they load in |
 | `dist/` | **Generated, committed**: the CSS layers, `components.css`, the behaviour modules and their manifests |
 | `crates/noctua-design-dist/`, `packages/dist/` | **Generated**: `dist/` copied, because a registry cannot carry a file above a package |
+| `crates/noctua-design-fonts/`, `crates/noctua-design-fonts-jp/`, `crates/noctua-design-fonts-kr/`, `crates/noctua-design-fonts-sc/`, `packages/fonts/` | **Generated**: the faces of `assets/fonts/` copied, for the same reason, and split because a registry refuses a crate over 10 MB |
 | `examples/` | Two consumers from outside the workspace, and [what each proves](examples/README.md) |
 | `docs-site/` | The documentation site, and [its own README](docs-site/README.md) |
 
@@ -190,13 +191,34 @@ and `font-ui` are the design tokens by name. A step of the spacing scale is a
 name and no bare multiplier is declared, so a number between two steps (`gap-5`)
 is no utility unless Tailwind's own `theme.css` is imported as well.
 
-### The one thing the package does not carry
+### The typefaces are packages of their own
 
-**The typefaces.** `fonts.css` asks for them at `../assets/fonts/`, beside the <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
-directory you copied, and megabytes of faces in every install would be a poor
-trade. Without them the page uses your system font and nothing breaks. To have
-them, take `assets/fonts/` from this repository, or from the archive every
-release attaches, which carries `dist/`, the faces and their licences:
+`fonts.css` asks for every face at `../assets/fonts/<file>`: in `assets/fonts/`, <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
+beside the directory you copied `dist/` to. The faces are 17 MB, more than a
+registry lets one crate hold, so they are not in the package that carries the
+sheets.
+
+| Registry | Package | Faces |
+|---|---|---|
+| crates.io | `noctua-design-fonts` | the Latin faces, the code face, the symbols and eight other scripts, about 3 MB |
+| crates.io | `noctua-design-fonts-jp`, `-kr`, `-sc` | one CJK family each, cut into slices |
+| npm | `@noctua-world/design-fonts` | all of them, listed by set in `fonts.json` |
+
+```rust
+// build.rs
+fn main() -> std::io::Result<()> {
+    noctua_design_dist::write_to("static/dist")?;
+    noctua_design_fonts::write_to("static/assets/fonts")
+}
+```
+
+Every crate of faces writes flat into that one directory, by the names the
+stylesheet uses, with the licence of each family beside it. A host that serves
+from memory serves each entry of `FILES` at `assets/fonts/<name>` instead. A
+face that is not served costs nothing but itself: the stacks fall back to the
+system's fonts, and a face is fetched only when a page draws a character in its
+range. The archive every release attaches carries `dist/`, the faces and their
+licences together:
 <https://github.com/noctua-world/noctua-design/releases/latest>.
 
 ### Working from a clone instead

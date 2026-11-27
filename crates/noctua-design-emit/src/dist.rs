@@ -121,7 +121,8 @@ fn library(shipped: &[&EmittedFile]) -> String {
          ///\n\
          /// Subdirectories are part of the name — `palettes/azure-vivid.json` — and\n\
          /// `dist/fonts.css` reaches the faces at `../assets/fonts/`, so whatever\n\
-         /// `dir` is, the fonts belong beside it and not inside it.\n\
+         /// `dir` is, the fonts belong beside it and not inside it. They are\n\
+         /// `noctua-design-fonts` and the crates named after it.\n\
          ///\n\
          /// # Errors\n\
          ///\n\

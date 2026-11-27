@@ -617,7 +617,8 @@ pub const FILES: &[(&str, &str)] = &[
 ///
 /// Subdirectories are part of the name — `palettes/azure-vivid.json` — and
 /// `dist/fonts.css` reaches the faces at `../assets/fonts/`, so whatever
-/// `dir` is, the fonts belong beside it and not inside it.
+/// `dir` is, the fonts belong beside it and not inside it. They are
+/// `noctua-design-fonts` and the crates named after it.
 ///
 /// # Errors
 ///

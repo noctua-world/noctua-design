@@ -37,11 +37,11 @@ because this system's default palette is scope-anchored. (Writing
 `<body data-palette="blue-balanced" data-theme="dark">` yourself does the same
 job for a page with no theme switcher.)
 
-**The typefaces are the one thing not in here.** `dist/fonts.css` asks for them
-at `../assets/fonts/`, beside the directory you copied — 16 MB of faces in every <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
-install would be a poor trade. Without them the page uses your system font and
-nothing breaks; to have them, take `assets/fonts/` from the repository or from
-the release archive.
+**The typefaces are a package of their own.** `dist/fonts.css` asks for each at
+`../assets/fonts/<file>`, beside the directory you copied, and <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
+`@noctua-world/design-fonts` is those files with their licences: copy its
+`fonts/` to `static/assets/fonts/`. Without them the page uses the system font
+and nothing breaks.
 
 Each behaviour module is an ES module, exporting `enhanceX(root)` and
 `releaseX(root)`:
