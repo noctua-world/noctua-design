@@ -13,23 +13,103 @@
  * `collapsed` takes the track to nothing. The duration is a token, and under
  * `prefers-reduced-motion` the token is nothing: the drawer is open or shut.
  *
- * HOW FAR IT OPENS. As far as its content, and never past
- * `--noctua-shell-drawer-max` of the box around it. That is a percentage, so it
- * holds only where that box has a size of its own on the axis. A window has. */
+ * HOW FAR IT OPENS. As far as its content, and never past its cap: a share of
+ * the room it divides with the work, `--noctua-shell-drawer-share-max` of it.
+ * With `share` it is that share exactly, held to the same cap.
+ *
+ * BELOW A FOOTER, THE ROOM IS WHAT THE FOOTER LEAVES, AND NO PERCENTAGE SAYS
+ * THAT. A percentage is of the whole window, so a drawer capped at one stood
+ * 96 pixels tall under a work area of 48 in a window 240 tall, against "always
+ * shorter than the workspace area" (`NOCTUA.md §12.11`). No stylesheet can
+ * subtract a sibling's height. A flex container can: it hands out what its
+ * rigid parts leave, in the ratio of the factors asked for. So a drawer at the
+ * bottom asks for no size and for a factor, share over what is left of a
+ * hundred, against the work's one, and takes that share of the room whatever
+ * stands rigid in it: a footer of any height, an alert line. Its content is
+ * its ceiling (`max-content`), so with little in it the rest goes back to the
+ * work.
+ *
+ * WHAT THAT ASKS OF THE WINDOW: a column laid out by flex with a height of its
+ * own, in which the work is the one other part that grows, from nothing
+ * (`flex: 1 1 0`).
+ *
+ * AND WHAT A WINDOW THAT IS NOT THAT GETS, which is less and never nothing.
+ * Two windows were measured, 240 tall, with forty lines in the drawer:
+ *
+ *   - A block box with a height of its own. No factor is read there, and with
+ *     the content as the only ceiling the drawer stood 800 tall and out of the
+ *     window. So the drawer also asks for a size, its share as a percentage,
+ *     which a flex column never reads (`flex-basis` is `0`, and a basis other
+ *     than `auto` is the size asked for) and every other box does. In a block
+ *     box it is a share of the whole box, footer included, since nothing
+ *     there can subtract the footer.
+ *   - A flex column whose work starts from its content's height
+ *     (`flex: 1 1 auto`) with more in it than the window holds. Nothing is
+ *     left to hand out, and the drawer stood 0 tall while open: visible to the
+ *     accessibility tree, in the tab order, the focus on a button with no
+ *     pixel drawn. So an open drawer has a floor, the smallest target
+ *     (`--noctua-target-min`), which the work gives up as any flex item gives
+ *     up room. A share that comes to less than the floor is the floor.
+ *
+ * AND A GRID IS A WINDOW NO DRAWER CAN SIZE ITSELF IN. A percentage in a grid
+ * item is of the item's own row, never of the grid. In the usual shell rows
+ * (`minmax(0, 1fr) auto auto`) the drawer's row is as tall as the drawer's
+ * content, so the percentage above is a share of its own content: four lines
+ * stood 56 tall in a row of 139, the rest scrolled away and the row left
+ * empty under it. Without the percentage the drawer filled that row, and a
+ * full one took the row to the whole window, 238 of 240, and left the work
+ * none. Nothing a stylesheet can write on the drawer tells a grid from a block
+ * box, and nothing written on a grid item reaches past its row, so no rule
+ * here serves both and the block box is the one served. The reader is told
+ * to lay the window out as the flex column, and
+ * `tests/browser/drawer.spec.js` holds what a grid gets: the share of the
+ * row, and the floor.
+ *
+ * The floor is a floor in a window that keeps the contract too. A drawer is
+ * then as tall as the work or taller only where the room they divide is under
+ * two targets, and no window that small holds a line of work. */
 .nd-drawer {
+  /* The share asked for: the cap, until `share` names one
+     (`drawer-share.css`). */
+  --nd-drawer-share: var(--noctua-shell-drawer-share-max);
   display: grid;
   grid-template-rows: 1fr;
   grid-template-columns: minmax(0, 1fr);
-  flex: none;
+  flex-grow: calc(
+    min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) /
+      (100 - min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)))
+  );
+  flex-shrink: 1;
+  flex-basis: 0;
   box-sizing: border-box;
+  /* Read wherever the factor above is not: in a block box the drawer is this
+     share of the box, under the same ceiling, and in a grid this share of its
+     own row. */
+  block-size: calc(min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) * 1%);
   min-inline-size: 0;
-  max-block-size: var(--noctua-shell-drawer-max);
+  /* A flex item is otherwise never smaller than what is in it, and a drawer
+     with more in it than its share would take the work's room. The floor is
+     the smallest target and not nothing: an open drawer is never drawn at no
+     height, whatever the window around it hands out. */
+  min-block-size: var(--noctua-target-min);
+  max-block-size: max-content;
   color: var(--nc-color-fg);
   background: var(--nc-color-surface);
   transition:
+    flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
+    inline-size var(--noctua-duration-base) var(--noctua-easing-out),
+    block-size var(--noctua-duration-base) var(--noctua-easing-out),
+    min-block-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-start;
+}
+
+/* GIVEN A SHARE, IT IS THAT SHARE AND NOT ITS CONTENT. The ceiling goes, so a
+   drawer with little in it still stands at the share the caller keeps for it,
+   and one with more scrolls. */
+.nd-drawer[data-nd-share] {
+  max-block-size: none;
 }
 
 /* A drawer at a side grows across the window and is as tall as its side.
@@ -42,9 +122,20 @@
 .nd-drawer[data-nd-side="end"] {
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 1fr;
+  /* Nothing rigid stands in the row beside it, so its share of the row is a
+     percentage and it asks the row for no factor. */
+  flex: none;
+  /* As tall as its side: no share of the height, and no floor on it. */
+  block-size: auto;
+  min-block-size: 0;
   max-block-size: none;
   max-inline-size: var(--noctua-shell-drawer-max);
   background: var(--nc-color-surface-subtle);
+}
+
+/* And given a share, a drawer at a side is that share of the row across. */
+.nd-drawer[data-nd-share]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  inline-size: calc(min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) * 1%);
 }
 
 /* AND IT STANDS AT THE SIDE IT NAMES, in the row it is in, wherever it is
@@ -64,17 +155,36 @@
    the way open, which is the two step functions: a drawer hidden at once would
    slide shut empty. */
 .nd-drawer[data-nd-collapsed="true"] {
+  /* It asks for no room, and the track inside closes on what is in it. A
+     drawer as tall as its content slides by the track, and one at its share
+     by the factor. */
+  flex-grow: 0;
+  /* And outside a flex column, where the size asked for is what is read, it
+     asks for none. The floor is an open drawer's, and goes with it. */
+  block-size: 0;
+  min-block-size: 0;
   grid-template-rows: 0fr;
   visibility: hidden;
   transition:
+    flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
+    inline-size var(--noctua-duration-base) var(--noctua-easing-out),
+    block-size var(--noctua-duration-base) var(--noctua-easing-out),
+    min-block-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-end;
 }
 
 .nd-drawer[data-nd-collapsed="true"]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  /* Shut, a drawer at a side is still as tall as its side. */
+  block-size: auto;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 0fr;
+}
+
+/* A share at a side is a size of its own, so shut it is told to be nothing. */
+.nd-drawer[data-nd-collapsed="true"][data-nd-share]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  inline-size: 0;
 }
 
 /* THE RAILS AND THE CONTENT, SIDE BY SIDE. The floor of nothing on both axes

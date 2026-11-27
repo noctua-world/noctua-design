@@ -37,11 +37,11 @@ because this system's default palette is scope-anchored. (Writing
 `<body data-palette="blue-balanced" data-theme="dark">` yourself does the same
 job for a page with no theme switcher.)
 
-**The typefaces are the one thing not in here.** `dist/fonts.css` asks for them
-at `../assets/fonts/`, beside the directory you copied — 16 MB of faces in every <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
-install would be a poor trade. Without them the page uses your system font and
-nothing breaks; to have them, take `assets/fonts/` from the repository or from
-the release archive.
+**The typefaces are a package of their own.** `dist/fonts.css` asks for each at
+`../assets/fonts/<file>`, beside the directory you copied, and <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
+`@noctua-world/design-fonts` is those files with their licences: copy its
+`fonts/` to `static/assets/fonts/`. Without them the page uses the system font
+and nothing breaks.
 
 Each behaviour module is an ES module, exporting `enhanceX(root)` and
 `releaseX(root)`:
@@ -57,9 +57,13 @@ a client-side router calls `releaseX` before it replaces markup.
 ## With Tailwind
 
 Nothing here needs Tailwind, and an application built on this system may use it.
-`dist/tailwind/bridge.css` maps every Tailwind v4 colour utility onto the token
-behind it and declares no colour. Link the sheets from `base.html` as above, then
-import the bridge after Tailwind in the entry stylesheet:
+`dist/tailwind/bridge.css` maps Tailwind v4's utilities onto the tokens: every
+colour utility onto its `--nc-*` token, and the spacing scale, the radii, the type
+sizes, line heights, weights, letter spacing and font roles, the shell's lengths,
+the smallest target, the measure, the easings and the breakpoints onto their
+`--noctua-*` tokens. It declares no colour and no length of its own. Link the sheets from
+`base.html` as above, then import the bridge after Tailwind in the entry
+stylesheet:
 
 ```css
 @import "tailwindcss";
@@ -67,7 +71,28 @@ import the bridge after Tailwind in the entry stylesheet:
 ```
 
 `bg-surface`, `text-fg` and `border-border` then follow the palette, the mode and
-a theme scope exactly as the components do.
+a theme scope exactly as the components do, and `gap-4`, `p-inset`, `min-w-0`,
+`h-shell-line`, `rounded-control`, `text-body`, `leading-body`, `font-semibold`
+and `font-ui` are the design tokens by name.
+
+**A step of the spacing scale is a name, and a number between two steps is no
+utility.** The bridge declares `--spacing-4` and sets the bare `--spacing` to
+`initial`, so `gap-4` is `var(--noctua-space-4)` and `gap-5` emits nothing,
+under either import. That takes out Tailwind's multiplier and nothing else:
+`@import "tailwindcss"` still brings Tailwind's own type sizes, radii and
+palette (`text-sm`, `rounded-md`). Import `tailwindcss/utilities.css` in its
+place where the tokens are meant to be the whole vocabulary.
+
+**A duration, a layer and a border width are utilities by the token's name.**
+Tailwind has no theme variable for them, and its own are bare numbers
+(`duration-150`, `z-10`, `border-2`), which no token stands behind. The bridge
+adds `duration-fast`, `z-dialog`, `border-hairline` with its sides
+(`border-b-hairline`), `outline-focus` and `outline-offset-focus`, and maps
+`ease-out`, `ease-in-out` and `ease-linear`. A `border-hairline` and an
+`outline-focus` each draw their line with no other class: the style comes with
+the width. A `duration-fast` follows `prefers-reduced-motion`, as the token
+does. The breakpoints are written as
+lengths, and the scene tokens have no utility.
 
 ## The components
 

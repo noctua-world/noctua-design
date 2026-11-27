@@ -378,5 +378,9 @@
     ["--nc-magnitude-medium", "#b29c6a"],
     ["--nc-magnitude-high", "#a6795a"],
     ["--nc-magnitude-higher", "#99564b"]
-  ]
+  ],
+  "page": {
+    "light": { "plain": "#ffffff", "cool": "#fdfdfd", "black": "#ffffff", "tinted": "#f8f6f8", "soft": "#f7f7f7", "softer": "#efeeef" },
+    "dark": { "plain": "#111111", "cool": "#101113", "black": "#000000", "tinted": "#1b151b", "soft": "#181718", "softer": "#201f20" }
+  }
 }

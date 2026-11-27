@@ -1,4 +1,4 @@
-# Publishes the three public npm packages.
+# Publishes the four public npm packages.
 #
 # There is no NODE_AUTH_TOKEN here, and that is the entire point: npm trusted
 # publishing exchanges the workflow's OIDC identity for a short-lived credential,
@@ -67,7 +67,7 @@ jobs:
         run: |
           tag="${{ inputs.tag || github.ref_name }}"
           tag="${tag#v}"
-          for pkg in dist tokens react; do
+          for pkg in dist fonts tokens react; do
             version="$(node -p "require('./packages/$pkg/package.json').version")"
             if [ "$tag" != "$version" ]; then
               echo "::error::tag v$tag does not match packages/$pkg $version"
@@ -79,11 +79,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # Tokens first: the React package names it as a dependency, and a version
-      # that is not on the registry yet is a package nobody can install.
+      # that is not on the registry yet is a package nobody can install. The
+      # faces go last, as they do on crates.io: nothing here depends on them, so
+      # a refusal of their name holds up nothing a consumer installs.
       - name: Pack and publish
         run: |
           mkdir -p packed
-          for pkg in tokens dist react; do
+          for pkg in tokens dist react fonts; do
             echo "::group::@noctua-world/design-$pkg"
             (cd "packages/$pkg" && pnpm pack --pack-destination ../../packed)
             # `./` is load-bearing. A bare `packed/x.tgz` has a slash and no

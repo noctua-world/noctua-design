@@ -1411,6 +1411,7 @@ fn drawer(
     let side_ = scope
         .pick(props, "side", &DrawerSide::ALL, DrawerSide::as_str)
         .unwrap_or_default();
+    let share_ = scope.find(props, "share");
     let collapsed_ = scope.flag(props, "collapsed").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
@@ -1420,6 +1421,7 @@ fn drawer(
             id: id_,
             label: label_,
             side: side_,
+            share: share_,
             collapsed: collapsed_,
             class: class_,
             {render(children, scope)}
@@ -2701,6 +2703,7 @@ fn number_input(
     let prefix_ = scope.find(props, "prefix");
     let suffix_ = scope.find(props, "suffix");
     let placeholder_ = scope.find(props, "placeholder");
+    let maxlength_ = scope.find(props, "maxlength");
     let hint_ = scope.find(props, "hint");
     let error_ = scope.find(props, "error");
     let required_ = scope.flag(props, "required").unwrap_or(false);
@@ -2741,6 +2744,7 @@ fn number_input(
             prefix: prefix_,
             suffix: suffix_,
             placeholder: placeholder_,
+            maxlength: maxlength_,
             hint: hint_,
             error: error_,
             required: required_,

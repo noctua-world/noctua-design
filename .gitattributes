@@ -7,6 +7,12 @@
 # included, and stay byte for byte as they were published.
 assets/fonts/OFL-*.txt -text
 
+# The packages that carry the faces hold copies of that directory, and
+# `cargo xtask check` holds every copy to its source byte for byte: a licence
+# normalised in the copy and not in the source would differ on a fresh clone.
+crates/noctua-design-fonts*/fonts/** -text
+packages/fonts/fonts/** -text
+
 # The fuzzy corpus is another repository's file, held to a recorded checksum:
 # it stays byte for byte as it was copied.
 assets/vendor/nc-fuzzy/fuzzy-corpus.tsv -text

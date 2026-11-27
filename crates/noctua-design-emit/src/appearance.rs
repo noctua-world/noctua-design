@@ -395,6 +395,121 @@ fn surface(out: &mut String, prefix: &str) {
     .expect("write");
 }
 
+/// The light page: paper. No ramp token is pure white.
+///
+/// One constant for the rule in `dist/theme.css` and for the page colours a
+/// native host reads as data ([`page_colour`]), so the two cannot differ.
+pub const PAPER: &str = "#fff"; // allow-literal: the page is paper; no ramp token is pure white
+
+/// The `black` backdrop in dark: pure black, which no ramp token is.
+pub const BLACK: &str = "#000"; // allow-literal: this value IS pure black, and no ramp token is
+
+/// The backdrop that is a literal, and only in dark.
+pub const BLACK_BACKDROP: &str = "black";
+
+/// The backdrop that asks for nothing: paper in light, [`PLAIN_DARK`] in dark.
+pub const PLAIN_BACKDROP: &str = "plain";
+
+/// What a dark page is painted with when no backdrop is named.
+pub const PLAIN_DARK: &str = "--nc-color-surface";
+
+/// The backdrops that are a contract colour in both modes, and which.
+pub const BACKDROP_TOKENS: [(&str, &str); 4] = [
+    ("cool", "--nc-color-surface-cool"),
+    ("tinted", "--nc-color-accent-bg"),
+    ("soft", "--nc-color-surface-subtle"),
+    ("softer", "--nc-color-surface-raised"),
+];
+
+/// The colour a page of `palette` is painted with, as `#rrggbb` in sRGB.
+///
+/// # Why this exists
+///
+/// A native host paints its window before its page has a first frame, and it
+/// has no stylesheet to ask. The light page was a literal in `dist/theme.css`
+/// and nowhere else, so a host could paint the dark page from the palette's
+/// values and had nothing to paint the light one from.
+///
+/// It is the cascade of [`backdrop`] read as a function: the same constants
+/// and the same table write the rules and answer here, and
+/// `tests/browser/page-colour.spec.js` holds the answer to the pixels a page
+/// paints.
+///
+/// # Errors
+///
+/// When `backdrop` is a value no rule here is written for, when the contract
+/// does not name the token a rule reads, or when the palette has no such step:
+/// each is a spec that changed without this table.
+pub fn page_colour(
+    vendor: &noctua_design_spec::Vendor,
+    palette: &str,
+    dark: bool,
+    backdrop: &str,
+) -> Result<String, String> {
+    let token = if backdrop == PLAIN_BACKDROP || backdrop == BLACK_BACKDROP {
+        if !dark {
+            // `black` has no light meaning and falls back to the plain page.
+            return Ok(six_digits(PAPER));
+        }
+        if backdrop == BLACK_BACKDROP {
+            return Ok(six_digits(BLACK));
+        }
+        PLAIN_DARK
+    } else {
+        BACKDROP_TOKENS
+            .iter()
+            .find(|(value, _)| *value == backdrop)
+            .map(|(_, token)| *token)
+            .ok_or_else(|| format!("no rule paints the `{backdrop}` backdrop"))?
+    };
+    let target = vendor
+        .contract
+        .iter()
+        .find(|(name, _)| name == token)
+        .map(|(_, value)| value.as_str())
+        .ok_or_else(|| format!("the contract does not declare {token}"))?;
+    let step = target
+        .trim()
+        .strip_prefix("var(")
+        .and_then(|rest| rest.strip_suffix(')'))
+        .map(str::trim)
+        .ok_or_else(|| format!("{token} is `{target}`, which is not one palette step"))?;
+    let ramps = vendor
+        .ramps
+        .get(palette)
+        .ok_or_else(|| format!("no palette is named `{palette}`"))?;
+    let steps = if dark { &ramps.dark } else { &ramps.light };
+    let hex = steps
+        .iter()
+        .find(|(name, _)| name == step)
+        .map(|(_, hex)| hex.as_str())
+        .ok_or_else(|| format!("palette `{palette}` has no step {step}"))?;
+    let hex = six_digits(hex);
+    if hex.len() == 7 && hex[1..].bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        Ok(hex)
+    } else {
+        Err(format!(
+            "palette `{palette}` gives {step} as `{hex}`, which is not a hex colour"
+        ))
+    }
+}
+
+/// `#abc` as `#aabbcc`, lower case; anything else lower case and unchanged.
+fn six_digits(hex: &str) -> String {
+    let hex = hex.trim().to_ascii_lowercase();
+    match hex.strip_prefix('#') {
+        Some(digits) if digits.len() == 3 => {
+            let mut out = String::from("#");
+            for digit in digits.chars() {
+                out.push(digit);
+                out.push(digit);
+            }
+            out
+        }
+        _ => hex,
+    }
+}
+
 /// The scope list at zero specificity, with `suffix` anded onto it.
 ///
 /// `:where()` is the point: these are BASE declarations, the value in force
@@ -451,7 +566,7 @@ fn backdrop(out: &mut String, prefix: &str) {
     writeln!(
         out,
         "{} {{\n\
-        \x20 --{prefix}-backdrop: #fff; /* allow-literal: the page is paper; no ramp token is pure white, and this is the base every rule below overrides */\n\
+        \x20 --{prefix}-backdrop: {PAPER}; /* allow-literal: the page is paper; no ramp token is pure white, and this is the base every rule below overrides */\n\
         }}\n",
         anywhere("")
     )
@@ -461,17 +576,12 @@ fn backdrop(out: &mut String, prefix: &str) {
         out,
         prefix,
         None,
-        &format!("--{prefix}-backdrop: var(--nc-color-surface);"),
+        &format!("--{prefix}-backdrop: var({PLAIN_DARK});"),
     );
 
     // The four that mean something in both modes, in one rule each. No mode
     // condition: the token already carries it.
-    for (value, token) in [
-        ("cool", "--nc-color-surface-cool"),
-        ("tinted", "--nc-color-accent-bg"),
-        ("soft", "--nc-color-surface-subtle"),
-        ("softer", "--nc-color-surface-raised"),
-    ] {
+    for (value, token) in BACKDROP_TOKENS {
         writeln!(
             out,
             "[data-{prefix}-backdrop=\"{value}\"] {{\n\
@@ -487,9 +597,9 @@ fn backdrop(out: &mut String, prefix: &str) {
     dark_rule(
         out,
         prefix,
-        Some("black"),
+        Some(BLACK_BACKDROP),
         &format!(
-            "--{prefix}-backdrop: #000; /* allow-literal: this value IS pure black, and no ramp token is \u{2014} --nc-gray-1 is #030303, which still lights an OLED pixel */"
+            "--{prefix}-backdrop: {BLACK}; /* allow-literal: this value IS pure black, and no ramp token is \u{2014} --nc-gray-1 is #030303, which still lights an OLED pixel */"
         ),
     );
 }
@@ -804,6 +914,86 @@ mod tests {
 
     fn css() -> String {
         emit(&shipped(), &model()).remove(0).contents
+    }
+
+    fn vendor() -> noctua_design_spec::Vendor {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        noctua_design_spec::vendor::load(&root).expect("vendor")
+    }
+
+    /// Every palette has a page colour for every backdrop the theme model
+    /// declares, in both modes, and the two literals are where the sheet
+    /// writes them: a light page is paper whatever the palette, and `black`
+    /// is black only in dark.
+    ///
+    /// The light page was a literal in the sheet and data nowhere, so a native
+    /// host had nothing to paint its window with before the first frame.
+    #[test]
+    fn every_palette_has_a_page_colour_for_every_backdrop() {
+        let vendor = vendor();
+        let backdrops = model().setting["backdrop"].resolved_values(&vendor);
+        assert!(backdrops.len() >= 6);
+        assert!(vendor.themes.len() > 30);
+        for palette in &vendor.themes {
+            for backdrop in &backdrops {
+                for dark in [false, true] {
+                    let hex = page_colour(&vendor, palette, dark, backdrop)
+                        .unwrap_or_else(|error| panic!("{palette} {backdrop}: {error}"));
+                    assert_eq!(hex.len(), 7, "{palette} {backdrop}: {hex}");
+                }
+            }
+            assert_eq!(
+                page_colour(&vendor, palette, false, "plain").unwrap(),
+                "#ffffff"
+            ); // allow-literal: the paper the sheet declares, asserted
+            assert_eq!(
+                page_colour(&vendor, palette, false, "black").unwrap(),
+                "#ffffff"
+            ); // allow-literal: as above
+            assert_eq!(
+                page_colour(&vendor, palette, true, "black").unwrap(),
+                "#000000"
+            ); // allow-literal: the black the sheet declares, asserted
+            let dark = &vendor.ramps[palette].dark;
+            let app = dark
+                .iter()
+                .find(|(name, _)| name == "--nc-neutral-bg-app")
+                .map(|(_, hex)| hex.clone())
+                .expect("the palette's page step");
+            assert_eq!(page_colour(&vendor, palette, true, "plain").unwrap(), app);
+        }
+        assert!(page_colour(&vendor, &vendor.themes[0], true, "no-such-backdrop").is_err());
+        assert!(page_colour(&vendor, "no-such-palette", true, "cool").is_err());
+    }
+
+    /// The data and the sheet are one table: every rule the sheet writes for a
+    /// named backdrop reads the token the data resolves, and the base pair is
+    /// the two the data starts from.
+    #[test]
+    fn the_page_colours_are_read_off_the_rules_the_sheet_writes() {
+        let css = bare(&css());
+        assert!(css.contains(&format!("--noctua-backdrop: {PAPER};")));
+        assert!(css.contains(&format!("--noctua-backdrop: var({PLAIN_DARK});")));
+        assert!(css.contains(&format!("--noctua-backdrop: {BLACK};")));
+        for (value, token) in BACKDROP_TOKENS {
+            assert!(
+                css.contains(&format!(
+                    "[data-noctua-backdrop=\"{value}\"] {{\n  --noctua-backdrop: var({token});"
+                )),
+                "the sheet has no rule painting `{value}` from {token}"
+            );
+        }
+        // And no backdrop the model declares is painted by a rule this table
+        // does not hold.
+        let vendor = vendor();
+        for backdrop in model().setting["backdrop"].resolved_values(&vendor) {
+            assert!(
+                backdrop == PLAIN_BACKDROP
+                    || backdrop == BLACK_BACKDROP
+                    || BACKDROP_TOKENS.iter().any(|(value, _)| *value == backdrop),
+                "`{backdrop}` is a backdrop and no table says what paints it"
+            );
+        }
     }
 
     /// The sheet with its comments removed.

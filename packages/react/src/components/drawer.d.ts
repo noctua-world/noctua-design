@@ -15,8 +15,10 @@ export interface DrawerProps {
   id?: string;
   /** The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required. */
   label: string;
-  /** Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in. */
+  /** The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. A block box gives that share of the box, and a grid of its row. */
   side?: DrawerSide;
+  /** A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In a block box it is of the box, and in a grid of its row. Without it, the content sizes it. */
+  share?: string;
   /** Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology. */
   collapsed?: boolean;
   className?: string;

@@ -1,0 +1,118 @@
+/* --- Drawer: the share it is given ---------------------------------------------
+ *
+ * A drawer's `share` is a whole percentage, written as `data-nd-share`, and each
+ * rule below hands one of them to `drawer.css` as the number it computes with.
+ *
+ * WHY A RULE FOR EACH, AND NOT ONE. A stylesheet cannot read a number out of an
+ * attribute in every engine this system is drawn by, and the other two ways to
+ * hand it over are a `style` attribute and a script. An application that serves
+ * its page under `style-src 'self'` has every `style` attribute refused, and a
+ * share drawn by a script is a drawer that changes height after its first
+ * frame. So the percentages are written out, one to a hundred, and a drawer is
+ * drawn at its share with no script and no `style`.
+ *
+ * `drawer.css` holds a share to `--noctua-shell-drawer-share-max`, so every
+ * rule past the cap draws the cap. They are written all the same: the cap is a
+ * token, and a percentage is one to a hundred.
+ *
+ * A test beside `sources()` holds this file to exactly these hundred rules. */
+.nd-drawer[data-nd-share="1"] { --nd-drawer-share: 1; }
+.nd-drawer[data-nd-share="2"] { --nd-drawer-share: 2; }
+.nd-drawer[data-nd-share="3"] { --nd-drawer-share: 3; }
+.nd-drawer[data-nd-share="4"] { --nd-drawer-share: 4; }
+.nd-drawer[data-nd-share="5"] { --nd-drawer-share: 5; }
+.nd-drawer[data-nd-share="6"] { --nd-drawer-share: 6; }
+.nd-drawer[data-nd-share="7"] { --nd-drawer-share: 7; }
+.nd-drawer[data-nd-share="8"] { --nd-drawer-share: 8; }
+.nd-drawer[data-nd-share="9"] { --nd-drawer-share: 9; }
+.nd-drawer[data-nd-share="10"] { --nd-drawer-share: 10; }
+.nd-drawer[data-nd-share="11"] { --nd-drawer-share: 11; }
+.nd-drawer[data-nd-share="12"] { --nd-drawer-share: 12; }
+.nd-drawer[data-nd-share="13"] { --nd-drawer-share: 13; }
+.nd-drawer[data-nd-share="14"] { --nd-drawer-share: 14; }
+.nd-drawer[data-nd-share="15"] { --nd-drawer-share: 15; }
+.nd-drawer[data-nd-share="16"] { --nd-drawer-share: 16; }
+.nd-drawer[data-nd-share="17"] { --nd-drawer-share: 17; }
+.nd-drawer[data-nd-share="18"] { --nd-drawer-share: 18; }
+.nd-drawer[data-nd-share="19"] { --nd-drawer-share: 19; }
+.nd-drawer[data-nd-share="20"] { --nd-drawer-share: 20; }
+.nd-drawer[data-nd-share="21"] { --nd-drawer-share: 21; }
+.nd-drawer[data-nd-share="22"] { --nd-drawer-share: 22; }
+.nd-drawer[data-nd-share="23"] { --nd-drawer-share: 23; }
+.nd-drawer[data-nd-share="24"] { --nd-drawer-share: 24; }
+.nd-drawer[data-nd-share="25"] { --nd-drawer-share: 25; }
+.nd-drawer[data-nd-share="26"] { --nd-drawer-share: 26; }
+.nd-drawer[data-nd-share="27"] { --nd-drawer-share: 27; }
+.nd-drawer[data-nd-share="28"] { --nd-drawer-share: 28; }
+.nd-drawer[data-nd-share="29"] { --nd-drawer-share: 29; }
+.nd-drawer[data-nd-share="30"] { --nd-drawer-share: 30; }
+.nd-drawer[data-nd-share="31"] { --nd-drawer-share: 31; }
+.nd-drawer[data-nd-share="32"] { --nd-drawer-share: 32; }
+.nd-drawer[data-nd-share="33"] { --nd-drawer-share: 33; }
+.nd-drawer[data-nd-share="34"] { --nd-drawer-share: 34; }
+.nd-drawer[data-nd-share="35"] { --nd-drawer-share: 35; }
+.nd-drawer[data-nd-share="36"] { --nd-drawer-share: 36; }
+.nd-drawer[data-nd-share="37"] { --nd-drawer-share: 37; }
+.nd-drawer[data-nd-share="38"] { --nd-drawer-share: 38; }
+.nd-drawer[data-nd-share="39"] { --nd-drawer-share: 39; }
+.nd-drawer[data-nd-share="40"] { --nd-drawer-share: 40; }
+.nd-drawer[data-nd-share="41"] { --nd-drawer-share: 41; }
+.nd-drawer[data-nd-share="42"] { --nd-drawer-share: 42; }
+.nd-drawer[data-nd-share="43"] { --nd-drawer-share: 43; }
+.nd-drawer[data-nd-share="44"] { --nd-drawer-share: 44; }
+.nd-drawer[data-nd-share="45"] { --nd-drawer-share: 45; }
+.nd-drawer[data-nd-share="46"] { --nd-drawer-share: 46; }
+.nd-drawer[data-nd-share="47"] { --nd-drawer-share: 47; }
+.nd-drawer[data-nd-share="48"] { --nd-drawer-share: 48; }
+.nd-drawer[data-nd-share="49"] { --nd-drawer-share: 49; }
+.nd-drawer[data-nd-share="50"] { --nd-drawer-share: 50; }
+.nd-drawer[data-nd-share="51"] { --nd-drawer-share: 51; }
+.nd-drawer[data-nd-share="52"] { --nd-drawer-share: 52; }
+.nd-drawer[data-nd-share="53"] { --nd-drawer-share: 53; }
+.nd-drawer[data-nd-share="54"] { --nd-drawer-share: 54; }
+.nd-drawer[data-nd-share="55"] { --nd-drawer-share: 55; }
+.nd-drawer[data-nd-share="56"] { --nd-drawer-share: 56; }
+.nd-drawer[data-nd-share="57"] { --nd-drawer-share: 57; }
+.nd-drawer[data-nd-share="58"] { --nd-drawer-share: 58; }
+.nd-drawer[data-nd-share="59"] { --nd-drawer-share: 59; }
+.nd-drawer[data-nd-share="60"] { --nd-drawer-share: 60; }
+.nd-drawer[data-nd-share="61"] { --nd-drawer-share: 61; }
+.nd-drawer[data-nd-share="62"] { --nd-drawer-share: 62; }
+.nd-drawer[data-nd-share="63"] { --nd-drawer-share: 63; }
+.nd-drawer[data-nd-share="64"] { --nd-drawer-share: 64; }
+.nd-drawer[data-nd-share="65"] { --nd-drawer-share: 65; }
+.nd-drawer[data-nd-share="66"] { --nd-drawer-share: 66; }
+.nd-drawer[data-nd-share="67"] { --nd-drawer-share: 67; }
+.nd-drawer[data-nd-share="68"] { --nd-drawer-share: 68; }
+.nd-drawer[data-nd-share="69"] { --nd-drawer-share: 69; }
+.nd-drawer[data-nd-share="70"] { --nd-drawer-share: 70; }
+.nd-drawer[data-nd-share="71"] { --nd-drawer-share: 71; }
+.nd-drawer[data-nd-share="72"] { --nd-drawer-share: 72; }
+.nd-drawer[data-nd-share="73"] { --nd-drawer-share: 73; }
+.nd-drawer[data-nd-share="74"] { --nd-drawer-share: 74; }
+.nd-drawer[data-nd-share="75"] { --nd-drawer-share: 75; }
+.nd-drawer[data-nd-share="76"] { --nd-drawer-share: 76; }
+.nd-drawer[data-nd-share="77"] { --nd-drawer-share: 77; }
+.nd-drawer[data-nd-share="78"] { --nd-drawer-share: 78; }
+.nd-drawer[data-nd-share="79"] { --nd-drawer-share: 79; }
+.nd-drawer[data-nd-share="80"] { --nd-drawer-share: 80; }
+.nd-drawer[data-nd-share="81"] { --nd-drawer-share: 81; }
+.nd-drawer[data-nd-share="82"] { --nd-drawer-share: 82; }
+.nd-drawer[data-nd-share="83"] { --nd-drawer-share: 83; }
+.nd-drawer[data-nd-share="84"] { --nd-drawer-share: 84; }
+.nd-drawer[data-nd-share="85"] { --nd-drawer-share: 85; }
+.nd-drawer[data-nd-share="86"] { --nd-drawer-share: 86; }
+.nd-drawer[data-nd-share="87"] { --nd-drawer-share: 87; }
+.nd-drawer[data-nd-share="88"] { --nd-drawer-share: 88; }
+.nd-drawer[data-nd-share="89"] { --nd-drawer-share: 89; }
+.nd-drawer[data-nd-share="90"] { --nd-drawer-share: 90; }
+.nd-drawer[data-nd-share="91"] { --nd-drawer-share: 91; }
+.nd-drawer[data-nd-share="92"] { --nd-drawer-share: 92; }
+.nd-drawer[data-nd-share="93"] { --nd-drawer-share: 93; }
+.nd-drawer[data-nd-share="94"] { --nd-drawer-share: 94; }
+.nd-drawer[data-nd-share="95"] { --nd-drawer-share: 95; }
+.nd-drawer[data-nd-share="96"] { --nd-drawer-share: 96; }
+.nd-drawer[data-nd-share="97"] { --nd-drawer-share: 97; }
+.nd-drawer[data-nd-share="98"] { --nd-drawer-share: 98; }
+.nd-drawer[data-nd-share="99"] { --nd-drawer-share: 99; }
+.nd-drawer[data-nd-share="100"] { --nd-drawer-share: 100; }

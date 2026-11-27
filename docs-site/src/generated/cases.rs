@@ -674,6 +674,45 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Drawer",
+        "case-drawer-7",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+                ("share", Value::Data("035")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-8",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+                ("share", Value::Data("33.5")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-9",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+                ("share", Value::Data("101")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
         "ErrorSummary",
         "case-error-summary-0",
         &[Node::Component {
@@ -1817,6 +1856,19 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
                 ("name", Value::Data("quantity")),
                 ("step", Value::Data("1")),
                 ("value", Value::Data("3")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "NumberInput",
+        "case-number-input-2",
+        &[Node::Component {
+            name: "NumberInput",
+            props: &[
+                ("label", Value::Data("Floor")),
+                ("maxlength", Value::Data("2")),
+                ("name", Value::Data("floor")),
             ],
             children: &[],
         }],

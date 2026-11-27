@@ -78,6 +78,7 @@ export declare const shell: {
   readonly promptMax: string;
   readonly promptShare: string;
   readonly drawerMax: string;
+  readonly drawerShareMax: string;
 };
 
 export declare const leading: {

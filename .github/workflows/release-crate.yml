@@ -1,4 +1,4 @@
-# Publishes the seven public crates.
+# Publishes the eleven public crates.
 #
 # Like the npm workflow, there is no stored token: crates.io trusted publishing
 # exchanges OIDC for a credential that lives about thirty minutes, and the auth
@@ -71,7 +71,9 @@ jobs:
 
       # Order is not decoration. The five data crates have no dependants on the
       # index until they are on it, so `noctua-design` cannot be verified before
-      # them. `noctua-design-dist` depends on nothing and could go anywhere.
+      # them. `noctua-design-dist` and the four crates of faces depend on nothing
+      # and could go anywhere. They go last: a new crate name is rate-limited,
+      # and a wait there holds up nothing a consumer compiles against.
       #
       # Idempotent, and the tolerance is on the *registry's* answer rather than a
       # prior lookup: crates.io's read path can lag its write path, so "the API
@@ -85,7 +87,11 @@ jobs:
             noctua-design-theme \
             noctua-design-lineage \
             noctua-design \
-            noctua-design-dist
+            noctua-design-dist \
+            noctua-design-fonts \
+            noctua-design-fonts-jp \
+            noctua-design-fonts-kr \
+            noctua-design-fonts-sc
           do
             echo "::group::$crate"
             set +e

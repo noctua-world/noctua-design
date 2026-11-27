@@ -1,0 +1,23 @@
+[package]
+name = "noctua-design-fonts-jp"
+description = "Noto Sans JP for the Noctua design system, cut into slices by unicode-range, embedded, with one call that writes them out."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+# The library is this project's, and the faces it embeds keep their own terms:
+# `fonts/` holds each licence beside the files it covers.
+license = "(MIT OR Apache-2.0) AND OFL-1.1"
+repository = "https://github.com/noctua-world/noctua-design"
+readme = "README.md"
+keywords = ["design-system", "fonts", "assets", "dioxus", "web"]
+categories = ["web-programming", "gui"]
+
+# `fonts/` here is a copy of files in `assets/fonts/` at the repository root,
+# made by `cargo xtask build` and never by hand. It is copied rather than
+# referenced because Cargo will not package a file above the package directory,
+# and a face is too large to share a crate with the others:
+# `crates/noctua-design-emit/src/faces.rs`.
+include = ["src/**/*.rs", "fonts/**", "README.md"]
+
+[lints]
+workspace = true

@@ -7800,6 +7800,72 @@ const PARAGRAPH_TONE_MUTED: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `Paragraph.tone` at `danger`.
+const PARAGRAPH_TONE_DANGER: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("tone")),
+                ("data-nd-slug", Value::Text("paragraph")),
+            ],
+            children: &[Node::Component {
+                name: "Paragraph",
+                props: &[("tone", Value::Text("danger"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-paragraph-tone-danger")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("danger"))],
+            }],
+        },
+    ],
+}];
+
+/// `Paragraph.tone` at `success`.
+const PARAGRAPH_TONE_SUCCESS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("tone")),
+                ("data-nd-slug", Value::Text("paragraph")),
+            ],
+            children: &[Node::Component {
+                name: "Paragraph",
+                props: &[("tone", Value::Text("success"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-paragraph-tone-success")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("success"))],
+            }],
+        },
+    ],
+}];
+
 /// `Progress.size` at `small`.
 const PROGRESS_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -13609,6 +13675,72 @@ const TEXT_TONE_ACCENT: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `Text.tone` at `danger`.
+const TEXT_TONE_DANGER: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("tone")),
+                ("data-nd-slug", Value::Text("text")),
+            ],
+            children: &[Node::Component {
+                name: "Text",
+                props: &[("tone", Value::Text("danger"))],
+                children: &[Node::Text(Value::Text("Text"))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-text-tone-danger")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("danger"))],
+            }],
+        },
+    ],
+}];
+
+/// `Text.tone` at `success`.
+const TEXT_TONE_SUCCESS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("tone")),
+                ("data-nd-slug", Value::Text("text")),
+            ],
+            children: &[Node::Component {
+                name: "Text",
+                props: &[("tone", Value::Text("success"))],
+                children: &[Node::Text(Value::Text("Text"))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-text-tone-success")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("success"))],
+            }],
+        },
+    ],
+}];
+
 /// `Textarea.resize` at `none`.
 const TEXTAREA_RESIZE_NONE: &[Node] = &[Node::Element {
     tag: "figure",
@@ -14513,6 +14645,8 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Paragraph", "size", "lead") => PARAGRAPH_SIZE_LEAD,
         ("Paragraph", "tone", "default") => PARAGRAPH_TONE_DEFAULT,
         ("Paragraph", "tone", "muted") => PARAGRAPH_TONE_MUTED,
+        ("Paragraph", "tone", "danger") => PARAGRAPH_TONE_DANGER,
+        ("Paragraph", "tone", "success") => PARAGRAPH_TONE_SUCCESS,
         ("Progress", "size", "small") => PROGRESS_SIZE_SMALL,
         ("Progress", "size", "medium") => PROGRESS_SIZE_MEDIUM,
         ("Progress", "size", "large") => PROGRESS_SIZE_LARGE,
@@ -14615,6 +14749,8 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Text", "tone", "default") => TEXT_TONE_DEFAULT,
         ("Text", "tone", "muted") => TEXT_TONE_MUTED,
         ("Text", "tone", "accent") => TEXT_TONE_ACCENT,
+        ("Text", "tone", "danger") => TEXT_TONE_DANGER,
+        ("Text", "tone", "success") => TEXT_TONE_SUCCESS,
         ("Textarea", "resize", "none") => TEXTAREA_RESIZE_NONE,
         ("Textarea", "resize", "vertical") => TEXTAREA_RESIZE_VERTICAL,
         ("Textarea", "resize", "both") => TEXTAREA_RESIZE_BOTH,

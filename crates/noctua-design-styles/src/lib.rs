@@ -57,7 +57,7 @@ pub const SOURCE_DIR: &str = "crates/noctua-design-styles/src/";
     clippy::too_many_lines,
     reason = "one line per stylesheet, and the order is the point"
 )]
-pub fn sources() -> [(&'static str, &'static str); 58] {
+pub fn sources() -> [(&'static str, &'static str); 59] {
     [
         (
             "crates/noctua-design-styles/src/base.css",
@@ -280,6 +280,10 @@ pub fn sources() -> [(&'static str, &'static str); 58] {
             include_str!("drawer.css"),
         ),
         (
+            "crates/noctua-design-styles/src/drawer-share.css",
+            include_str!("drawer-share.css"),
+        ),
+        (
             "crates/noctua-design-styles/src/split.css",
             include_str!("split.css"),
         ),
@@ -332,6 +336,34 @@ mod tests {
     }
 
     /// An empty file is a band that was lost on its way here.
+    /// The share a drawer is given is one rule for each whole percentage, one
+    /// to a hundred, each handing over its own number and nothing else.
+    ///
+    /// `Drawer` took no size, so an interface could not draw the share of the
+    /// window its state keeps for the drawer. A rule missing from the run is a
+    /// share drawn as no share at all, and one with the wrong number is a
+    /// drawer of another size, with nothing on the page to say so.
+    #[test]
+    fn a_drawers_share_is_a_rule_for_each_whole_percentage() {
+        let text = include_str!("drawer-share.css");
+        let rules: Vec<&str> = text
+            .lines()
+            .filter(|line| line.starts_with(".nd-drawer"))
+            .collect();
+        let expected: Vec<String> = (1..=100)
+            .map(|share| {
+                format!(".nd-drawer[data-nd-share=\"{share}\"] {{ --nd-drawer-share: {share}; }}")
+            })
+            .collect();
+        assert_eq!(rules, expected);
+        // And nothing else in the file is a rule.
+        assert_eq!(text.matches('{').count(), 100);
+        // The property they set is the one the drawer's own rules read.
+        let drawer = include_str!("drawer.css");
+        assert!(drawer.contains("var(--nd-drawer-share)"));
+        assert!(drawer.contains("--nd-drawer-share: var(--noctua-shell-drawer-share-max);"));
+    }
+
     #[test]
     fn no_stylesheet_is_empty() {
         for (path, text) in sources() {

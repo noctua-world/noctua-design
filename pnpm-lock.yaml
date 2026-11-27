@@ -39,6 +39,8 @@ importers:
 
   packages/dist: {}
 
+  packages/fonts: {}
+
   packages/react:
     dependencies:
       '@noctua-world/design-tokens':

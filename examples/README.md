@@ -7,7 +7,7 @@ gets.
 
 | | What it proves |
 |---|---|
-| `consumer-rust/` | The Dioxus crate builds and renders for a project that has only the crate — and every component's root class is painted by `dist/components.css` |
+| `consumer-rust/` | The Dioxus crate builds and renders for a project that has only the crate — and every component's root class is painted by `dist/components.css`. Every face `dist/fonts.css` asks for is one the crates of faces wrote where it asks, every token the Tailwind bridge names is one a shipped sheet declares, and the page's colour in the theme crate is the one in the palette's file |
 | `consumer-web/` | The stylesheets and the behaviour modules work in a plain HTML page: nine `<link>`s, two `import`s, and no build step of any kind |
 
 ```sh

@@ -20,6 +20,23 @@ use std::process::Command;
 
 use crate::{build, gates, references, ui};
 
+/// The typefaces the packages carry, held to their sources byte for byte.
+fn carried_faces(root: &Path, failures: &mut Vec<String>) -> Result<(), String> {
+    let (copies, stale) = crate::faces::drifted(root)?;
+    if stale.is_empty() {
+        ui::ok(&format!(
+            "{copies} face and licence copy(ies) match assets/fonts"
+        ));
+    } else {
+        for problem in &stale {
+            ui::failure(problem);
+        }
+        ui::detail("`cargo xtask build` copies them again, and deletes nothing");
+        failures.push(format!("{} carried face(s) out of sync", stale.len()));
+    }
+    Ok(())
+}
+
 /// Runs every gate.
 ///
 /// # Errors
@@ -82,6 +99,8 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
         );
         failures.push(format!("{} generated file(s) out of sync", drifted.len()));
     }
+
+    carried_faces(root, &mut failures)?;
 
     vendored_corpus(root, &mut failures);
 

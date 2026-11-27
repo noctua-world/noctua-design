@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Drawer` example. 4 of them.
+/// Every `Drawer` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Drawer { name: "…", label: "…", … }"#,
@@ -372,6 +372,61 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                             ],
                         },
                     ],
+                },
+            ],
+        }],
+    ),
+    (
+        r#"Footer { … } above Drawer { share: "30", … }"#,
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-window"))],
+            children: &[
+                Node::Element {
+                    tag: "div",
+                    attributes: &[("class", Value::Text("nd-example-work"))],
+                    children: &[Node::Component {
+                        name: "Paragraph",
+                        props: &[],
+                        children: &[Node::Text(Value::Message(Key::ExampleDrawerWork))],
+                    }],
+                },
+                Node::Component {
+                    name: "Footer",
+                    props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+                    children: &[
+                        Node::Component {
+                            name: "FooterLine",
+                            props: &[("kind", Value::Text("modeline"))],
+                            children: &[Node::Element {
+                                tag: "span",
+                                attributes: &[],
+                                children: &[Node::Text(Value::Message(Key::ExampleFooterPage))],
+                            }],
+                        },
+                        Node::Component {
+                            name: "FooterLine",
+                            props: &[("kind", Value::Text("prompt"))],
+                            children: &[],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "Drawer",
+                    props: &[
+                        ("name", Value::Text("drawer-share")),
+                        ("label", Value::Message(Key::ExampleDrawerLabel)),
+                        ("share", Value::Text("30")),
+                    ],
+                    children: &[Node::Element {
+                        tag: "div",
+                        attributes: &[("class", Value::Text("nd-example-pane"))],
+                        children: &[Node::Component {
+                            name: "Paragraph",
+                            props: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleRailCommandsBody))],
+                        }],
+                    }],
                 },
             ],
         }],

@@ -337,6 +337,56 @@ mod tests {
         super::parse("t.toml", "[shell]\nprompt-max = \"8\"\n").expect("a count is valid");
     }
 
+    /// A drawer's cap is one share written as a percentage and as a number,
+    /// and it is under a half.
+    ///
+    /// A drawer below a footer was capped at a share of the whole window, so
+    /// in a window 240 pixels tall it stood 96 tall under a work area of 48.
+    /// It takes its share of the room the footer leaves by a flex factor now,
+    /// which needs the number, and two values would be two caps.
+    #[test]
+    fn a_drawers_cap_is_one_share_under_a_half() {
+        super::parse(
+            "t.toml",
+            "[shell]\ndrawer-max = \"40%\"\ndrawer-share-max = \"40\"\n",
+        )
+        .expect("one share, written twice");
+        for (bad, why) in [
+            (
+                "[shell]\ndrawer-max = \"40%\"\ndrawer-share-max = \"30\"\n",
+                "two caps",
+            ),
+            ("[shell]\ndrawer-max = \"40%\"\n", "only one of them"),
+            ("[shell]\ndrawer-share-max = \"40\"\n", "only one of them"),
+            (
+                "[shell]\ndrawer-max = \"50%\"\ndrawer-share-max = \"50\"\n",
+                "not shorter",
+            ),
+            (
+                "[shell]\ndrawer-max = \"40%\"\ndrawer-share-max = \"40%\"\n",
+                "not a count",
+            ),
+        ] {
+            let error = super::parse("t.toml", bad).expect_err("must fail");
+            assert!(
+                error
+                    .problems()
+                    .iter()
+                    .any(|problem| problem.message().contains(why)),
+                "{bad:?} was rejected, but not for `{why}`"
+            );
+        }
+        let spec = super::load(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../spec/tokens.toml"
+        ))
+        .expect("the shipped tokens");
+        assert_eq!(
+            spec.shell["drawer-max"],
+            format!("{}%", spec.shell["drawer-share-max"])
+        );
+    }
+
     /// Every other shell value, and every target size, is a length.
     #[test]
     fn a_shell_length_and_a_target_carry_a_unit() {

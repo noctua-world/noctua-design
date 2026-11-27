@@ -21,8 +21,19 @@
 //   | `data-nd-seat-focus`  | `:focus-visible`, and `:focus`   | the element alone       |
 //   | `data-nd-seat-active` | `:active`                        | the element and above   |
 //   | `data-nd-seat-drag`   | what that seat is dragging       | the element alone       |
+//   | `data-nd-seat-option` | `data-nd-active="true"`          | the element alone       |
 //
 // "Above" is every ancestor, and the control of a `<label>` among them.
+//
+// THE LAST ROW STANDS FOR AN ATTRIBUTE AND NOT FOR A PSEUDO-CLASS. A list
+// walked by the keyboard moves a mark and never the focus
+// (`option-list.js`), so where the system's own keyboard is in one is
+// `data-nd-active="true"` on the option, which `OptionItem`'s `active` writes.
+// That mark is one attribute on one option, as the engine's states are one
+// pointer's and one keyboard's, so a second seat's place in the same list is
+// `data-nd-seat-option`, drawn by the rule that draws the mark. It is not
+// `data-nd-seat-focus`: a list's focus ring is the list's, drawn round the
+// whole of it, and the option a seat is on is a row inside.
 //
 // The value is the seats in that state there, as ids separated by spaces and
 // sorted, and an element no seat is on carries no attribute at all. The
@@ -55,7 +66,7 @@
 //
 //   element.dispatchEvent(new CustomEvent("nd-seat", {
 //     bubbles: true,
-//     detail: { seat: "2", state: "hover" },      // hover | focus | active | drag
+//     detail: { seat: "2", state: "hover" },      // hover | focus | active | drag | option
 //   }));
 //
 // `on: false` in the detail takes that state off the seat, wherever it was, and
@@ -72,6 +83,7 @@ const ATTRIBUTE = {
   focus: "data-nd-seat-focus",
   active: "data-nd-seat-active",
   drag: "data-nd-seat-drag",
+  option: "data-nd-seat-option",
 };
 
 /** The states whose pseudo-class matches every ancestor as well. */
@@ -182,6 +194,17 @@ export function seatDrag(seat, element) {
   place("drag", seat, element);
 }
 
+/**
+ * Says which option of a list a seat's keyboard is on, or `null` for none.
+ *
+ * The twin of `data-nd-active="true"`, the mark a walked list moves in place
+ * of the focus. It draws the option and announces nothing: which option a
+ * screen reader is told is `aria-activedescendant`, the system's own seat's.
+ */
+export function seatOption(seat, element) {
+  place("option", seat, element);
+}
+
 /** Takes every state off a seat: the seat left, or its window lost it. */
 export function clearSeat(seat) {
   for (const state of Object.keys(ATTRIBUTE)) place(state, seat, null);
@@ -202,7 +225,7 @@ const answered = new WeakSet();
  * Listens for `nd-seat`, so a host can say all of the above by dispatching.
  *
  * The event's target is the element. `detail.seat` is the id, `detail.state`
- * one of `hover`, `focus`, `active` and `drag`, and `detail.on === false` takes
+ * one of `hover`, `focus`, `active`, `drag` and `option`, and `detail.on === false` takes
  * the state off instead. A detail that names no seat or an unknown state throws
  * rather than guessing: a typo there would otherwise draw nothing, silently.
  * Thrown from a listener, it reaches the host as the window's `error` event and

@@ -1,0 +1,28 @@
+{
+  "name": "@noctua-world/design-fonts",
+  "version": "0.3.1",
+  "description": "The typefaces the Noctua design system's stylesheet asks for, with their licences: the files a page serves beside dist/.",
+  "license": "OFL-1.1 AND MIT AND Apache-2.0 AND CC-BY-4.0 AND Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noctua-world/noctua-design.git",
+    "directory": "packages/fonts"
+  },
+  "homepage": "https://noctua-world.github.io/noctua-design/",
+  "bugs": {
+    "url": "https://github.com/noctua-world/noctua-design/issues"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    "./fonts.json": "./fonts.json",
+    "./*": "./fonts/*"
+  },
+  "files": [
+    "fonts",
+    "fonts.json"
+  ]
+}

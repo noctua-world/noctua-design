@@ -185,6 +185,8 @@ pub mod shell {
     pub const PROMPT_SHARE: &str = "var(--noctua-shell-prompt-share)";
     /// `40%`.
     pub const DRAWER_MAX: &str = "var(--noctua-shell-drawer-max)";
+    /// `40`.
+    pub const DRAWER_SHARE_MAX: &str = "var(--noctua-shell-drawer-share-max)";
 }
 
 /// Motion durations. Each is the ordinary value; the reduced-motion collapse lives in CSS, where the media query can reach it.

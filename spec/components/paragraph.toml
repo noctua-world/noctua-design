@@ -14,10 +14,10 @@ doc = "The text size, from the type scale: `small`, `body` or `lead`. `body` is 
 
 [prop.tone]
 type = "enum"
-values = ["default", "muted"]
+values = ["default", "muted", "danger", "success"]
 default = "default"
 attribute = "data-nd-tone"
-doc = "How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it."
+doc = "The colour of the text: `default`, `muted` for text that supports the text around it, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing."
 
 [prop.children]
 type = "children"

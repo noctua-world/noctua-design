@@ -2428,6 +2428,13 @@ const DRAWER: &[Example] = &[
         r"Drawer { … } with more in it than its share of the window",
         Key::ExampleDrawerScroll
     ),
+    // A SHARE, UNDER A FOOTER. The one example with something rigid between
+    // the work and the drawer, which is what a share is a share of: the room
+    // the footer leaves, and not the whole window.
+    example!(
+        r#"Footer { … } above Drawer { share: "30", … }"#,
+        Key::ExampleDrawerShare
+    ),
 ];
 
 const DRAWER_RAIL: &[Example] = &[
@@ -2933,7 +2940,7 @@ const NUMBER_INPUT: &[Example] = &[
     // off. The arrow keys and Page Up still move it, and `big_step` is what
     // makes crossing this range from the keyboard possible at all.
     example!(
-        r"NumberInput { name, label, value, step, big_step, steppers, group }",
+        r"NumberInput { name, label, value, step, big_step, steppers, group, maxlength }",
         Key::ExampleNumberInputNoteLarge
     ),
     // REFUSED, LOCKED AND UNAVAILABLE — three states, each on a question the

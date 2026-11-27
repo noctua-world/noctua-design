@@ -65,3 +65,24 @@ expect = { attrs = { "data-nd-collapsed" = "false" }, absent = ["inert"], focus 
 [[case.child]]
 component = "Button"
 props = { label = "Close the page" }
+
+[[case]]
+name = "a share is written as its whole percentage, for the stylesheet's rule"
+note = "The stylesheet has a rule for each whole percentage and reads no number out of an attribute, so the attribute holds the number as that rule spells it. A share an interface keeps in its state had no prop to be drawn by."
+props = { name = "pages", label = "Drawer", share = "035" }
+children = "Commands"
+expect = { attrs = { "data-nd-share" = "35" } }
+
+[[case]]
+name = "a share that is no whole percentage writes nothing"
+note = "The attribute's presence is what tells the stylesheet a share was given. One it has no rule for would be a drawer at its cap with nothing asking for that, so neither body guesses."
+props = { name = "pages", label = "Drawer", share = "33.5" }
+children = "Commands"
+expect = { absent = ["data-nd-share"] }
+
+[[case]]
+name = "a share past a hundred writes nothing either"
+note = "A percentage is one to a hundred. Held to the cap is the stylesheet's to do, for a share it has a rule for."
+props = { name = "pages", label = "Drawer", share = "101" }
+children = "Commands"
+expect = { absent = ["data-nd-share"] }

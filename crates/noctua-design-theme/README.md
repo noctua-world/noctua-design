@@ -12,4 +12,18 @@ The values a page actually paints with are CSS custom properties, in
 exist and what each one may be — a `ThemeScope` writing attributes, a server
 deciding what to stamp before the first paint.
 
+One colour is here as data: the page's. A native host paints its window before
+its page has a first frame, with no stylesheet to ask, so
+`Palette::page(mode, backdrop)` answers in sRGB bytes with what
+`dist/theme.css` paints the page for that palette, appearance and backdrop.
+
+```rust
+use noctua_design_theme::{Backdrop, Mode, Palette};
+
+// A light page is paper, whatever the palette.
+assert_eq!(Palette::DEFAULT.page(Mode::Light, Backdrop::Plain), Some([255, 255, 255]));
+// The system preference is the host's to read; ask again with what it resolved to.
+assert_eq!(Palette::DEFAULT.page(Mode::System, Backdrop::Plain), None);
+```
+
 MIT OR Apache-2.0.

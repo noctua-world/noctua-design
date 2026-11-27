@@ -8,7 +8,7 @@
 
 use dioxus::prelude::*;
 
-/// Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in.
+/// The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. A block box gives that share of the box, and a grid of its row.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DrawerSide {
     #[default]
@@ -39,7 +39,7 @@ impl DrawerSide {
 ///
 /// # Accessibility
 ///
-/// The drawer is a `role="region"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. It opens in the flow of the window and covers nothing.
+/// A `role="region"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. Open at the bottom it is at least `--noctua-target-min` tall, so the focus is never in a drawer of no height.
 #[component]
 pub fn Drawer(
     /// What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required.
@@ -48,9 +48,11 @@ pub fn Drawer(
     id: Option<String>,
     /// The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required.
     label: String,
-    /// Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in.
+    /// The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. A block box gives that share of the box, and a grid of its row.
     #[props(default)]
     side: DrawerSide,
+    /// A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In a block box it is of the box, and in a grid of its row. Without it, the content sizes it.
+    share: Option<String>,
     /// Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology.
     #[props(default = false)]
     collapsed: bool,
@@ -62,6 +64,18 @@ pub fn Drawer(
 ) -> Element {
     let root = format!("nd-drawer {class}");
     let root = root.trim().to_owned();
+    // A WHOLE PERCENTAGE FROM 1 TO 100, OR NO ATTRIBUTE AT ALL. The stylesheet
+    // has a rule for each of those and for nothing else, and takes the
+    // attribute's presence as a share given, so a value outside them is not
+    // written: the drawer is then as large as its content. Written back as
+    // the number, so `"035"` and `" 35 "` are the share `35`.
+    let share = share
+        .as_deref()
+        .map(str::trim)
+        .filter(|text| !text.is_empty() && text.bytes().all(|byte| byte.is_ascii_digit()))
+        .and_then(|text| text.parse::<u32>().ok())
+        .filter(|share| (1..=100).contains(share))
+        .map(|share| share.to_string());
 
     rsx! {
         div {
@@ -72,6 +86,7 @@ pub fn Drawer(
             "data-nd-drawer": "{name}",
             "data-nd-side": side.as_str(),
             "data-nd-collapsed": if collapsed { "true" } else { "false" },
+            "data-nd-share": share,
             div { class: "nd-drawer-panel", {children} }
         }
     }

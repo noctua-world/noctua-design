@@ -251,6 +251,52 @@ test("the active row is told apart without colour, and moving it moves no name",
   expect(await differing(page, on, off), "the active row draws no bar").toBeGreaterThan(0);
 });
 
+test("a second seat's place in a list is drawn exactly as the keyboard's own", async ({ page }) => {
+  // The mark is one attribute on one option, so a second seat's keyboard in
+  // the same list had nowhere to be written: an interface drew it as a focus
+  // on the option, which the stylesheet draws round the list. `seats.js`
+  // writes `data-nd-seat-option`, and the rule that draws the mark draws it.
+  await open(page);
+  await page.mouse.move(0, 0);
+  const items = box(page, "walk");
+  const option = list(page, "walk").locator('[data-nd-value="help"]');
+  const other = list(page, "walk").locator('[data-nd-value="sidebar"]');
+  await items.scrollIntoViewIfNeeded();
+  const seat = (target, on) =>
+    target.evaluate(async (element, placed) => {
+      const tag = document.querySelector('script[type="module"][src*="shell.js"]');
+      const seats = await import(new URL("seats.js", tag.src).href);
+      seats.seatOption("2", placed ? element : null);
+    }, on);
+  const mark = (target, on) =>
+    target.evaluate((element, placed) => {
+      if (placed) element.setAttribute("data-nd-active", "true");
+      else element.removeAttribute("data-nd-active");
+    }, on);
+
+  await expect(active(page, "walk")).toHaveCount(0);
+  const rest = await items.screenshot();
+
+  await mark(option, true);
+  const own = await items.screenshot();
+  await mark(option, false);
+
+  await seat(option, true);
+  await expect(option).toHaveAttribute("data-nd-seat-option", "2");
+  const second = await items.screenshot();
+  expect(await differing(page, own, rest), "the active option is drawn like the rest").toBeGreaterThan(0);
+  expect(await differing(page, own, second), "a second seat's option is not drawn as the mark is").toBe(0);
+
+  // Two seats on two options are two rows drawn, and neither is the other's.
+  await mark(other, true);
+  const both = await items.screenshot();
+  expect(await differing(page, both, second), "the keyboard's own option is not drawn beside a seat's").toBeGreaterThan(0);
+  await seat(option, false);
+  await expect(option).not.toHaveAttribute("data-nd-seat-option");
+  const one = await items.screenshot();
+  expect(await differing(page, both, one), "a seat that left is still drawn").toBeGreaterThan(0);
+});
+
 for (const scheme of ["light", "dark"]) {
   test(`matched letters stay readable on the active row, in ${scheme}`, async ({ browser }) => {
     const context = await browser.newContext({ colorScheme: scheme });

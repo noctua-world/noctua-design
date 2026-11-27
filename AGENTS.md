@@ -154,6 +154,8 @@ crates/
   noctua-design-emit/     the emitters. HAND-WRITTEN
   noctua-design-spec/     the contract reader and the prose register
   noctua-design-dist/     dist/ COPIED, so crates.io can carry it. GENERATED
+  noctua-design-fonts/    the faces that ship whole, COPIED from assets/fonts/, and
+  noctua-design-fonts-*/  one crate for each sliced family. GENERATED
   noctua-design-{tokens,theme,i18n,icons,grammars}/   GENERATED, COMMITTED
 packages/
   react/                  the React package. src/theme.js is GENERATED
@@ -161,6 +163,7 @@ packages/
     icons/<name>.js       one module per icon, so one icon costs one
     vendor/               the colour tokens, vendored from noctua-colors
   dist/                   dist/ COPIED again, so npm can carry it. GENERATED
+  fonts/                  every face, COPIED again, so npm can carry them. GENERATED
 dist/                     GENERATED, COMMITTED: the CSS layers, components.css, every shipped
                           behaviour module, the manifests, and tokens/css/ — the colour sheets
                           base.html links, without which a consumer's page has no palette
@@ -305,7 +308,9 @@ of these carries measured rules, not description:
 | an icon, a source, the payload rules | `crates/noctua-design-emit/src/icons.rs` |
 | a `tone` | `crates/noctua-design-emit/src/tones.rs` |
 | glass, the backdrop, any appearance setting | `crates/noctua-design-emit/src/appearance.rs` |
+| the Tailwind bridge, or the name of a utility | `crates/noctua-design-emit/src/tailwind.rs` |
 | a font face or the preload set | `crates/noctua-design-emit/src/fonts.rs` |
+| which package carries a face, or a face's licence | `crates/noctua-design-emit/src/faces.rs` |
 | which page a component is on, a title, the search index | `crates/noctua-design-emit/src/docs.rs` |
 | shipped behaviour — which file does what | `crates/noctua-design-runtime/src/lib.rs` |
 | an enhanced form control, or anything locale-shaped | `crates/noctua-design-runtime/src/inputs.js` |
@@ -518,10 +523,32 @@ bypass the token layer.
 **What `dist/` carries**: the token layer, the faces, the appearance layer, the scoped semantic
 contract and `components.css`, plus every behaviour module and the palette and theme data they
 read. `ls dist/` is the inventory, and `cargo xtask build` writes it. It also carries
-`dist/tailwind/bridge.css`, the vendored mapping of Tailwind's colour utilities onto the `--nc-*`
-tokens, copied as the colour sheets are: this system writes no Tailwind class, and an application
-that composes its own layout with Tailwind finds the mapping in the package it installed. A test
-holds every token the bridge names to the sheets `dist/` declares them in.
+`dist/tailwind/bridge.css`, the one file an application that composes its own layout with Tailwind
+imports: this system writes no Tailwind class, and such an application finds the mapping in the
+package it installed. **The bridge has two halves and two authors.** The first is the vendored
+mapping of Tailwind's colour utilities onto the `--nc-*` tokens, copied byte for byte as the colour
+sheets are. The second is generated here, from `spec/tokens.toml` and `spec/fonts.toml`, by
+`crates/noctua-design-emit/src/tailwind.rs`: the spacing scale, the radii, the type sizes, line
+heights, weights, letter spacing and font roles, the shell's lengths, the smallest target, the
+measure, the easings and the breakpoints, each as the Tailwind v4 theme variable its utilities
+read. **A step of the scale is a name and the bare `--spacing` is set to `initial`**, so `gap-4` is
+the token and `gap-5`, which is no step, emits nothing: a multiplier would make every number a
+utility, which is the token literal of invariant 2 under another name. Leaving it undeclared was
+not enough: `@import "tailwindcss"` brings Tailwind's own `theme.css` and its multiplier, and
+`gap-5` was a utility again under the import every README showed. `initial` takes out that one
+variable. Tailwind's default type sizes, radii and palette are still there under the full import,
+and `tailwindcss/utilities.css` is the import that brings none of them, which the READMEs say.
+**What Tailwind has no theme variable for is a named `@utility` after the block**: a duration, a
+layer, a border width and its sides, and the focus ring (`duration-fast`, `z-dialog`,
+`border-b-hairline`, `outline-focus`), because the bare number Tailwind offers for each is a
+literal, and a `duration-150` does not collapse under `prefers-reduced-motion` as the token does.
+**A utility that sets a line's width sets its style beside it**
+(`var(--tw-border-style, solid)`, `var(--tw-outline-style, solid)`), as Tailwind's own do: a width
+alone computed `outline-style: none`, and `outline-focus` drew no ring.
+Tests hold every token the bridge names to the sheets `dist/` declares them in, and **every token
+those sheets declare to a utility or to an entry in `EXCUSED`**, with its reason, so a token added
+to the spec and not to the bridge fails the build, in a group nobody listed as much as in one
+somebody did.
 
 **The component rules are hand-written and copied, never generated.**
 `crates/noctua-design-styles/src/` holds one stylesheet per family, and **`sources()` there is the
@@ -590,6 +617,7 @@ styled exactly like the pseudo-class (`NOCTUA.md §9.7`, §12.18):
 | `data-nd-seat-focus` | `:focus-visible`, and `:focus` | the element alone |
 | `data-nd-seat-active` | `:active` | the element, every ancestor, and the control of a `<label>` among them |
 | `data-nd-seat-drag` | what that seat is dragging | the element alone |
+| `data-nd-seat-option` | `data-nd-active="true"`, the option a list's keyboard is on | the element alone |
 
 The value is the ids of the seats in that state there, separated by spaces and sorted, and a rule
 asks only whether the attribute is present. In a component stylesheet a state pseudo-class is
@@ -618,6 +646,19 @@ other way, a seat attribute inside `@media (hover: hover)`, any state but `:hove
 states asked for together, a sibling that is not where its native rule puts it, and a seat attribute
 outside the twin form with no native rule before it.
 `data-nd-seat-drag` stands for no pseudo-class and owes no native rule.
+
+**A mark a caller writes has a twin as a state does.** A list walked by the keyboard moves a mark
+and never the focus, so where the system's own keyboard is in one is `data-nd-active="true"` on
+the option, which `OptionItem`'s `active` writes. It is one attribute on one option, so a second
+seat's place in the same list is `data-nd-seat-option` (`seatOption`), and a rule writes the two
+together and no other way: `:is([data-nd-active="true"], [data-nd-seat-option])`. `seat_twin`
+refuses the mark with a value outside that form, in any case or quoting, and the seat's attribute
+outside it. There is no sibling form, because a mark stands behind no hover query. A valueless
+`[data-nd-active]` is a script's own toggle on a list it alone walks (`Select`, `Search`,
+`DateInput`): no caller writes it and no seat can be put there, so the gate reads only the mark
+written with its value. It draws and announces nothing: `aria-activedescendant` is the system's
+own seat's. `tests/browser/option-list.spec.js` holds the two to one picture, and
+`tests/browser/forced-colors.spec.js` holds the seat's row apart from its neighbours there.
 
 **A state drawn in colour is drawn again under forced colours.** There the system paints every
 fill as the window and every border, a transparent one included, in the text colour, so a state
@@ -677,7 +718,7 @@ back every timer and frame callback a page has waiting once it is prepared and r
 an example may count, and no page is left out of the sweep for it.
 
 **Nothing writes the attributes by hand**: `dist/seats.js` stamps them where the pseudo-class
-would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat`
+would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag`, `seatOption` and `clearSeat`, or an `nd-seat`
 event for a host with no script of its own — and how a system delivers a second seat is the
 host's to know (`NOCTUA.md §5.12`). A seat id is a string or a number with no space in it, and
 anything else is refused.
@@ -737,6 +778,16 @@ surface transparent is a light island on a dark page. `dist/theme.css` paints
 `background` shorthand**: it resets `background-image`, so a frame asking for a pattern gets the
 colour and nothing else. The backdrop is `--noctua-backdrop`, declared on the same selector list;
 it moves one variable, so no measured contrast pair moves with it.
+
+**The page's colour is also data, for a host with no stylesheet to ask.** A native window is
+painted before its page has a first frame, and the light page is paper, a literal no palette step
+holds. `Palette::page(mode, backdrop)` in the theme crate answers in sRGB bytes, and every
+`dist/palettes/<name>.json` carries the same table as `page.light` and `page.dark`, a hex for each
+backdrop. Both are written by `appearance::page_colour`, from the constants and the table the
+backdrop's own rules are written from, so a rule and its datum cannot differ;
+`tests/browser/page-colour.spec.js` holds the table to the pixels a page paints, and
+`examples/consumer-rust` holds the crate to the file. A backdrop added to `spec/theme.toml` with no
+rule in that table fails the build.
 
 **Every theme attribute goes on ONE element.** A theme file's forced-mode rule is compound on one
 element (`[data-palette="blue-vivid"][data-theme="dark"]`); split the palette onto a wrapper and the
@@ -990,15 +1041,64 @@ side of it, `--noctua-shell-rail` wide, on the footer corners' own shade, holdin
 `Tabs` drawn as a rail. A drawer at the bottom is on the page's own surface, as the footer's last
 line is, and one at a side is on the subtle surface, which is all that tells it from the work.
 
-**It opens to a share of the box around it, so that box needs a size.** A drawer is as large as
-its content, up to `--noctua-shell-drawer-max`. That is a percentage, and it resolves only where
-the element around the drawer has a size of its own on that axis: a window has, and a box as tall
-as its content has not. Every example therefore stands in `.nd-example-window`, the site's
-stand-in for a window.
+**It opens to a share of the room it divides with the work, so the box around it needs a size.**
+A drawer is as large as its content, up to its cap, and with `share` it is that share exactly,
+held to the same cap. The cap is one share written twice in `spec/tokens.toml`, and the spec
+refuses two that differ or one at a half or more: `--noctua-shell-drawer-max`, a percentage, and
+`--noctua-shell-drawer-share-max`, the same number with no unit. The element around the drawer
+needs a size of its own on that axis: a window has, and a box as tall as its content has not.
+Every example therefore stands in `.nd-example-window`, the site's stand-in for a window.
+
+**Below a footer the room is what the footer leaves, and a flex factor is the one thing that can
+say so.** A percentage is of the whole window, and no stylesheet subtracts a sibling's height, so a
+drawer capped at a percentage stood 96 pixels tall under a work area of 48 in a window 240 tall,
+against "always shorter than the workspace area" (`NOCTUA.md §12.11`). A flex container hands out
+what its rigid parts leave, in the ratio of the factors asked for. So a drawer at the bottom asks
+for no size and for a factor, its share over what is left of a hundred, against the work's one,
+and its content is its ceiling (`max-block-size: max-content`), which `share` takes away. **That is
+a contract with the window**: a column laid out by flex, with a height of its own, in which the
+work is the one other part that grows, and grows from nothing (`flex: 1 1 0`). The work's own
+padding and border are rigid, as the footer is, so the room is the window less all of them. A
+drawer at a side has nothing rigid in its row, so there the cap is the percentage and a share is a
+percentage of the row.
+
+**A window that does not keep the contract gets less, and never nothing.** Two were measured, 240
+tall with forty lines in the drawer. A block box with a height of its own reads no
+factor, and with the content as its only ceiling the drawer stood 800 tall, out of the window. So
+the drawer also asks for a size, `block-size` at its share as a percentage, which a flex column
+never reads (`flex-basis: 0` is the size asked for there) and every other box does: in a block box
+it is a share of the whole box, footer included. A flex column whose work starts from its content
+(`flex: 1 1 auto`) had nothing left to hand out, and the drawer stood 0 tall while open, in the tab
+order, the focus on a button with no pixel drawn. So an open drawer at the bottom has a floor,
+`--noctua-target-min`, and a share that comes to less is the floor. **The contract is the
+reader's, so it is on the page**: the guidance, the accessibility notes and the `side` and `share`
+docs of `spec/components/drawer.toml` say it in both locales, and `README.md` says it for a
+consumer who never opens the site. `tests/browser/drawer.spec.js` holds both windows.
+
+**A grid is a window no drawer can size itself in, and the reader's text says so.** A percentage
+in a grid item is of the item's own row, never of the grid. In the usual shell rows
+(`minmax(0, 1fr) auto auto`) the drawer's row is as tall as the drawer's content, so the
+percentage is a share of its own content: four lines stood 56 tall in a row of 139, the rest
+scrolled away. Without the percentage the drawer filled its row, and a full one took the row to the
+whole window, 238 of 240, and left the work none. No rule written on the drawer tells a grid from a block box, so no rule
+serves both, and the block box is the one served. The text once promised "that share of the whole
+box" for any box that is no flex column. It now names the block box, and says a grid gives the
+share of the drawer's own row. The same spec holds that, with the floor, in a grid window of its
+own, so a rule that changes what a grid gets has to change what the reader is told.
+
+**A share is drawn by a rule for each whole percentage, with no `style` and no script.**
+`share` is `data-nd-share`, and `crates/noctua-design-styles/src/drawer-share.css` holds one rule
+for each value from 1 to 100, handing the number to the drawer's own rules as `--nd-drawer-share`.
+A stylesheet cannot read a number out of an attribute in every engine, a page served under
+`style-src 'self'` has every `style` attribute refused, and a share a script drew would change the
+drawer's height after its first frame. Both bodies write the attribute only for a whole number
+from 1 to 100, as that number, because its presence is what takes the content's ceiling away. A
+test beside `sources()` holds the file to exactly those hundred rules.
 
 **It slides by a grid track, and the hiding is the stylesheet's.** No engine moves a box between
 nothing and the size of its content, so the root is a grid of one track and `.nd-drawer-panel` is
-the one thing in it, with a floor of nothing on both axes. The rails and the content each scroll
+the one thing in it, with a floor of nothing on both axes. A drawer at its share slides by its
+flex factor, which `collapsed` takes to nothing in the same transition. The rails and the content each scroll
 what does not fit, which is what keeps them inside a drawer partway shut. `collapsed` takes the
 track to nothing and sets `visibility: hidden`, at the end of the slide on the way shut and at the
 start on the way open, so a collapsed drawer is out of the tab order and the accessibility tree
@@ -1611,8 +1711,9 @@ the one failure each tolerates. `cargo xtask release` prepares the version.
 
 **What is published**: `noctua-design` and the crates it depends on — `noctua-design-tokens`,
 `noctua-design-icons`, `noctua-design-grammars`, `noctua-design-theme` and `noctua-design-lineage`
-— and `noctua-design-dist`; on npm, `@noctua-world/design-tokens`, `@noctua-world/design-dist` and
-`@noctua-world/design-react`. **The compiler is never published**: `noctua-design-emit`, `-spec`,
+— `noctua-design-dist`, and the crates of faces, `noctua-design-fonts` and one
+`noctua-design-fonts-<family>` for each sliced family; on npm, `@noctua-world/design-tokens`,
+`@noctua-world/design-dist`, `@noctua-world/design-fonts` and `@noctua-world/design-react`. **The compiler is never published**: `noctua-design-emit`, `-spec`,
 `-styles`, `-runtime`, `-i18n` and `xtask` stay `publish = false`, because a consumer inherits what
 the system *is*, never what builds it, which is also why the published support crates carry no
 dependencies at all. `grep -L '^publish = false' crates/*/Cargo.toml` lists what publishes.
@@ -1624,6 +1725,28 @@ package directory, and `dist/` sits at the repository root, where a consumer cop
 copy. A component crate does not depend on the assets crate: writing files is the application's
 decision, and a component that wrote one would be making it for them.
 
+**The typefaces ship as packages of their own, and the split is a measurement.**
+`dist/fonts.css` asks for every face at `../assets/fonts/<file>`, and `assets/fonts/` is above
+every package as `dist/` is, so a registry consumer had every `@font-face` and no face. The faces
+are already compressed and come to more than crates.io lets one crate hold, with `dist/` or
+without it (`du -sb assets/fonts`, against the 10 MB a crate may be), so the cut follows the one
+line `spec/fonts.toml` already draws: every `[[face]]` in `noctua-design-fonts`, and each
+`[[sliced]]` family in a crate named by the last word of its family. npm has no such ceiling, so
+`@noctua-world/design-fonts` holds them all and lists them by set in `fonts.json`.
+`crates/noctua-design-emit/src/faces.rs` decides which face goes where and writes each crate's
+library; a face is bytes and an emitted file is text, so `cargo xtask build` copies the bytes and
+`cargo xtask check` holds every copy to its source and fails on a stale one, which a build never
+deletes. Git stores a blob once however many paths name it, so the copies cost a checkout and no
+history. **The path is the contract**: every crate writes flat, by the names the stylesheet uses,
+into `assets/fonts/` beside the directory that holds `dist/`, and `examples/consumer-rust`
+resolves every `url()` the shipped sheet writes against what the crates wrote. **A licence travels
+with its faces**, as the Open Font License requires: each package carries the text for every
+family in it and `ATTRIBUTION.md`, and a test fails on a licence in `assets/fonts/` that no
+package carries. **A new sliced family is a new crate, made by hand**: its `Cargo.toml` and
+`README.md` beside the others', its name in `release-crate.yml` and in `xtask/src/release.rs`,
+and a trusted publisher on crates.io before the tag. The build fails, naming the directory, until
+the manifest is there.
+
 **By hand, the order matters**: a crate cannot be published before the crates it depends on are on
 the index.
 
@@ -1631,7 +1754,8 @@ the index.
 cargo publish -p noctua-design-tokens     # then icons, grammars, theme, lineage
 cargo publish -p noctua-design            # after its dependencies are on the index
 cargo publish -p noctua-design-dist       # independent of the rest
-pnpm --filter @noctua-world/design-tokens publish   # then design-dist, then design-react
+cargo publish -p noctua-design-fonts      # then -jp, -kr, -sc: independent too
+pnpm --filter @noctua-world/design-tokens publish   # then design-dist, design-fonts, design-react
 ```
 
 **Pack with `pnpm`, upload with `npm`.** `pnpm` rewrites `workspace:*` to the real version and

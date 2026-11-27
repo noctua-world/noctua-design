@@ -2132,3 +2132,277 @@
   --color-accent-a11: var(--nc-accent-a11);
   --color-accent-a12: var(--nc-accent-a12);
 }
+
+/* The design tokens, appended by noctua-design — do not edit.
+ * Source: spec/tokens.toml, spec/fonts.toml
+ * Regenerate: cargo xtask build
+ *
+ * Edits to this file will be overwritten. Change the spec instead.
+ */
+
+/* Every size, radius and type utility, pointing at the --noctua-* token
+   behind it. dist/tokens.css and dist/fonts.css declare the tokens, so a
+   page links those two and imports this file after Tailwind.
+ 
+   A step of the spacing scale is a name here (gap-4, p-inset, min-w-0),
+   and the bare --spacing multiplier is taken out of the theme: a number
+   that is no step of the scale (gap-5) has no utility, whether Tailwind's
+   own theme.css was imported before this file or not. The rest of that
+   theme is untouched: import tailwindcss/utilities.css alone to have no
+   type size, radius or colour but the tokens'. */
+@theme inline {
+  /* No multiplier: `initial` removes the one Tailwind's theme.css declares. */
+  --spacing: initial;
+
+  /* Spacing: the steps, then the named purposes. */
+  --spacing-0: var(--noctua-space-0);
+  --spacing-1: var(--noctua-space-1);
+  --spacing-2: var(--noctua-space-2);
+  --spacing-3: var(--noctua-space-3);
+  --spacing-4: var(--noctua-space-4);
+  --spacing-6: var(--noctua-space-6);
+  --spacing-8: var(--noctua-space-8);
+  --spacing-12: var(--noctua-space-12);
+  --spacing-16: var(--noctua-space-16);
+  --spacing-24: var(--noctua-space-24);
+  --spacing-32: var(--noctua-space-32);
+  --spacing-48: var(--noctua-space-48);
+  --spacing-64: var(--noctua-space-64);
+  --spacing-tight: var(--noctua-space-tight);
+  --spacing-inset: var(--noctua-space-inset);
+  --spacing-gap: var(--noctua-space-gap);
+  --spacing-paragraph: var(--noctua-space-paragraph);
+  --spacing-heading: var(--noctua-space-heading);
+  --spacing-section: var(--noctua-space-section);
+  --spacing-region: var(--noctua-space-region);
+
+  /* The shell's lengths and the smallest target, as sizes: h-shell-line,
+     w-shell-rail, min-h-target-min. */
+  --spacing-shell-line: var(--noctua-shell-line);
+  --spacing-shell-rail: var(--noctua-shell-rail);
+  --spacing-shell-prompt-share: var(--noctua-shell-prompt-share);
+  --spacing-shell-drawer-max: var(--noctua-shell-drawer-max);
+  --spacing-target-min: var(--noctua-target-min);
+
+  /* Radii: rounded-control. */
+  --radius-none: var(--noctua-radius-none);
+  --radius-control: var(--noctua-radius-control);
+  --radius-surface: var(--noctua-radius-surface);
+  --radius-pill: var(--noctua-radius-pill);
+
+  /* Font roles: font-ui, font-mono. */
+  --font-sans: var(--noctua-font-sans);
+  --font-serif: var(--noctua-font-serif);
+  --font-display: var(--noctua-font-display);
+  --font-mono: var(--noctua-font-mono);
+  --font-ui: var(--noctua-font-ui);
+
+  /* Type sizes: text-body, text-caption. */
+  --text-caption: var(--noctua-size-caption);
+  --text-small: var(--noctua-size-small);
+  --text-body: var(--noctua-size-body);
+  --text-lead: var(--noctua-size-lead);
+  --text-h4: var(--noctua-size-h4);
+  --text-h3: var(--noctua-size-h3);
+  --text-h2: var(--noctua-size-h2);
+  --text-h1: var(--noctua-size-h1);
+  --text-display: var(--noctua-size-display);
+
+  /* Line heights: leading-body. */
+  --leading-tight: var(--noctua-leading-tight);
+  --leading-heading: var(--noctua-leading-heading);
+  --leading-body: var(--noctua-leading-body);
+  --leading-loose: var(--noctua-leading-loose);
+
+  /* Weights: font-semibold. */
+  --font-weight-regular: var(--noctua-weight-regular);
+  --font-weight-medium: var(--noctua-weight-medium);
+  --font-weight-semibold: var(--noctua-weight-semibold);
+  --font-weight-bold: var(--noctua-weight-bold);
+
+  /* Letter spacing: tracking-caps. */
+  --tracking-tight: var(--noctua-tracking-tight);
+  --tracking-normal: var(--noctua-tracking-normal);
+  --tracking-wide: var(--noctua-tracking-wide);
+  --tracking-caps: var(--noctua-tracking-caps);
+
+  /* The prose line-length cap: max-w-measure. */
+  --container-measure: var(--noctua-measure);
+  --container-measure-lead: var(--noctua-measure-lead);
+
+  /* Easings: ease-out, ease-in-out. */
+  --ease-out: var(--noctua-easing-out);
+  --ease-in-out: var(--noctua-easing-in-out);
+  --ease-linear: var(--noctua-easing-linear);
+
+  /* Breakpoints, as the lengths the spec declares: a media query cannot
+     read a custom property. Minimum widths, as everywhere here. */
+  --breakpoint-sm: 30rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+}
+
+/* What Tailwind has no theme variable for, as a utility of its own by the
+   token's name. A duration follows prefers-reduced-motion, as the token
+   does: duration-fast, z-dialog, border-hairline, border-b-hairline,
+   outline-focus, outline-offset-focus. */
+@utility duration-instant {
+  --tw-duration: var(--noctua-duration-instant);
+  transition-duration: var(--noctua-duration-instant);
+}
+@utility duration-fast {
+  --tw-duration: var(--noctua-duration-fast);
+  transition-duration: var(--noctua-duration-fast);
+}
+@utility duration-base {
+  --tw-duration: var(--noctua-duration-base);
+  transition-duration: var(--noctua-duration-base);
+}
+@utility duration-slow {
+  --tw-duration: var(--noctua-duration-slow);
+  transition-duration: var(--noctua-duration-slow);
+}
+@utility duration-blink {
+  --tw-duration: var(--noctua-duration-blink);
+  transition-duration: var(--noctua-duration-blink);
+}
+@utility z-base {
+  z-index: var(--noctua-layer-base);
+}
+@utility z-raised {
+  z-index: var(--noctua-layer-raised);
+}
+@utility z-sticky {
+  z-index: var(--noctua-layer-sticky);
+}
+@utility z-overlay {
+  z-index: var(--noctua-layer-overlay);
+}
+@utility z-dialog {
+  z-index: var(--noctua-layer-dialog);
+}
+@utility z-popover {
+  z-index: var(--noctua-layer-popover);
+}
+@utility z-toast {
+  z-index: var(--noctua-layer-toast);
+}
+@utility z-tooltip {
+  z-index: var(--noctua-layer-tooltip);
+}
+@utility border-hairline {
+  border-style: var(--tw-border-style, solid);
+  border-width: var(--noctua-border-hairline);
+}
+@utility border-x-hairline {
+  border-inline-style: var(--tw-border-style, solid);
+  border-inline-width: var(--noctua-border-hairline);
+}
+@utility border-y-hairline {
+  border-block-style: var(--tw-border-style, solid);
+  border-block-width: var(--noctua-border-hairline);
+}
+@utility border-s-hairline {
+  border-inline-start-style: var(--tw-border-style, solid);
+  border-inline-start-width: var(--noctua-border-hairline);
+}
+@utility border-e-hairline {
+  border-inline-end-style: var(--tw-border-style, solid);
+  border-inline-end-width: var(--noctua-border-hairline);
+}
+@utility border-t-hairline {
+  border-top-style: var(--tw-border-style, solid);
+  border-top-width: var(--noctua-border-hairline);
+}
+@utility border-r-hairline {
+  border-right-style: var(--tw-border-style, solid);
+  border-right-width: var(--noctua-border-hairline);
+}
+@utility border-b-hairline {
+  border-bottom-style: var(--tw-border-style, solid);
+  border-bottom-width: var(--noctua-border-hairline);
+}
+@utility border-l-hairline {
+  border-left-style: var(--tw-border-style, solid);
+  border-left-width: var(--noctua-border-hairline);
+}
+@utility border-strong {
+  border-style: var(--tw-border-style, solid);
+  border-width: var(--noctua-border-strong);
+}
+@utility border-x-strong {
+  border-inline-style: var(--tw-border-style, solid);
+  border-inline-width: var(--noctua-border-strong);
+}
+@utility border-y-strong {
+  border-block-style: var(--tw-border-style, solid);
+  border-block-width: var(--noctua-border-strong);
+}
+@utility border-s-strong {
+  border-inline-start-style: var(--tw-border-style, solid);
+  border-inline-start-width: var(--noctua-border-strong);
+}
+@utility border-e-strong {
+  border-inline-end-style: var(--tw-border-style, solid);
+  border-inline-end-width: var(--noctua-border-strong);
+}
+@utility border-t-strong {
+  border-top-style: var(--tw-border-style, solid);
+  border-top-width: var(--noctua-border-strong);
+}
+@utility border-r-strong {
+  border-right-style: var(--tw-border-style, solid);
+  border-right-width: var(--noctua-border-strong);
+}
+@utility border-b-strong {
+  border-bottom-style: var(--tw-border-style, solid);
+  border-bottom-width: var(--noctua-border-strong);
+}
+@utility border-l-strong {
+  border-left-style: var(--tw-border-style, solid);
+  border-left-width: var(--noctua-border-strong);
+}
+@utility border-rule {
+  border-style: var(--tw-border-style, solid);
+  border-width: var(--noctua-border-rule);
+}
+@utility border-x-rule {
+  border-inline-style: var(--tw-border-style, solid);
+  border-inline-width: var(--noctua-border-rule);
+}
+@utility border-y-rule {
+  border-block-style: var(--tw-border-style, solid);
+  border-block-width: var(--noctua-border-rule);
+}
+@utility border-s-rule {
+  border-inline-start-style: var(--tw-border-style, solid);
+  border-inline-start-width: var(--noctua-border-rule);
+}
+@utility border-e-rule {
+  border-inline-end-style: var(--tw-border-style, solid);
+  border-inline-end-width: var(--noctua-border-rule);
+}
+@utility border-t-rule {
+  border-top-style: var(--tw-border-style, solid);
+  border-top-width: var(--noctua-border-rule);
+}
+@utility border-r-rule {
+  border-right-style: var(--tw-border-style, solid);
+  border-right-width: var(--noctua-border-rule);
+}
+@utility border-b-rule {
+  border-bottom-style: var(--tw-border-style, solid);
+  border-bottom-width: var(--noctua-border-rule);
+}
+@utility border-l-rule {
+  border-left-style: var(--tw-border-style, solid);
+  border-left-width: var(--noctua-border-rule);
+}
+@utility outline-focus {
+  outline-style: var(--tw-outline-style, solid);
+  outline-width: var(--noctua-focus-width);
+}
+@utility outline-offset-focus {
+  outline-offset: var(--noctua-focus-offset);
+}

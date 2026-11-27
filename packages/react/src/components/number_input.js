@@ -17,7 +17,7 @@ import { Icon } from "./icon.js";
 import { AILabel } from "./ai_label.js";
 import { minus } from "@noctua-world/design-tokens/icons/minus.js";
 import { plus } from "@noctua-world/design-tokens/icons/plus.js";
-export function NumberInput({ name, label, value, min, max, step, bigStep, steppers, stepping, incrementLabel, decrementLabel, minLabel, maxLabel, invalidLabel, group, prefix, suffix, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
+export function NumberInput({ name, label, value, min, max, step, bigStep, steppers, stepping, incrementLabel, decrementLabel, minLabel, maxLabel, invalidLabel, group, prefix, suffix, placeholder, maxlength, hint, error, required, requiredLabel, disabled, readonly, size, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const stepping_ = stepping ?? "assist";
   const id = `nd-number-input-${name}`;
@@ -84,6 +84,8 @@ export function NumberInput({ name, label, value, min, max, step, bigStep, stepp
         name,
         defaultValue: value,
         placeholder,
+        // See the Dioxus half: the real attribute, on what a reader types.
+        maxLength: maxlength,
         required,
         disabled,
         readOnly: readonly,

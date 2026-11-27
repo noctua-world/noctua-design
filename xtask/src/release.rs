@@ -90,12 +90,17 @@ fn plan(root: &Path, current: &str) -> Result<Vec<(String, usize)>, String> {
         "packages/react/package.json",
         "packages/tokens/package.json",
         "packages/dist/package.json",
+        "packages/fonts/package.json",
         "docs-site/package.json",
         // The install instructions. A reader copies these, so a stale one is an
         // error from a registry — the worst place to learn a document rotted.
         "README.md",
         "crates/noctua-design/README.md",
         "crates/noctua-design-dist/README.md",
+        "crates/noctua-design-fonts/README.md",
+        "crates/noctua-design-fonts-jp/README.md",
+        "crates/noctua-design-fonts-kr/README.md",
+        "crates/noctua-design-fonts-sc/README.md",
     ] {
         let text = std::fs::read_to_string(root.join(path))
             .map_err(|error| format!("could not read {path}: {error}"))?;

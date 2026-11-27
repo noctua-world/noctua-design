@@ -4187,6 +4187,25 @@ a.nd-avatar-more-chip[data-nd-seat-hover] {
 .nd-text[data-nd-weight="bold"] { font-weight: var(--noctua-weight-bold); }
 .nd-text[data-nd-tone="muted"] { color: var(--nc-color-fg-muted); }
 .nd-text[data-nd-tone="accent"] { color: var(--nc-color-accent); }
+/* WHAT WENT WRONG AND WHAT WENT RIGHT, AND WHY NEITHER IS THE CONTEXT ALONE.
+ *
+ * The colour system's `danger` and `success` are the solid step of each
+ * family, solved as a fill. As the ink of a sentence on a light page the
+ * success one measures 3.0:1 in every palette and the danger one 4.5:1 on
+ * paper and 3.9:1 on the `softer` backdrop, under the 4.5:1 body text needs
+ * (WCAG 1.4.3). So the tone is mixed toward the page's own ink where it is
+ * used, from two contexts and no colour of this system's: at this share the
+ * worst case over every palette, both modes and the `softer` backdrop is
+ * 4.9:1, and `tests/browser/text-tones.spec.js` measures it from pixels.
+ *
+ * The colour is never the whole of it (WCAG 1.4.1): the caller's words say
+ * which, and under forced colours both are the page's ink. */
+.nd-text[data-nd-tone="danger"] {
+  color: color-mix(in oklab, var(--nc-color-danger) 60%, var(--nc-color-fg));
+}
+.nd-text[data-nd-tone="success"] {
+  color: color-mix(in oklab, var(--nc-color-success) 60%, var(--nc-color-fg));
+}
 /* Tabular figures, so a column of numbers lines up. */
 .nd-text[data-nd-numeric="true"] { font-variant-numeric: tabular-nums; }
 
@@ -4197,6 +4216,13 @@ a.nd-avatar-more-chip[data-nd-seat-hover] {
   max-inline-size: var(--noctua-measure-lead);
 }
 .nd-paragraph[data-nd-tone="muted"] { color: var(--nc-color-fg-muted); }
+/* The same two inks as `Text`'s, mixed for the same measured reason. */
+.nd-paragraph[data-nd-tone="danger"] {
+  color: color-mix(in oklab, var(--nc-color-danger) 60%, var(--nc-color-fg));
+}
+.nd-paragraph[data-nd-tone="success"] {
+  color: color-mix(in oklab, var(--nc-color-success) 60%, var(--nc-color-fg));
+}
 
 /* The measure lives here, on the reading column, and nowhere else. */
 .nd-prose-block[data-nd-measure="default"] > * { max-inline-size: var(--noctua-measure); }
@@ -12205,8 +12231,13 @@ because a specimen of a `needs_name` component must not render a
  * to stay legible on it (`NOCTUA.md §12.4`). The bar is the half that is not a
  * colour.
  *
- * After the hover rule, so a row that is both reads as active. */
-.nd-option-item[data-nd-active="true"] {
+ * After the hover rule, so a row that is both reads as active.
+ *
+ * AND A SECOND SEAT'S PLACE IN THE LIST IS DRAWN BY THE SAME RULE. The mark is
+ * one attribute on one option, so another seat's keyboard has nowhere to be
+ * written but its own attribute, `data-nd-seat-option` (`dist/seats.js`), and
+ * `seat_twin` refuses the mark written without it. */
+.nd-option-item:is([data-nd-active="true"], [data-nd-seat-option]) {
   background: var(--nc-color-surface-raised);
   border-inline-start-color: var(--nc-color-selected);
 }
@@ -12222,7 +12253,7 @@ because a specimen of a `needs_name` component must not render a
     border-inline-start-color: Canvas;
   }
 
-  .nd-option-item[data-nd-active="true"] {
+  .nd-option-item:is([data-nd-active="true"], [data-nd-seat-option]) {
     border-inline-start-color: Highlight;
   }
 }
@@ -12753,23 +12784,103 @@ because a specimen of a `needs_name` component must not render a
  * `collapsed` takes the track to nothing. The duration is a token, and under
  * `prefers-reduced-motion` the token is nothing: the drawer is open or shut.
  *
- * HOW FAR IT OPENS. As far as its content, and never past
- * `--noctua-shell-drawer-max` of the box around it. That is a percentage, so it
- * holds only where that box has a size of its own on the axis. A window has. */
+ * HOW FAR IT OPENS. As far as its content, and never past its cap: a share of
+ * the room it divides with the work, `--noctua-shell-drawer-share-max` of it.
+ * With `share` it is that share exactly, held to the same cap.
+ *
+ * BELOW A FOOTER, THE ROOM IS WHAT THE FOOTER LEAVES, AND NO PERCENTAGE SAYS
+ * THAT. A percentage is of the whole window, so a drawer capped at one stood
+ * 96 pixels tall under a work area of 48 in a window 240 tall, against "always
+ * shorter than the workspace area" (`NOCTUA.md §12.11`). No stylesheet can
+ * subtract a sibling's height. A flex container can: it hands out what its
+ * rigid parts leave, in the ratio of the factors asked for. So a drawer at the
+ * bottom asks for no size and for a factor, share over what is left of a
+ * hundred, against the work's one, and takes that share of the room whatever
+ * stands rigid in it: a footer of any height, an alert line. Its content is
+ * its ceiling (`max-content`), so with little in it the rest goes back to the
+ * work.
+ *
+ * WHAT THAT ASKS OF THE WINDOW: a column laid out by flex with a height of its
+ * own, in which the work is the one other part that grows, from nothing
+ * (`flex: 1 1 0`).
+ *
+ * AND WHAT A WINDOW THAT IS NOT THAT GETS, which is less and never nothing.
+ * Two windows were measured, 240 tall, with forty lines in the drawer:
+ *
+ *   - A block box with a height of its own. No factor is read there, and with
+ *     the content as the only ceiling the drawer stood 800 tall and out of the
+ *     window. So the drawer also asks for a size, its share as a percentage,
+ *     which a flex column never reads (`flex-basis` is `0`, and a basis other
+ *     than `auto` is the size asked for) and every other box does. In a block
+ *     box it is a share of the whole box, footer included, since nothing
+ *     there can subtract the footer.
+ *   - A flex column whose work starts from its content's height
+ *     (`flex: 1 1 auto`) with more in it than the window holds. Nothing is
+ *     left to hand out, and the drawer stood 0 tall while open: visible to the
+ *     accessibility tree, in the tab order, the focus on a button with no
+ *     pixel drawn. So an open drawer has a floor, the smallest target
+ *     (`--noctua-target-min`), which the work gives up as any flex item gives
+ *     up room. A share that comes to less than the floor is the floor.
+ *
+ * AND A GRID IS A WINDOW NO DRAWER CAN SIZE ITSELF IN. A percentage in a grid
+ * item is of the item's own row, never of the grid. In the usual shell rows
+ * (`minmax(0, 1fr) auto auto`) the drawer's row is as tall as the drawer's
+ * content, so the percentage above is a share of its own content: four lines
+ * stood 56 tall in a row of 139, the rest scrolled away and the row left
+ * empty under it. Without the percentage the drawer filled that row, and a
+ * full one took the row to the whole window, 238 of 240, and left the work
+ * none. Nothing a stylesheet can write on the drawer tells a grid from a block
+ * box, and nothing written on a grid item reaches past its row, so no rule
+ * here serves both and the block box is the one served. The reader is told
+ * to lay the window out as the flex column, and
+ * `tests/browser/drawer.spec.js` holds what a grid gets: the share of the
+ * row, and the floor.
+ *
+ * The floor is a floor in a window that keeps the contract too. A drawer is
+ * then as tall as the work or taller only where the room they divide is under
+ * two targets, and no window that small holds a line of work. */
 .nd-drawer {
+  /* The share asked for: the cap, until `share` names one
+     (`drawer-share.css`). */
+  --nd-drawer-share: var(--noctua-shell-drawer-share-max);
   display: grid;
   grid-template-rows: 1fr;
   grid-template-columns: minmax(0, 1fr);
-  flex: none;
+  flex-grow: calc(
+    min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) /
+      (100 - min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)))
+  );
+  flex-shrink: 1;
+  flex-basis: 0;
   box-sizing: border-box;
+  /* Read wherever the factor above is not: in a block box the drawer is this
+     share of the box, under the same ceiling, and in a grid this share of its
+     own row. */
+  block-size: calc(min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) * 1%);
   min-inline-size: 0;
-  max-block-size: var(--noctua-shell-drawer-max);
+  /* A flex item is otherwise never smaller than what is in it, and a drawer
+     with more in it than its share would take the work's room. The floor is
+     the smallest target and not nothing: an open drawer is never drawn at no
+     height, whatever the window around it hands out. */
+  min-block-size: var(--noctua-target-min);
+  max-block-size: max-content;
   color: var(--nc-color-fg);
   background: var(--nc-color-surface);
   transition:
+    flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
+    inline-size var(--noctua-duration-base) var(--noctua-easing-out),
+    block-size var(--noctua-duration-base) var(--noctua-easing-out),
+    min-block-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-start;
+}
+
+/* GIVEN A SHARE, IT IS THAT SHARE AND NOT ITS CONTENT. The ceiling goes, so a
+   drawer with little in it still stands at the share the caller keeps for it,
+   and one with more scrolls. */
+.nd-drawer[data-nd-share] {
+  max-block-size: none;
 }
 
 /* A drawer at a side grows across the window and is as tall as its side.
@@ -12782,9 +12893,20 @@ because a specimen of a `needs_name` component must not render a
 .nd-drawer[data-nd-side="end"] {
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 1fr;
+  /* Nothing rigid stands in the row beside it, so its share of the row is a
+     percentage and it asks the row for no factor. */
+  flex: none;
+  /* As tall as its side: no share of the height, and no floor on it. */
+  block-size: auto;
+  min-block-size: 0;
   max-block-size: none;
   max-inline-size: var(--noctua-shell-drawer-max);
   background: var(--nc-color-surface-subtle);
+}
+
+/* And given a share, a drawer at a side is that share of the row across. */
+.nd-drawer[data-nd-share]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  inline-size: calc(min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) * 1%);
 }
 
 /* AND IT STANDS AT THE SIDE IT NAMES, in the row it is in, wherever it is
@@ -12804,17 +12926,36 @@ because a specimen of a `needs_name` component must not render a
    the way open, which is the two step functions: a drawer hidden at once would
    slide shut empty. */
 .nd-drawer[data-nd-collapsed="true"] {
+  /* It asks for no room, and the track inside closes on what is in it. A
+     drawer as tall as its content slides by the track, and one at its share
+     by the factor. */
+  flex-grow: 0;
+  /* And outside a flex column, where the size asked for is what is read, it
+     asks for none. The floor is an open drawer's, and goes with it. */
+  block-size: 0;
+  min-block-size: 0;
   grid-template-rows: 0fr;
   visibility: hidden;
   transition:
+    flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
+    inline-size var(--noctua-duration-base) var(--noctua-easing-out),
+    block-size var(--noctua-duration-base) var(--noctua-easing-out),
+    min-block-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-end;
 }
 
 .nd-drawer[data-nd-collapsed="true"]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  /* Shut, a drawer at a side is still as tall as its side. */
+  block-size: auto;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 0fr;
+}
+
+/* A share at a side is a size of its own, so shut it is told to be nothing. */
+.nd-drawer[data-nd-collapsed="true"][data-nd-share]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  inline-size: 0;
 }
 
 /* THE RAILS AND THE CONTENT, SIDE BY SIDE. The floor of nothing on both axes
@@ -12885,6 +13026,127 @@ because a specimen of a `needs_name` component must not render a
     border-inline-start-color: Highlight;
   }
 }
+
+/* --- crates/noctua-design-styles/src/drawer-share.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+/* --- Drawer: the share it is given ---------------------------------------------
+ *
+ * A drawer's `share` is a whole percentage, written as `data-nd-share`, and each
+ * rule below hands one of them to `drawer.css` as the number it computes with.
+ *
+ * WHY A RULE FOR EACH, AND NOT ONE. A stylesheet cannot read a number out of an
+ * attribute in every engine this system is drawn by, and the other two ways to
+ * hand it over are a `style` attribute and a script. An application that serves
+ * its page under `style-src 'self'` has every `style` attribute refused, and a
+ * share drawn by a script is a drawer that changes height after its first
+ * frame. So the percentages are written out, one to a hundred, and a drawer is
+ * drawn at its share with no script and no `style`.
+ *
+ * `drawer.css` holds a share to `--noctua-shell-drawer-share-max`, so every
+ * rule past the cap draws the cap. They are written all the same: the cap is a
+ * token, and a percentage is one to a hundred.
+ *
+ * A test beside `sources()` holds this file to exactly these hundred rules. */
+.nd-drawer[data-nd-share="1"] { --nd-drawer-share: 1; }
+.nd-drawer[data-nd-share="2"] { --nd-drawer-share: 2; }
+.nd-drawer[data-nd-share="3"] { --nd-drawer-share: 3; }
+.nd-drawer[data-nd-share="4"] { --nd-drawer-share: 4; }
+.nd-drawer[data-nd-share="5"] { --nd-drawer-share: 5; }
+.nd-drawer[data-nd-share="6"] { --nd-drawer-share: 6; }
+.nd-drawer[data-nd-share="7"] { --nd-drawer-share: 7; }
+.nd-drawer[data-nd-share="8"] { --nd-drawer-share: 8; }
+.nd-drawer[data-nd-share="9"] { --nd-drawer-share: 9; }
+.nd-drawer[data-nd-share="10"] { --nd-drawer-share: 10; }
+.nd-drawer[data-nd-share="11"] { --nd-drawer-share: 11; }
+.nd-drawer[data-nd-share="12"] { --nd-drawer-share: 12; }
+.nd-drawer[data-nd-share="13"] { --nd-drawer-share: 13; }
+.nd-drawer[data-nd-share="14"] { --nd-drawer-share: 14; }
+.nd-drawer[data-nd-share="15"] { --nd-drawer-share: 15; }
+.nd-drawer[data-nd-share="16"] { --nd-drawer-share: 16; }
+.nd-drawer[data-nd-share="17"] { --nd-drawer-share: 17; }
+.nd-drawer[data-nd-share="18"] { --nd-drawer-share: 18; }
+.nd-drawer[data-nd-share="19"] { --nd-drawer-share: 19; }
+.nd-drawer[data-nd-share="20"] { --nd-drawer-share: 20; }
+.nd-drawer[data-nd-share="21"] { --nd-drawer-share: 21; }
+.nd-drawer[data-nd-share="22"] { --nd-drawer-share: 22; }
+.nd-drawer[data-nd-share="23"] { --nd-drawer-share: 23; }
+.nd-drawer[data-nd-share="24"] { --nd-drawer-share: 24; }
+.nd-drawer[data-nd-share="25"] { --nd-drawer-share: 25; }
+.nd-drawer[data-nd-share="26"] { --nd-drawer-share: 26; }
+.nd-drawer[data-nd-share="27"] { --nd-drawer-share: 27; }
+.nd-drawer[data-nd-share="28"] { --nd-drawer-share: 28; }
+.nd-drawer[data-nd-share="29"] { --nd-drawer-share: 29; }
+.nd-drawer[data-nd-share="30"] { --nd-drawer-share: 30; }
+.nd-drawer[data-nd-share="31"] { --nd-drawer-share: 31; }
+.nd-drawer[data-nd-share="32"] { --nd-drawer-share: 32; }
+.nd-drawer[data-nd-share="33"] { --nd-drawer-share: 33; }
+.nd-drawer[data-nd-share="34"] { --nd-drawer-share: 34; }
+.nd-drawer[data-nd-share="35"] { --nd-drawer-share: 35; }
+.nd-drawer[data-nd-share="36"] { --nd-drawer-share: 36; }
+.nd-drawer[data-nd-share="37"] { --nd-drawer-share: 37; }
+.nd-drawer[data-nd-share="38"] { --nd-drawer-share: 38; }
+.nd-drawer[data-nd-share="39"] { --nd-drawer-share: 39; }
+.nd-drawer[data-nd-share="40"] { --nd-drawer-share: 40; }
+.nd-drawer[data-nd-share="41"] { --nd-drawer-share: 41; }
+.nd-drawer[data-nd-share="42"] { --nd-drawer-share: 42; }
+.nd-drawer[data-nd-share="43"] { --nd-drawer-share: 43; }
+.nd-drawer[data-nd-share="44"] { --nd-drawer-share: 44; }
+.nd-drawer[data-nd-share="45"] { --nd-drawer-share: 45; }
+.nd-drawer[data-nd-share="46"] { --nd-drawer-share: 46; }
+.nd-drawer[data-nd-share="47"] { --nd-drawer-share: 47; }
+.nd-drawer[data-nd-share="48"] { --nd-drawer-share: 48; }
+.nd-drawer[data-nd-share="49"] { --nd-drawer-share: 49; }
+.nd-drawer[data-nd-share="50"] { --nd-drawer-share: 50; }
+.nd-drawer[data-nd-share="51"] { --nd-drawer-share: 51; }
+.nd-drawer[data-nd-share="52"] { --nd-drawer-share: 52; }
+.nd-drawer[data-nd-share="53"] { --nd-drawer-share: 53; }
+.nd-drawer[data-nd-share="54"] { --nd-drawer-share: 54; }
+.nd-drawer[data-nd-share="55"] { --nd-drawer-share: 55; }
+.nd-drawer[data-nd-share="56"] { --nd-drawer-share: 56; }
+.nd-drawer[data-nd-share="57"] { --nd-drawer-share: 57; }
+.nd-drawer[data-nd-share="58"] { --nd-drawer-share: 58; }
+.nd-drawer[data-nd-share="59"] { --nd-drawer-share: 59; }
+.nd-drawer[data-nd-share="60"] { --nd-drawer-share: 60; }
+.nd-drawer[data-nd-share="61"] { --nd-drawer-share: 61; }
+.nd-drawer[data-nd-share="62"] { --nd-drawer-share: 62; }
+.nd-drawer[data-nd-share="63"] { --nd-drawer-share: 63; }
+.nd-drawer[data-nd-share="64"] { --nd-drawer-share: 64; }
+.nd-drawer[data-nd-share="65"] { --nd-drawer-share: 65; }
+.nd-drawer[data-nd-share="66"] { --nd-drawer-share: 66; }
+.nd-drawer[data-nd-share="67"] { --nd-drawer-share: 67; }
+.nd-drawer[data-nd-share="68"] { --nd-drawer-share: 68; }
+.nd-drawer[data-nd-share="69"] { --nd-drawer-share: 69; }
+.nd-drawer[data-nd-share="70"] { --nd-drawer-share: 70; }
+.nd-drawer[data-nd-share="71"] { --nd-drawer-share: 71; }
+.nd-drawer[data-nd-share="72"] { --nd-drawer-share: 72; }
+.nd-drawer[data-nd-share="73"] { --nd-drawer-share: 73; }
+.nd-drawer[data-nd-share="74"] { --nd-drawer-share: 74; }
+.nd-drawer[data-nd-share="75"] { --nd-drawer-share: 75; }
+.nd-drawer[data-nd-share="76"] { --nd-drawer-share: 76; }
+.nd-drawer[data-nd-share="77"] { --nd-drawer-share: 77; }
+.nd-drawer[data-nd-share="78"] { --nd-drawer-share: 78; }
+.nd-drawer[data-nd-share="79"] { --nd-drawer-share: 79; }
+.nd-drawer[data-nd-share="80"] { --nd-drawer-share: 80; }
+.nd-drawer[data-nd-share="81"] { --nd-drawer-share: 81; }
+.nd-drawer[data-nd-share="82"] { --nd-drawer-share: 82; }
+.nd-drawer[data-nd-share="83"] { --nd-drawer-share: 83; }
+.nd-drawer[data-nd-share="84"] { --nd-drawer-share: 84; }
+.nd-drawer[data-nd-share="85"] { --nd-drawer-share: 85; }
+.nd-drawer[data-nd-share="86"] { --nd-drawer-share: 86; }
+.nd-drawer[data-nd-share="87"] { --nd-drawer-share: 87; }
+.nd-drawer[data-nd-share="88"] { --nd-drawer-share: 88; }
+.nd-drawer[data-nd-share="89"] { --nd-drawer-share: 89; }
+.nd-drawer[data-nd-share="90"] { --nd-drawer-share: 90; }
+.nd-drawer[data-nd-share="91"] { --nd-drawer-share: 91; }
+.nd-drawer[data-nd-share="92"] { --nd-drawer-share: 92; }
+.nd-drawer[data-nd-share="93"] { --nd-drawer-share: 93; }
+.nd-drawer[data-nd-share="94"] { --nd-drawer-share: 94; }
+.nd-drawer[data-nd-share="95"] { --nd-drawer-share: 95; }
+.nd-drawer[data-nd-share="96"] { --nd-drawer-share: 96; }
+.nd-drawer[data-nd-share="97"] { --nd-drawer-share: 97; }
+.nd-drawer[data-nd-share="98"] { --nd-drawer-share: 98; }
+.nd-drawer[data-nd-share="99"] { --nd-drawer-share: 99; }
+.nd-drawer[data-nd-share="100"] { --nd-drawer-share: 100; }
 
 /* --- crates/noctua-design-styles/src/split.css ---
    COPIED, NOT GENERATED. Edit the file named above. */

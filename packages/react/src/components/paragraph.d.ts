@@ -7,12 +7,12 @@
 import type { ReactNode } from "react";
 
 export type ParagraphSize = "small" | "body" | "lead";
-export type ParagraphTone = "default" | "muted";
+export type ParagraphTone = "default" | "muted" | "danger" | "success";
 
 export interface ParagraphProps {
   /** The text size, from the type scale: `small`, `body` or `lead`. `body` is the default. */
   size?: ParagraphSize;
-  /** How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it. */
+  /** The colour of the text: `default`, `muted` for text that supports the text around it, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing. */
   tone?: ParagraphTone;
   /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
   aiMark?: string;

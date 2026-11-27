@@ -18,5 +18,12 @@ noctua-design = { path = "../../crates/noctua-design" }
 # repository. Reaching into `../../dist/` would prove something no consumer
 # can do, which is the mistake this example exists to avoid.
 noctua-design-dist = { path = "../../crates/noctua-design-dist" }
+# The typefaces `dist/fonts.css` asks for, from the crates that carry them. All
+# four, because the question asked of them is whether every face the
+# stylesheet names is one a consumer can install.
+noctua-design-fonts = { path = "../../crates/noctua-design-fonts" }
+noctua-design-fonts-jp = { path = "../../crates/noctua-design-fonts-jp" }
+noctua-design-fonts-kr = { path = "../../crates/noctua-design-fonts-kr" }
+noctua-design-fonts-sc = { path = "../../crates/noctua-design-fonts-sc" }
 dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks"] }
 dioxus-ssr = "0.7"

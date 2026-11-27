@@ -104,6 +104,11 @@ type = "text"
 attribute = "placeholder"
 doc = "An example quantity, shown inside the box while it is empty. Never the only name the field has."
 
+[prop.maxlength]
+type = "text"
+attribute = "maxlength"
+doc = "The most characters the box accepts while a reader types, a sign and a decimal mark among them. It is the real attribute, so the browser stops the keystroke. The steppers and the arrow keys answer to `min` and `max`."
+
 [prop.hint]
 type = "text"
 doc = "What a reader needs before answering. Drawn by `Field`."

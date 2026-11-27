@@ -275,6 +275,12 @@ prompt-share = "30vh"
 # A percentage, so it resolves against the window and a drawer on a narrow
 # window stays narrow.
 drawer-max = "40%"
+# The same share as a number with no unit. A drawer below a footer is held to
+# its share of the room the footer leaves, and it takes that room as a flex
+# factor, which is a ratio of two numbers: a percentage cannot be divided by.
+# The two say one thing and the build fails when they differ. Under 50, so a
+# drawer at its cap is shorter than the work beside it (`NOCTUA.md §12.11`).
+drawer-share-max = "40"
 
 
 # --- The scene ------------------------------------------------------------

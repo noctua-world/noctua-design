@@ -198,7 +198,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
     // off. The arrow keys and Page Up still move it, and `big_step` is what
     // makes crossing this range from the keyboard possible at all.
     (
-        r"NumberInput { name, label, value, step, big_step, steppers, group }",
+        r"NumberInput { name, label, value, step, big_step, steppers, group, maxlength }",
         &[Node::Component {
             name: "NumberInput",
             props: &[
@@ -209,6 +209,9 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("big_step", Value::Text("5000")),
                 ("steppers", Value::Bool(false)),
                 ("group", Value::Bool(true)),
+                // Six digits and no seventh. The separators `group` draws at
+                // rest are the script's, and no engine counts them.
+                ("maxlength", Value::Text("6")),
             ],
             children: &[],
         }],

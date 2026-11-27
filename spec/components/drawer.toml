@@ -1,7 +1,5 @@
 guidance = """
-Use a drawer for a panel that opens along one edge of a window and stays beside
-the work. Nothing behind it is inert and the focus is never held in it. For a
-surface that must be answered first, use `Dialog`.
+Use a drawer for a panel that opens along one edge of a window and stays beside the work. It is not modal. For a surface that must be answered first, use `Dialog`. At the bottom, put it in a flex column whose work has `flex: 1 1 0`.
 """
 
 [meta]
@@ -21,10 +19,28 @@ summary = "Open a panel along one edge of a window, beside the work and never ov
 # window but Escape while the focus is inside.
 #
 # HOW FAR IT OPENS. Along the edge it opens from, a drawer is as large as what
-# is in it and never larger than `--noctua-shell-drawer-max`, a share of the
-# window. That is a percentage, so the element around a drawer needs a size of
-# its own on that axis: a window is one, and a box as tall as its content is
-# not. Past the share, the content scrolls and the rails stay.
+# is in it and never larger than its cap, `--noctua-shell-drawer-max` of the
+# room it divides with the work. With `share` it is that share of the room
+# exactly, held to the same cap. Below a footer the room is what the footer
+# leaves, so a drawer is shorter than the work above it in a window of any
+# height. The element around a drawer needs a size of its own on that axis: a
+# window is one, and a box as tall as its content is not. Past its size, the
+# content scrolls and the rails stay.
+#
+# WHAT THE WINDOW OWES A DRAWER AT THE BOTTOM. A column laid out by flex, in
+# which the work is the one other part that grows, from nothing (`flex: 1 1
+# 0`). The drawer takes its share as a flex factor against the work's, which is
+# how it is a share of what the footer leaves and not of the whole window.
+#
+# AND WHAT ANY OTHER WINDOW GETS. A block box with a height of its own reads no
+# factor, so there the drawer is its share of the whole box, under the same
+# ceiling of its content. A grid gives it that share of its own row and never
+# of the window, since a percentage in a grid item is of the item's row: a
+# grid is no window for a drawer at the bottom, and the reader is told so. A flex column whose work starts
+# from its content (`flex: 1 1 auto`) can leave nothing to hand out, and there
+# an open drawer stands at its floor, `--noctua-target-min`: it was once drawn
+# at no height with the focus inside it. `crates/noctua-design-styles/src/drawer.css`
+# holds all three, and `tests/browser/drawer.spec.js` asks for each.
 #
 # WHAT IS IN IT. Up to two `DrawerRail`s and one element of content, in the
 # order the keyboard should reach them. The content is the caller's own
@@ -75,7 +91,20 @@ attribute = "data-nd-side"
 # A drawer opens to a share of the WINDOW around it. A picture of one alone has
 # no window, so no share is taken and the three values draw one box.
 variants = false
-doc = "Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in."
+doc = "The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. A block box gives that share of the box, and a grid of its row."
+
+# THE SHARE THE CALLER KEEPS FOR IT. An interface that lets a reader resize its
+# drawer holds a share in its state and draws the drawer at it, whatever is in
+# the drawer. It is an attribute and the stylesheet has a rule for each whole
+# percentage, so it is drawn with no `style` attribute and no script: a page
+# served under `style-src 'self'` has every `style` attribute refused.
+#
+# A value that is no whole number from 1 to 100 writes nothing, and the drawer
+# is as large as its content. Neither body guesses at one.
+[prop.share]
+type = "text"
+attribute = "data-nd-share"
+doc = "A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In a block box it is of the box, and in a grid of its row. Without it, the content sizes it."
 
 [prop.collapsed]
 type = "bool"
@@ -91,7 +120,7 @@ doc = "The rails and the content, in the order the keyboard reaches them: up to 
 needs_name = true
 role = "region"
 notes = """
-The drawer is a `role="region"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. It opens in the flow of the window and covers nothing.
+A `role="region"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. Open at the bottom it is at least `--noctua-target-min` tall, so the focus is never in a drawer of no height.
 """
 
 [keyboard]

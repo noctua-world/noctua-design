@@ -51,6 +51,7 @@ suite. The Rust half of this repository builds and tests without it, and
 | `crates/noctua-design-styles/` | The component rules, hand-written. `sources()` is the order they load in |
 | `dist/` | **Generated, committed**: the CSS layers, `components.css`, the behaviour modules and their manifests |
 | `crates/noctua-design-dist/`, `packages/dist/` | **Generated**: `dist/` copied, because a registry cannot carry a file above a package |
+| `crates/noctua-design-fonts/`, `crates/noctua-design-fonts-jp/`, `crates/noctua-design-fonts-kr/`, `crates/noctua-design-fonts-sc/`, `packages/fonts/` | **Generated**: the faces of `assets/fonts/` copied, for the same reason, and split because a registry refuses a crate over 10 MB |
 | `examples/` | Two consumers from outside the workspace, and [what each proves](examples/README.md) |
 | `docs-site/` | The documentation site, and [its own README](docs-site/README.md) |
 
@@ -130,11 +131,11 @@ export default () => <Button label="Save" />;
 ```toml
 # Cargo.toml
 [dependencies]
-noctua-design = "0.3.0"
+noctua-design = "0.3.1"
 dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks"] }
 
 [build-dependencies]
-noctua-design-dist = "0.3.0"
+noctua-design-dist = "0.3.1"
 ```
 
 ```rust
@@ -167,12 +168,35 @@ is one import, and nothing pulls in the rest:
 Each module exports `enhanceX(root)` and `releaseX(root)`. An app with a
 client-side router calls the second one before it replaces markup.
 
+### A drawer, and the window it stands in
+
+A `Drawer` at the bottom of a window takes a share of the room the footer
+leaves, and only a flex container can hand that out. Lay the window out as a
+flex column with a height of its own, and let the work be the one other part
+that grows, from nothing:
+
+```css
+.window { display: flex; flex-direction: column; block-size: 100vh; } /* allow-literal: an example of a consumer's own stylesheet */
+.work   { flex: 1 1 0; min-block-size: 0; overflow: auto; }
+```
+
+In a block box with a height of its own the drawer takes its share of the
+whole box, footer included. A grid is no window for it: a percentage in a grid
+item is of the item's own row, so there the drawer is its share of its own row
+and the rest of what is in it scrolls. A work that starts from its content
+(`flex: 1 1 auto`) can leave the drawer no room, and an open drawer then stands
+at its floor, `--noctua-target-min`.
+
 ### With Tailwind
 
 Nothing here needs Tailwind, and an application built on this system may use it.
-`dist/tailwind/bridge.css` maps every Tailwind v4 colour utility onto the token
-behind it and declares no colour. Link the sheets from `base.html` as above, then
-import the bridge after Tailwind in the entry stylesheet:
+`dist/tailwind/bridge.css` maps Tailwind v4's utilities onto the tokens: every
+colour utility onto its `--nc-*` token, and the spacing scale, the radii, the type
+sizes, line heights, weights, letter spacing and font roles, the shell's lengths,
+the smallest target, the measure, the easings and the breakpoints onto their
+`--noctua-*` tokens. It declares no colour and no length of its own. Link the sheets from
+`base.html` as above, then import the bridge after Tailwind in the entry
+stylesheet:
 
 ```css
 @import "tailwindcss";
@@ -180,15 +204,57 @@ import the bridge after Tailwind in the entry stylesheet:
 ```
 
 `bg-surface`, `text-fg` and `border-border` then follow the palette, the mode and
-a theme scope exactly as the components do.
+a theme scope exactly as the components do, and `gap-4`, `p-inset`, `min-w-0`,
+`h-shell-line`, `rounded-control`, `text-body`, `leading-body`, `font-semibold`
+and `font-ui` are the design tokens by name.
 
-### The one thing the package does not carry
+**A step of the spacing scale is a name, and a number between two steps is no
+utility.** The bridge declares `--spacing-4` and sets the bare `--spacing` to
+`initial`, so `gap-4` is `var(--noctua-space-4)` and `gap-5` emits nothing,
+under either import. That takes out Tailwind's multiplier and nothing else:
+`@import "tailwindcss"` still brings Tailwind's own type sizes, radii and
+palette (`text-sm`, `rounded-md`). Import `tailwindcss/utilities.css` in its
+place where the tokens are meant to be the whole vocabulary.
 
-**The typefaces.** `fonts.css` asks for them at `../assets/fonts/`, beside the <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
-directory you copied, and megabytes of faces in every install would be a poor
-trade. Without them the page uses your system font and nothing breaks. To have
-them, take `assets/fonts/` from this repository, or from the archive every
-release attaches, which carries `dist/`, the faces and their licences:
+**A duration, a layer and a border width are utilities by the token's name.**
+Tailwind has no theme variable for them, and its own are bare numbers
+(`duration-150`, `z-10`, `border-2`), which no token stands behind. The bridge
+adds `duration-fast`, `z-dialog`, `border-hairline` with its sides
+(`border-b-hairline`), `outline-focus` and `outline-offset-focus`, and maps
+`ease-out`, `ease-in-out` and `ease-linear`. A `border-hairline` and an
+`outline-focus` each draw their line with no other class: the style comes with
+the width. A `duration-fast` follows `prefers-reduced-motion`, as the token
+does. The breakpoints are written as
+lengths, and the scene tokens have no utility.
+
+### The typefaces are packages of their own
+
+`fonts.css` asks for every face at `../assets/fonts/<file>`: in `assets/fonts/`, <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
+beside the directory you copied `dist/` to. The faces are 17 MB, more than a
+registry lets one crate hold, so they are not in the package that carries the
+sheets.
+
+| Registry | Package | Faces |
+|---|---|---|
+| crates.io | `noctua-design-fonts` | the Latin faces, the code face, the symbols and eight other scripts, about 3 MB |
+| crates.io | `noctua-design-fonts-jp`, `-kr`, `-sc` | one CJK family each, cut into slices |
+| npm | `@noctua-world/design-fonts` | all of them, listed by set in `fonts.json` |
+
+```rust
+// build.rs
+fn main() -> std::io::Result<()> {
+    noctua_design_dist::write_to("static/dist")?;
+    noctua_design_fonts::write_to("static/assets/fonts")
+}
+```
+
+Every crate of faces writes flat into that one directory, by the names the
+stylesheet uses, with the licence of each family beside it. A host that serves
+from memory serves each entry of `FILES` at `assets/fonts/<name>` instead. A
+face that is not served costs nothing but itself: the stacks fall back to the
+system's fonts, and a face is fetched only when a page draws a character in its
+range. The archive every release attaches carries `dist/`, the faces and their
+licences together:
 <https://github.com/noctua-world/noctua-design/releases/latest>.
 
 ### Working from a clone instead
@@ -206,7 +272,7 @@ package produces:
 Cargo can take the crate straight from a tag:
 
 ```toml
-noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.3.0" }
+noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.3.1" }
 ```
 
 A project inside the workspace, as `noctua-central` is, depends on
