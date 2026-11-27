@@ -66,8 +66,8 @@ pub fn bridge(vendor: &str, spec: &Spec, fonts: &Fonts) -> EmittedFile {
 /// Whether a token's value is a length or a percentage, and so can stand
 /// where Tailwind expects a size.
 ///
-/// The shell holds one count with no unit, the most lines a prompt grows to,
-/// and a count is no size.
+/// The shell holds two numbers with no unit, the most lines a prompt grows to
+/// and a drawer's largest share, and a number is no size.
 fn is_length(value: &str) -> bool {
     let value = value.trim();
     value.parse::<f64>().is_err()
@@ -244,9 +244,10 @@ mod tests {
         (tokens, faces)
     }
 
-    /// The groups the bridge owes a utility for, and the two tokens in them
+    /// The groups the bridge owes a utility for, and the three tokens in them
     /// that are no size: the scale's base, which would be Tailwind's
-    /// multiplier, and the prompt's count of lines.
+    /// multiplier, the prompt's count of lines, and a drawer's largest share
+    /// as a number.
     const OWED: &[&str] = &[
         "--noctua-space-",
         "--noctua-radius-",
@@ -259,7 +260,11 @@ mod tests {
         "--noctua-target-",
         "--noctua-font-",
     ];
-    const NOT_A_SIZE: &[&str] = &["--noctua-space-base", "--noctua-shell-prompt-max"];
+    const NOT_A_SIZE: &[&str] = &[
+        "--noctua-space-base",
+        "--noctua-shell-prompt-max",
+        "--noctua-shell-drawer-share-max",
+    ];
 
     /// Every spacing, radius, type, font, shell and target token the shipped
     /// sheets declare has a utility, read from the sheets and not from the

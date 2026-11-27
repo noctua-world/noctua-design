@@ -21,10 +21,18 @@ summary = "Open a panel along one edge of a window, beside the work and never ov
 # window but Escape while the focus is inside.
 #
 # HOW FAR IT OPENS. Along the edge it opens from, a drawer is as large as what
-# is in it and never larger than `--noctua-shell-drawer-max`, a share of the
-# window. That is a percentage, so the element around a drawer needs a size of
-# its own on that axis: a window is one, and a box as tall as its content is
-# not. Past the share, the content scrolls and the rails stay.
+# is in it and never larger than its cap, `--noctua-shell-drawer-max` of the
+# room it divides with the work. With `share` it is that share of the room
+# exactly, held to the same cap. Below a footer the room is what the footer
+# leaves, so a drawer is shorter than the work above it in a window of any
+# height. The element around a drawer needs a size of its own on that axis: a
+# window is one, and a box as tall as its content is not. Past its size, the
+# content scrolls and the rails stay.
+#
+# WHAT THE WINDOW OWES A DRAWER AT THE BOTTOM. A column laid out by flex, in
+# which the work is the one other part that grows, from nothing (`flex: 1 1
+# 0`). The drawer takes its share as a flex factor against the work's, which is
+# how it is a share of what the footer leaves and not of the whole window.
 #
 # WHAT IS IN IT. Up to two `DrawerRail`s and one element of content, in the
 # order the keyboard should reach them. The content is the caller's own
@@ -76,6 +84,19 @@ attribute = "data-nd-side"
 # no window, so no share is taken and the three values draw one box.
 variants = false
 doc = "Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in."
+
+# THE SHARE THE CALLER KEEPS FOR IT. An interface that lets a reader resize its
+# drawer holds a share in its state and draws the drawer at it, whatever is in
+# the drawer. It is an attribute and the stylesheet has a rule for each whole
+# percentage, so it is drawn with no `style` attribute and no script: a page
+# served under `style-src 'self'` has every `style` attribute refused.
+#
+# A value that is no whole number from 1 to 100 writes nothing, and the drawer
+# is as large as its content. Neither body guesses at one.
+[prop.share]
+type = "text"
+attribute = "data-nd-share"
+doc = "The share of the room the drawer takes, a whole percentage from `1` to `100`, whatever is in it. It is held to `--noctua-shell-drawer-max`. Without it the drawer is as large as its content."
 
 [prop.collapsed]
 type = "bool"

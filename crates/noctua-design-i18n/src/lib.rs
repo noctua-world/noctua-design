@@ -1444,6 +1444,8 @@ pub enum Key {
     ExampleDrawerSide,
     /// `example.drawer.scroll`
     ExampleDrawerScroll,
+    /// `example.drawer.share`
+    ExampleDrawerShare,
     /// `example.drawer-rail.controls`
     ExampleDrawerRailControls,
     /// `example.drawer-rail.tabs`
@@ -4440,6 +4442,8 @@ pub enum Key {
     ComponentDrawerPropLabelDoc,
     /// `component.drawer.prop.side.doc`
     ComponentDrawerPropSideDoc,
+    /// `component.drawer.prop.share.doc`
+    ComponentDrawerPropShareDoc,
     /// `component.drawer.prop.collapsed.doc`
     ComponentDrawerPropCollapsedDoc,
     /// `component.drawer.prop.children.doc`
@@ -6926,7 +6930,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3401] = [
+    pub const ALL: [Self; 3403] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -7589,6 +7593,7 @@ impl Key {
         Self::ExampleDrawerCollapsed,
         Self::ExampleDrawerSide,
         Self::ExampleDrawerScroll,
+        Self::ExampleDrawerShare,
         Self::ExampleDrawerRailControls,
         Self::ExampleDrawerRailTabs,
         Self::ExampleDrawerRailBoth,
@@ -9087,6 +9092,7 @@ impl Key {
         Self::ComponentDrawerPropIdDoc,
         Self::ComponentDrawerPropLabelDoc,
         Self::ComponentDrawerPropSideDoc,
+        Self::ComponentDrawerPropShareDoc,
         Self::ComponentDrawerPropCollapsedDoc,
         Self::ComponentDrawerPropChildrenDoc,
         Self::ComponentDrawerKeyTabName,
@@ -10996,6 +11002,7 @@ impl Key {
             Self::ExampleDrawerCollapsed => "example.drawer.collapsed",
             Self::ExampleDrawerSide => "example.drawer.side",
             Self::ExampleDrawerScroll => "example.drawer.scroll",
+            Self::ExampleDrawerShare => "example.drawer.share",
             Self::ExampleDrawerRailControls => "example.drawer-rail.controls",
             Self::ExampleDrawerRailTabs => "example.drawer-rail.tabs",
             Self::ExampleDrawerRailBoth => "example.drawer-rail.both",
@@ -12740,6 +12747,7 @@ impl Key {
             Self::ComponentDrawerPropIdDoc => "component.drawer.prop.id.doc",
             Self::ComponentDrawerPropLabelDoc => "component.drawer.prop.label.doc",
             Self::ComponentDrawerPropSideDoc => "component.drawer.prop.side.doc",
+            Self::ComponentDrawerPropShareDoc => "component.drawer.prop.share.doc",
             Self::ComponentDrawerPropCollapsedDoc => "component.drawer.prop.collapsed.doc",
             Self::ComponentDrawerPropChildrenDoc => "component.drawer.prop.children.doc",
             Self::ComponentDrawerKeyTabName => "component.drawer.key.tab.name",
@@ -15590,6 +15598,9 @@ impl Locale {
                 }
                 Key::ExampleDrawerScroll => {
                     "Past its share of the window the content scrolls. The rail stays where it is."
+                }
+                Key::ExampleDrawerShare => {
+                    "`share` keeps a share of the room the footer leaves, whatever is in the drawer. The work above is always the taller."
                 }
                 Key::ExampleDrawerRailControls => {
                     "A rail is as wide as a footer's corner and as tall as the drawer. It holds a `Toolbar` drawn as a rail."
@@ -18688,6 +18699,9 @@ impl Locale {
                 }
                 Key::ComponentDrawerPropSideDoc => {
                     "Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in."
+                }
+                Key::ComponentDrawerPropShareDoc => {
+                    "The share of the room the drawer takes, a whole percentage from `1` to `100`, whatever is in it. It is held to `--noctua-shell-drawer-max`. Without it the drawer is as large as its content."
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology."
@@ -23306,6 +23320,9 @@ impl Locale {
                 Key::ExampleDrawerScroll => {
                     "Além da fração da janela o conteúdo rola. O trilho fica onde está."
                 }
+                Key::ExampleDrawerShare => {
+                    "`share` reserva uma fração do espaço que o rodapé deixa, seja qual for o conteúdo. A área de trabalho acima é sempre a mais alta."
+                }
                 Key::ExampleDrawerRailControls => {
                     "Um trilho tem a largura de um canto do rodapé e a altura da gaveta. Ele guarda uma `Toolbar` desenhada como trilho."
                 }
@@ -26429,6 +26446,9 @@ impl Locale {
                 }
                 Key::ComponentDrawerPropSideDoc => {
                     "De qual borda da janela a gaveta abre: `bottom`, `start` ou `end`. Ela cresce no eixo dessa borda, até `--noctua-shell-drawer-max` e não mais. Num lado, fica nesse lado da fileira em que está."
+                }
+                Key::ComponentDrawerPropShareDoc => {
+                    "A fração do espaço que a gaveta ocupa, uma porcentagem inteira de `1` a `100`, seja qual for o conteúdo. Ela é limitada a `--noctua-shell-drawer-max`. Sem ela a gaveta tem o tamanho do conteúdo."
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "Se a gaveta está fechada. Uma gaveta recolhida mantém o que está nela e não mostra nada. Fica fora da ordem de tabulação e escondida da tecnologia assistiva."
@@ -31093,6 +31113,9 @@ impl Locale {
                 Key::ExampleDrawerScroll => {
                     "⟦Paast iits shaaree oof thee wiindoow thee coonteent scroolls. Thee raaiil staays wheeree iit iis.⟧"
                 }
+                Key::ExampleDrawerShare => {
+                    "⟦`shaaree` keeeeps aa shaaree oof thee roooom thee fooooteer leeaavees, whaateeveer iis iin thee draaweer. Thee woork aaboovee iis aalwaays thee taalleer.⟧"
+                }
                 Key::ExampleDrawerRailControls => {
                     "⟦AA raaiil iis aas wiidee aas aa fooooteer's coorneer aand aas taall aas thee draaweer. IIt hoolds aa `Toooolbaar` draawn aas aa raaiil.⟧"
                 }
@@ -34318,6 +34341,9 @@ impl Locale {
                 }
                 Key::ComponentDrawerPropSideDoc => {
                     "⟦Whiich eedgee oof thee wiindoow thee draaweer oopeens froom: `boottoom`, `staart` oor `eend`. IIt groows aaloong thaat eedgee's aaxiis, too `--nooctuuaa-sheell-draaweer-maax` aand noo fuurtheer. AAt aa siidee, iit staands aat thaat siidee oof thee roow iit iis iin.⟧"
+                }
+                Key::ComponentDrawerPropShareDoc => {
+                    "⟦Thee shaaree oof thee roooom thee draaweer taakees, aa whoolee peerceentaagee froom `1` too `100`, whaateeveer iis iin iit. IIt iis heeld too `--nooctuuaa-sheell-draaweer-maax`. Wiithoouut iit thee draaweer iis aas laargee aas iits coonteent.⟧"
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "⟦Wheetheer thee draaweer iis shuut. AA coollaapseed draaweer keeeeps whaat iis iin iit aand shoows noonee oof iit. IIt iis oouut oof thee taab oordeer aand hiiddeen froom aassiistiivee teechnooloogy.⟧"

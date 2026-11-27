@@ -4262,6 +4262,18 @@ const PROMPT_REACT: &str = r#"  const root = ["nd-prompt", className].filter(Boo
 /// a re-render takes back.
 const DRAWER_DIOXUS: &str = r#"    let root = format!("nd-drawer {class}");
     let root = root.trim().to_owned();
+    // A WHOLE PERCENTAGE FROM 1 TO 100, OR NO ATTRIBUTE AT ALL. The stylesheet
+    // has a rule for each of those and for nothing else, and takes the
+    // attribute's presence as a share given, so a value outside them is not
+    // written: the drawer is then as large as its content. Written back as
+    // the number, so `"035"` and `" 35 "` are the share `35`.
+    let share = share
+        .as_deref()
+        .map(str::trim)
+        .filter(|text| !text.is_empty() && text.bytes().all(|byte| byte.is_ascii_digit()))
+        .and_then(|text| text.parse::<u32>().ok())
+        .filter(|share| (1..=100).contains(share))
+        .map(|share| share.to_string());
 
     rsx! {
         div {
@@ -4272,6 +4284,7 @@ const DRAWER_DIOXUS: &str = r#"    let root = format!("nd-drawer {class}");
             "data-nd-drawer": "{name}",
             "data-nd-side": side.as_str(),
             "data-nd-collapsed": if collapsed { "true" } else { "false" },
+            "data-nd-share": share,
             div { class: "nd-drawer-panel", {children} }
         }
     }
@@ -4279,6 +4292,11 @@ const DRAWER_DIOXUS: &str = r#"    let root = format!("nd-drawer {class}");
 
 /// The same panel, in React.
 const DRAWER_REACT: &str = r#"  const root = ["nd-drawer", className].filter(Boolean).join(" ");
+  // See the Dioxus half: a whole percentage from 1 to 100, written back as
+  // the number, or no attribute at all.
+  const asked = String(share ?? "").trim();
+  const whole = /^[0-9]+$/.test(asked) ? Number.parseInt(asked, 10) : 0;
+  const share_ = whole >= 1 && whole <= 100 ? String(whole) : undefined;
 
   return h(
     "div",
@@ -4290,6 +4308,7 @@ const DRAWER_REACT: &str = r#"  const root = ["nd-drawer", className].filter(Boo
       "data-nd-drawer": name,
       "data-nd-side": side ?? "bottom",
       "data-nd-collapsed": String(collapsed ?? false),
+      "data-nd-share": share_,
       ...rest,
     },
     // See the Dioxus half: the one thing in the track that slides.

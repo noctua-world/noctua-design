@@ -13,23 +13,60 @@
  * `collapsed` takes the track to nothing. The duration is a token, and under
  * `prefers-reduced-motion` the token is nothing: the drawer is open or shut.
  *
- * HOW FAR IT OPENS. As far as its content, and never past
- * `--noctua-shell-drawer-max` of the box around it. That is a percentage, so it
- * holds only where that box has a size of its own on the axis. A window has. */
+ * HOW FAR IT OPENS. As far as its content, and never past its cap: a share of
+ * the room it divides with the work, `--noctua-shell-drawer-share-max` of it.
+ * With `share` it is that share exactly, held to the same cap.
+ *
+ * BELOW A FOOTER, THE ROOM IS WHAT THE FOOTER LEAVES, AND NO PERCENTAGE SAYS
+ * THAT. A percentage is of the whole window, so a drawer capped at one stood
+ * 96 pixels tall under a work area of 48 in a window 240 tall, against "always
+ * shorter than the workspace area" (`NOCTUA.md §12.11`). No stylesheet can
+ * subtract a sibling's height. A flex container can: it hands out what its
+ * rigid parts leave, in the ratio of the factors asked for. So a drawer at the
+ * bottom asks for no size and for a factor, share over what is left of a
+ * hundred, against the work's one, and takes that share of the room whatever
+ * stands rigid in it: a footer of any height, an alert line. Its content is
+ * its ceiling (`max-content`), so with little in it the rest goes back to the
+ * work.
+ *
+ * WHAT THAT ASKS OF THE WINDOW: a column laid out by flex with a height of its
+ * own, in which the work is the one other part that grows, from nothing
+ * (`flex: 1 1 0`). A work that starts from its content's height can leave no
+ * room to share, and the drawer is then drawn as nothing. */
 .nd-drawer {
+  /* The share asked for: the cap, until `share` names one
+     (`drawer-share.css`). */
+  --nd-drawer-share: var(--noctua-shell-drawer-share-max);
   display: grid;
   grid-template-rows: 1fr;
   grid-template-columns: minmax(0, 1fr);
-  flex: none;
+  flex-grow: calc(
+    min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) /
+      (100 - min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)))
+  );
+  flex-shrink: 1;
+  flex-basis: 0;
   box-sizing: border-box;
   min-inline-size: 0;
-  max-block-size: var(--noctua-shell-drawer-max);
+  /* A flex item is otherwise never smaller than what is in it, and a drawer
+     with more in it than its share would take the work's room. */
+  min-block-size: 0;
+  max-block-size: max-content;
   color: var(--nc-color-fg);
   background: var(--nc-color-surface);
   transition:
+    flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
+    inline-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-start;
+}
+
+/* GIVEN A SHARE, IT IS THAT SHARE AND NOT ITS CONTENT. The ceiling goes, so a
+   drawer with little in it still stands at the share the caller keeps for it,
+   and one with more scrolls. */
+.nd-drawer[data-nd-share] {
+  max-block-size: none;
 }
 
 /* A drawer at a side grows across the window and is as tall as its side.
@@ -42,9 +79,17 @@
 .nd-drawer[data-nd-side="end"] {
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 1fr;
+  /* Nothing rigid stands in the row beside it, so its share of the row is a
+     percentage and it asks the row for no factor. */
+  flex: none;
   max-block-size: none;
   max-inline-size: var(--noctua-shell-drawer-max);
   background: var(--nc-color-surface-subtle);
+}
+
+/* And given a share, a drawer at a side is that share of the row across. */
+.nd-drawer[data-nd-share]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  inline-size: calc(min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) * 1%);
 }
 
 /* AND IT STANDS AT THE SIDE IT NAMES, in the row it is in, wherever it is
@@ -64,9 +109,15 @@
    the way open, which is the two step functions: a drawer hidden at once would
    slide shut empty. */
 .nd-drawer[data-nd-collapsed="true"] {
+  /* It asks for no room, and the track inside closes on what is in it. A
+     drawer as tall as its content slides by the track, and one at its share
+     by the factor. */
+  flex-grow: 0;
   grid-template-rows: 0fr;
   visibility: hidden;
   transition:
+    flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
+    inline-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-end;
@@ -75,6 +126,11 @@
 .nd-drawer[data-nd-collapsed="true"]:is([data-nd-side="start"], [data-nd-side="end"]) {
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 0fr;
+}
+
+/* A share at a side is a size of its own, so shut it is told to be nothing. */
+.nd-drawer[data-nd-collapsed="true"][data-nd-share]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  inline-size: 0;
 }
 
 /* THE RAILS AND THE CONTENT, SIDE BY SIDE. The floor of nothing on both axes

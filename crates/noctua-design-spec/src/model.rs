@@ -78,7 +78,8 @@ pub struct Spec {
     /// line, the width of an icon rail, and how far a prompt and a drawer may
     /// grow.
     ///
-    /// Every value is a length except `prompt-max`, which is a count of lines.
+    /// Every value is a length except `prompt-max`, which is a count of lines,
+    /// and `drawer-share-max`, which is `drawer-max` as a number.
     #[serde(default)]
     pub shell: IndexMap<String, String>,
 

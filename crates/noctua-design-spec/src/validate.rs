@@ -229,8 +229,13 @@ fn check_units(spec: &Spec, problems: &mut Vec<Problem>) {
 ///
 /// Every other name in the table is a length. `prompt-max` counts lines, so a
 /// unit on it would multiply a line's height by a length, and the browser
-/// drops that declaration without a word.
-const SHELL_COUNTS: [&str; 1] = ["prompt-max"];
+/// drops that declaration without a word. `drawer-share-max` is a drawer's
+/// largest share as a number, for a flex factor, which no percentage enters.
+const SHELL_COUNTS: [&str; 2] = ["prompt-max", "drawer-share-max"];
+
+/// The share a drawer is held to, as a percentage and as a number.
+const DRAWER_MAX: &str = "drawer-max";
+const DRAWER_SHARE_MAX: &str = "drawer-share-max";
 
 /// A count is a whole number of at least one, with no unit.
 fn check_counts(spec: &Spec, problems: &mut Vec<Problem>) {
@@ -243,6 +248,54 @@ fn check_counts(spec: &Spec, problems: &mut Vec<Problem>) {
                     .fix("give it a whole number of at least one and no unit, as in `8`"),
             );
         }
+    }
+    check_drawer_share(spec, problems);
+}
+
+/// A drawer's largest share is written twice, and the two are one value under
+/// a half.
+///
+/// The percentage sizes a drawer at a side and the number is the flex factor
+/// of one below a footer, so two values would be two caps. At a half or more,
+/// a drawer at its cap is as tall as the work beside it, or taller.
+fn check_drawer_share(spec: &Spec, problems: &mut Vec<Problem>) {
+    let (Some(percent), Some(number)) =
+        (spec.shell.get(DRAWER_MAX), spec.shell.get(DRAWER_SHARE_MAX))
+    else {
+        if spec.shell.contains_key(DRAWER_MAX) != spec.shell.contains_key(DRAWER_SHARE_MAX) {
+            problems.push(
+                Problem::whole_file(format!(
+                    "shell.{DRAWER_MAX} and shell.{DRAWER_SHARE_MAX} are one share written \
+                     twice, and only one of them is declared"
+                ))
+                .fix("declare both, as in `drawer-max = \"40%\"` and `drawer-share-max = \"40\"`"),
+            );
+        }
+        return;
+    };
+    let Ok(share) = number.trim().parse::<u32>() else {
+        // Not a count: `check_counts` has said so.
+        return;
+    };
+    if percent.trim() != format!("{share}%") {
+        problems.push(
+            Problem::whole_file(format!(
+                "shell.{DRAWER_MAX} is `{percent}` and shell.{DRAWER_SHARE_MAX} is `{number}`, \
+                 which are two caps for one drawer"
+            ))
+            .fix(format!(
+                "write the same share in both, as in `drawer-max = \"{share}%\"`"
+            )),
+        );
+    }
+    if share >= 50 {
+        problems.push(
+            Problem::whole_file(format!(
+                "shell.{DRAWER_SHARE_MAX} is `{number}`, so a drawer at its cap is not shorter \
+                 than the work beside it"
+            ))
+            .fix("give it a share under a half, as in `40`"),
+        );
     }
 }
 

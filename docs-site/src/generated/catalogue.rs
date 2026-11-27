@@ -4624,6 +4624,18 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
                 doc: Key::ComponentDrawerPropSideDoc,
             },
             DocProp {
+                name: "share",
+                kind: "text",
+                values: &[],
+                elements: &[],
+                default: None,
+                attribute: Some("data-nd-share"),
+                required: false,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentDrawerPropShareDoc,
+            },
+            DocProp {
                 name: "collapsed",
                 kind: "bool",
                 values: &[],

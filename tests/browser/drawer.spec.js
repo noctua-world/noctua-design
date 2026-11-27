@@ -132,6 +132,32 @@ const turnPartway = (locator, value) =>
     };
   }, value);
 
+/**
+ * The room a window's drawer and its work divide: the window less what stands
+ * rigid in it, which is every part that neither grows nor is the drawer, and
+ * the work's own padding and border.
+ */
+const roomOf = (frame) =>
+  frame.evaluate((one) => {
+    const style = getComputedStyle(one);
+    const edge = (el, name) => Number.parseFloat(getComputedStyle(el).getPropertyValue(name)) || 0;
+    let room =
+      one.getBoundingClientRect().height -
+      Number.parseFloat(style.borderTopWidth) -
+      Number.parseFloat(style.borderBottomWidth);
+    for (const part of one.children) {
+      if (part.matches(".nd-drawer")) continue;
+      if (part.matches(".nd-example-work")) {
+        for (const name of ["padding-top", "padding-bottom", "border-top-width", "border-bottom-width"]) {
+          room -= edge(part, name);
+        }
+        continue;
+      }
+      room -= part.getBoundingClientRect().height;
+    }
+    return room;
+  });
+
 /** Waits until nothing in the drawer is still moving. */
 const settled = (locator) =>
   locator.evaluate((one) => Promise.all(one.getAnimations().map((each) => each.finished.catch(() => null))));
@@ -198,7 +224,11 @@ for (const width of [320, 768, 1280]) {
       const long = drawer(page, "drawer-long");
       const longEdge = await inner(windowOf(page, "drawer-long"));
       const tall = await box(long);
-      expect(tall.height, `${locale}: a full drawer is not its share of the window`).toBeCloseTo(longEdge.height * limit, 0);
+      // Its share of the room it divides with the work, which is the window
+      // less the work's own padding: nothing else stands in this one.
+      const room = await roomOf(windowOf(page, "drawer-long"));
+      expect(room).toBeLessThanOrEqual(longEdge.height);
+      expect(tall.height, `${locale}: a full drawer is not its share of the room`).toBeCloseTo(room * limit, 0);
       expect(tall.bottom).toBeCloseTo(longEdge.bottom, 1);
       const scroll = await long
         .locator(".nd-drawer-panel > :not(.nd-drawer-rail)")
@@ -237,6 +267,137 @@ for (const width of [320, 768, 1280]) {
     }
   });
 }
+
+// THE WINDOW HEIGHTS A DRAWER IS HELD TO ITS WORK AT: the interface's smallest
+// (`NOCTUA.md §12.19`), and three above it. At each of the first three a cap
+// read against the whole window stood the drawer as tall as the work or
+// taller: measured 96 to 48 at 240.
+for (const height of [240, 320, 480, 600]) {
+  test(`under a footer a full drawer is shorter than the work, in a window ${height} tall`, async ({ page }) => {
+    await open(page);
+    const frame = windowOf(page, "drawer-share");
+    const one = drawer(page, "drawer-share");
+    // The example's own window, at the height asked about, with no share
+    // given and more in the drawer than any share of it holds.
+    await frame.evaluate((el, tall) => {
+      el.style.blockSize = `${tall}px`;
+    }, height);
+    await one.evaluate((el) => {
+      el.removeAttribute("data-nd-share");
+      const pane = el.querySelector(".nd-example-pane");
+      for (let at = 0; at < 40; at += 1) pane.append(pane.firstElementChild.cloneNode(true));
+    });
+    await settled(one);
+    await frame.scrollIntoViewIfNeeded();
+
+    const limit = await share(page);
+    const edge = await inner(frame);
+    expect(edge.height).toBeCloseTo(height - 2, 0);
+    const footer = await box(frame.locator(".nd-footer"));
+    expect(footer.height, "the example has no footer to stand under").toBeGreaterThan(30);
+    const work = await box(frame.locator(".nd-example-work"));
+    const tall = await box(one);
+    const room = await roomOf(frame);
+
+    expect(tall.height, "a full drawer is not its share of the room the footer leaves").toBeCloseTo(room * limit, 0);
+    expect(tall.height, "the drawer is as tall as the work, or taller").toBeLessThan(work.height);
+    // The three stand one under the other and fill the window exactly.
+    expect(work.top).toBeCloseTo(edge.top, 1);
+    expect(footer.top).toBeCloseTo(work.bottom, 1);
+    expect(tall.top).toBeCloseTo(footer.bottom, 1);
+    expect(tall.bottom).toBeCloseTo(edge.bottom, 1);
+    const spill = await frame.evaluate((el) => el.scrollHeight - el.clientHeight);
+    expect(spill, "the window grew taller than itself").toBeLessThanOrEqual(0);
+    const scroll = await one
+      .locator(".nd-drawer-panel > :not(.nd-drawer-rail)")
+      .evaluate((el) => el.scrollHeight - el.clientHeight);
+    expect(scroll, "what does not fit a full drawer does not scroll").toBeGreaterThan(1);
+  });
+}
+
+test("a drawer given a share is that share of the room, whatever is in it", async ({ page }) => {
+  await open(page);
+  const frame = windowOf(page, "drawer-share");
+  const one = drawer(page, "drawer-share");
+  await frame.scrollIntoViewIfNeeded();
+  const limit = await share(page);
+  const room = await roomOf(frame);
+  expect(room).toBeGreaterThan(100);
+
+  // WITH LITTLE IN IT, IT IS STILL ITS SHARE: taller than its content.
+  await expect(one).toHaveAttribute("data-nd-share", "30");
+  const content = await box(one.locator(".nd-example-pane > *").first());
+  const drawn = await box(one);
+  expect(drawn.height, "a drawer given a share is not that share").toBeCloseTo(room * 0.3, 0);
+  expect(drawn.height).toBeGreaterThan(content.height + 4);
+  // It is drawn by the stylesheet alone: no `style` is written on it.
+  expect(await one.getAttribute("style")).toBeNull();
+
+  // ANOTHER SHARE THE CALLER WRITES IS DRAWN, and one past the cap is the cap.
+  const give = async (value) => {
+    await one.evaluate((el, next) => el.setAttribute("data-nd-share", next), value);
+    await settled(one);
+    return (await box(one)).height;
+  };
+  expect(await give("10"), "a share of 10 is not a tenth of the room").toBeCloseTo(room * 0.1, 0);
+  expect(await give("1")).toBeCloseTo(room * 0.01, 0);
+  expect(await give("40")).toBeCloseTo(room * limit, 0);
+  expect(await give("75"), "a share past the cap is not held to it").toBeCloseTo(room * limit, 0);
+  expect(await give("100")).toBeCloseTo(room * limit, 0);
+  const work = await box(frame.locator(".nd-example-work"));
+  expect((await box(one)).height, "at its cap the drawer is as tall as the work").toBeLessThan(work.height);
+
+  // WITH MORE IN IT THAN ITS SHARE, the share holds and the content scrolls.
+  await give("30");
+  await one.evaluate((el) => {
+    const pane = el.querySelector(".nd-example-pane");
+    for (let at = 0; at < 40; at += 1) pane.append(pane.firstElementChild.cloneNode(true));
+  });
+  expect((await box(one)).height).toBeCloseTo(room * 0.3, 0);
+  const scroll = await one
+    .locator(".nd-drawer-panel > :not(.nd-drawer-rail)")
+    .evaluate((el) => el.scrollHeight - el.clientHeight);
+  expect(scroll).toBeGreaterThan(1);
+});
+
+test("a drawer given a share slides shut from it and back to it", async ({ page }) => {
+  await open(page);
+  const one = drawer(page, "drawer-share");
+  await windowOf(page, "drawer-share").scrollIntoViewIfNeeded();
+  const full = (await box(one)).height;
+  expect(full).toBeGreaterThan(20);
+  const shutting = await turnPartway(one, "true");
+  expect(shutting.moving, "a drawer at a share shuts with no movement").toBeGreaterThan(0);
+  expect(shutting.height, "a drawer at a share shuts in one step").toBeGreaterThan(1);
+  expect(shutting.height, "a drawer at a share shuts in one step").toBeLessThan(full - 1);
+  await one.evaluate((el) => el.getAnimations().forEach((each) => each.play()));
+  await settled(one);
+  expect((await box(one)).height, "a shut drawer keeps its share").toBeLessThanOrEqual(0.5);
+  expect(await one.evaluate((el) => getComputedStyle(el).visibility)).toBe("hidden");
+  await one.evaluate((el) => el.setAttribute("data-nd-collapsed", "false"));
+  await settled(one);
+  expect((await box(one)).height).toBeCloseTo(full, 1);
+});
+
+test("a drawer at a side given a share is that share of the row across, and shuts to nothing", async ({ page }) => {
+  await open(page);
+  const frame = windowOf(page, "drawer-start");
+  const one = drawer(page, "drawer-start");
+  await frame.scrollIntoViewIfNeeded();
+  const limit = await share(page);
+  const edge = await inner(frame);
+  const give = async (value) => {
+    await one.evaluate((el, next) => el.setAttribute("data-nd-share", next), value);
+    await settled(one);
+    return (await box(one)).width;
+  };
+  expect(await give("25"), "a side drawer given a quarter is not a quarter of the row").toBeCloseTo(edge.width * 0.25, 0);
+  expect(await give("90"), "a side share past the cap is not held to it").toBeCloseTo(edge.width * limit, 0);
+  expect((await inner(frame)).overflow, "the window scrolls sideways").toBeLessThanOrEqual(0);
+  await one.evaluate((el) => el.setAttribute("data-nd-collapsed", "true"));
+  await settled(one);
+  expect((await box(one)).width, "a shut side drawer keeps its share").toBeLessThanOrEqual(0.5);
+});
 
 test("a drawer stands at the side it names wherever it is written", async ({ page }) => {
   await open(page);

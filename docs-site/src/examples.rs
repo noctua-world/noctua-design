@@ -2428,6 +2428,13 @@ const DRAWER: &[Example] = &[
         r"Drawer { … } with more in it than its share of the window",
         Key::ExampleDrawerScroll
     ),
+    // A SHARE, UNDER A FOOTER. The one example with something rigid between
+    // the work and the drawer, which is what a share is a share of: the room
+    // the footer leaves, and not the whole window.
+    example!(
+        r#"Footer { … } above Drawer { share: "30", … }"#,
+        Key::ExampleDrawerShare
+    ),
 ];
 
 const DRAWER_RAIL: &[Example] = &[

@@ -81,6 +81,7 @@ export const shell = {
   promptMax: "var(--noctua-shell-prompt-max)",
   promptShare: "var(--noctua-shell-prompt-share)",
   drawerMax: "var(--noctua-shell-drawer-max)",
+  drawerShareMax: "var(--noctua-shell-drawer-share-max)",
 };
 
 export const leading = {

@@ -1024,15 +1024,41 @@ side of it, `--noctua-shell-rail` wide, on the footer corners' own shade, holdin
 `Tabs` drawn as a rail. A drawer at the bottom is on the page's own surface, as the footer's last
 line is, and one at a side is on the subtle surface, which is all that tells it from the work.
 
-**It opens to a share of the box around it, so that box needs a size.** A drawer is as large as
-its content, up to `--noctua-shell-drawer-max`. That is a percentage, and it resolves only where
-the element around the drawer has a size of its own on that axis: a window has, and a box as tall
-as its content has not. Every example therefore stands in `.nd-example-window`, the site's
-stand-in for a window.
+**It opens to a share of the room it divides with the work, so the box around it needs a size.**
+A drawer is as large as its content, up to its cap, and with `share` it is that share exactly,
+held to the same cap. The cap is one share written twice in `spec/tokens.toml`, and the spec
+refuses two that differ or one at a half or more: `--noctua-shell-drawer-max`, a percentage, and
+`--noctua-shell-drawer-share-max`, the same number with no unit. The element around the drawer
+needs a size of its own on that axis: a window has, and a box as tall as its content has not.
+Every example therefore stands in `.nd-example-window`, the site's stand-in for a window.
+
+**Below a footer the room is what the footer leaves, and a flex factor is the one thing that can
+say so.** A percentage is of the whole window, and no stylesheet subtracts a sibling's height, so a
+drawer capped at a percentage stood 96 pixels tall under a work area of 48 in a window 240 tall,
+against "always shorter than the workspace area" (`NOCTUA.md §12.11`). A flex container hands out
+what its rigid parts leave, in the ratio of the factors asked for. So a drawer at the bottom asks
+for no size and for a factor, its share over what is left of a hundred, against the work's one,
+and its content is its ceiling (`max-block-size: max-content`), which `share` takes away. **That is
+a contract with the window**: a column laid out by flex, with a height of its own, in which the
+work is the one other part that grows, and grows from nothing (`flex: 1 1 0`). The work's own
+padding and border are rigid, as the footer is, so the room is the window less all of them. A work
+that starts from its content's height can leave no room to share, and the drawer is drawn as
+nothing. A drawer at a side has nothing rigid in its row, so there the cap is the percentage and a
+share is a percentage of the row.
+
+**A share is drawn by a rule for each whole percentage, with no `style` and no script.**
+`share` is `data-nd-share`, and `crates/noctua-design-styles/src/drawer-share.css` holds one rule
+for each value from 1 to 100, handing the number to the drawer's own rules as `--nd-drawer-share`.
+A stylesheet cannot read a number out of an attribute in every engine, a page served under
+`style-src 'self'` has every `style` attribute refused, and a share a script drew would change the
+drawer's height after its first frame. Both bodies write the attribute only for a whole number
+from 1 to 100, as that number, because its presence is what takes the content's ceiling away. A
+test beside `sources()` holds the file to exactly those hundred rules.
 
 **It slides by a grid track, and the hiding is the stylesheet's.** No engine moves a box between
 nothing and the size of its content, so the root is a grid of one track and `.nd-drawer-panel` is
-the one thing in it, with a floor of nothing on both axes. The rails and the content each scroll
+the one thing in it, with a floor of nothing on both axes. A drawer at its share slides by its
+flex factor, which `collapsed` takes to nothing in the same transition. The rails and the content each scroll
 what does not fit, which is what keeps them inside a drawer partway shut. `collapsed` takes the
 track to nothing and sets `visibility: hidden`, at the end of the slide on the way shut and at the
 start on the way open, so a collapsed drawer is out of the tab order and the accessibility tree

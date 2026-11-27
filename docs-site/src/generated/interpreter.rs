@@ -1411,6 +1411,7 @@ fn drawer(
     let side_ = scope
         .pick(props, "side", &DrawerSide::ALL, DrawerSide::as_str)
         .unwrap_or_default();
+    let share_ = scope.find(props, "share");
     let collapsed_ = scope.flag(props, "collapsed").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
@@ -1420,6 +1421,7 @@ fn drawer(
             id: id_,
             label: label_,
             side: side_,
+            share: share_,
             collapsed: collapsed_,
             class: class_,
             {render(children, scope)}

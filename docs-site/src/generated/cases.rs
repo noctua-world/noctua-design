@@ -674,6 +674,45 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Drawer",
+        "case-drawer-7",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+                ("share", Value::Data("035")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-8",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+                ("share", Value::Data("33.5")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-9",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+                ("share", Value::Data("101")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
         "ErrorSummary",
         "case-error-summary-0",
         &[Node::Component {

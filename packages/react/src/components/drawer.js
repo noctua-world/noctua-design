@@ -11,8 +11,13 @@
 
 import { createElement as h } from "react";
 
-export function Drawer({ name, id, label, side, collapsed, className, children, ...rest }) {
+export function Drawer({ name, id, label, side, share, collapsed, className, children, ...rest }) {
   const root = ["nd-drawer", className].filter(Boolean).join(" ");
+  // See the Dioxus half: a whole percentage from 1 to 100, written back as
+  // the number, or no attribute at all.
+  const asked = String(share ?? "").trim();
+  const whole = /^[0-9]+$/.test(asked) ? Number.parseInt(asked, 10) : 0;
+  const share_ = whole >= 1 && whole <= 100 ? String(whole) : undefined;
 
   return h(
     "div",
@@ -24,6 +29,7 @@ export function Drawer({ name, id, label, side, collapsed, className, children, 
       "data-nd-drawer": name,
       "data-nd-side": side ?? "bottom",
       "data-nd-collapsed": String(collapsed ?? false),
+      "data-nd-share": share_,
       ...rest,
     },
     // See the Dioxus half: the one thing in the track that slides.

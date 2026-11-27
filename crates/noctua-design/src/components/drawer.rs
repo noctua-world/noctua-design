@@ -51,6 +51,8 @@ pub fn Drawer(
     /// Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in.
     #[props(default)]
     side: DrawerSide,
+    /// The share of the room the drawer takes, a whole percentage from `1` to `100`, whatever is in it. It is held to `--noctua-shell-drawer-max`. Without it the drawer is as large as its content.
+    share: Option<String>,
     /// Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology.
     #[props(default = false)]
     collapsed: bool,
@@ -62,6 +64,18 @@ pub fn Drawer(
 ) -> Element {
     let root = format!("nd-drawer {class}");
     let root = root.trim().to_owned();
+    // A WHOLE PERCENTAGE FROM 1 TO 100, OR NO ATTRIBUTE AT ALL. The stylesheet
+    // has a rule for each of those and for nothing else, and takes the
+    // attribute's presence as a share given, so a value outside them is not
+    // written: the drawer is then as large as its content. Written back as
+    // the number, so `"035"` and `" 35 "` are the share `35`.
+    let share = share
+        .as_deref()
+        .map(str::trim)
+        .filter(|text| !text.is_empty() && text.bytes().all(|byte| byte.is_ascii_digit()))
+        .and_then(|text| text.parse::<u32>().ok())
+        .filter(|share| (1..=100).contains(share))
+        .map(|share| share.to_string());
 
     rsx! {
         div {
@@ -72,6 +86,7 @@ pub fn Drawer(
             "data-nd-drawer": "{name}",
             "data-nd-side": side.as_str(),
             "data-nd-collapsed": if collapsed { "true" } else { "false" },
+            "data-nd-share": share,
             div { class: "nd-drawer-panel", {children} }
         }
     }

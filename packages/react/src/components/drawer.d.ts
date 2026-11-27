@@ -17,6 +17,8 @@ export interface DrawerProps {
   label: string;
   /** Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in. */
   side?: DrawerSide;
+  /** The share of the room the drawer takes, a whole percentage from `1` to `100`, whatever is in it. It is held to `--noctua-shell-drawer-max`. Without it the drawer is as large as its content. */
+  share?: string;
   /** Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology. */
   collapsed?: boolean;
   className?: string;

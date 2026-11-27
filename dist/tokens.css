@@ -115,6 +115,7 @@
   --noctua-shell-prompt-max: 8;
   --noctua-shell-prompt-share: 30vh;
   --noctua-shell-drawer-max: 40%;
+  --noctua-shell-drawer-share-max: 40;
 
   /* The scene: what a Lineage cell is worth. */
   --noctua-scene-cell: 9rem;
