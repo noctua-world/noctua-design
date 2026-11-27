@@ -530,12 +530,22 @@ mapping of Tailwind's colour utilities onto the `--nc-*` tokens, copied byte for
 sheets are. The second is generated here, from `spec/tokens.toml` and `spec/fonts.toml`, by
 `crates/noctua-design-emit/src/tailwind.rs`: the spacing scale, the radii, the type sizes, line
 heights, weights, letter spacing and font roles, the shell's lengths, the smallest target, the
-measure and the breakpoints, each as the Tailwind v4 theme variable its utilities read. **A step of
-the scale is a name and no bare `--spacing` is declared**, so `gap-4` is the token and `gap-5`,
-which is no step, emits nothing: a multiplier would make every number a utility, which is the token
-literal of invariant 2 under another name. Tests hold every token the bridge names to the sheets
-`dist/` declares them in, and every size and type token those sheets declare to a utility, so a
-token added to the spec and not to the bridge fails the build.
+measure, the easings and the breakpoints, each as the Tailwind v4 theme variable its utilities
+read. **A step of the scale is a name and the bare `--spacing` is set to `initial`**, so `gap-4` is
+the token and `gap-5`, which is no step, emits nothing: a multiplier would make every number a
+utility, which is the token literal of invariant 2 under another name. Leaving it undeclared was
+not enough: `@import "tailwindcss"` brings Tailwind's own `theme.css` and its multiplier, and
+`gap-5` was a utility again under the import every README showed. `initial` takes out that one
+variable. Tailwind's default type sizes, radii and palette are still there under the full import,
+and `tailwindcss/utilities.css` is the import that brings none of them, which the READMEs say.
+**What Tailwind has no theme variable for is a named `@utility` after the block**: a duration, a
+layer, a border width and its sides, and the focus ring (`duration-fast`, `z-dialog`,
+`border-b-hairline`, `outline-focus`), because the bare number Tailwind offers for each is a
+literal, and a `duration-150` does not collapse under `prefers-reduced-motion` as the token does.
+Tests hold every token the bridge names to the sheets `dist/` declares them in, and **every token
+those sheets declare to a utility or to an entry in `EXCUSED`**, with its reason, so a token added
+to the spec and not to the bridge fails the build, in a group nobody listed as much as in one
+somebody did.
 
 **The component rules are hand-written and copied, never generated.**
 `crates/noctua-design-styles/src/` holds one stylesheet per family, and **`sources()` there is the

@@ -2145,9 +2145,15 @@
    page links those two and imports this file after Tailwind.
  
    A step of the spacing scale is a name here (gap-4, p-inset, min-w-0),
-   and no bare --spacing multiplier is declared: a number that is no step
-   of the scale has no utility. */
+   and the bare --spacing multiplier is taken out of the theme: a number
+   that is no step of the scale (gap-5) has no utility, whether Tailwind's
+   own theme.css was imported before this file or not. The rest of that
+   theme is untouched: import tailwindcss/utilities.css alone to have no
+   type size, radius or colour but the tokens'. */
 @theme inline {
+  /* No multiplier: `initial` removes the one Tailwind's theme.css declares. */
+  --spacing: initial;
+
   /* Spacing: the steps, then the named purposes. */
   --spacing-0: var(--noctua-space-0);
   --spacing-1: var(--noctua-space-1);
@@ -2224,10 +2230,178 @@
   --container-measure: var(--noctua-measure);
   --container-measure-lead: var(--noctua-measure-lead);
 
+  /* Easings: ease-out, ease-in-out. */
+  --ease-out: var(--noctua-easing-out);
+  --ease-in-out: var(--noctua-easing-in-out);
+  --ease-linear: var(--noctua-easing-linear);
+
   /* Breakpoints, as the lengths the spec declares: a media query cannot
      read a custom property. Minimum widths, as everywhere here. */
   --breakpoint-sm: 30rem;
   --breakpoint-md: 48rem;
   --breakpoint-lg: 64rem;
   --breakpoint-xl: 80rem;
+}
+
+/* What Tailwind has no theme variable for, as a utility of its own by the
+   token's name. A duration follows prefers-reduced-motion, as the token
+   does: duration-fast, z-dialog, border-hairline, border-b-hairline,
+   outline-focus, outline-offset-focus. */
+@utility duration-instant {
+  --tw-duration: var(--noctua-duration-instant);
+  transition-duration: var(--noctua-duration-instant);
+}
+@utility duration-fast {
+  --tw-duration: var(--noctua-duration-fast);
+  transition-duration: var(--noctua-duration-fast);
+}
+@utility duration-base {
+  --tw-duration: var(--noctua-duration-base);
+  transition-duration: var(--noctua-duration-base);
+}
+@utility duration-slow {
+  --tw-duration: var(--noctua-duration-slow);
+  transition-duration: var(--noctua-duration-slow);
+}
+@utility duration-blink {
+  --tw-duration: var(--noctua-duration-blink);
+  transition-duration: var(--noctua-duration-blink);
+}
+@utility z-base {
+  z-index: var(--noctua-layer-base);
+}
+@utility z-raised {
+  z-index: var(--noctua-layer-raised);
+}
+@utility z-sticky {
+  z-index: var(--noctua-layer-sticky);
+}
+@utility z-overlay {
+  z-index: var(--noctua-layer-overlay);
+}
+@utility z-dialog {
+  z-index: var(--noctua-layer-dialog);
+}
+@utility z-popover {
+  z-index: var(--noctua-layer-popover);
+}
+@utility z-toast {
+  z-index: var(--noctua-layer-toast);
+}
+@utility z-tooltip {
+  z-index: var(--noctua-layer-tooltip);
+}
+@utility border-hairline {
+  border-style: var(--tw-border-style, solid);
+  border-width: var(--noctua-border-hairline);
+}
+@utility border-x-hairline {
+  border-inline-style: var(--tw-border-style, solid);
+  border-inline-width: var(--noctua-border-hairline);
+}
+@utility border-y-hairline {
+  border-block-style: var(--tw-border-style, solid);
+  border-block-width: var(--noctua-border-hairline);
+}
+@utility border-s-hairline {
+  border-inline-start-style: var(--tw-border-style, solid);
+  border-inline-start-width: var(--noctua-border-hairline);
+}
+@utility border-e-hairline {
+  border-inline-end-style: var(--tw-border-style, solid);
+  border-inline-end-width: var(--noctua-border-hairline);
+}
+@utility border-t-hairline {
+  border-top-style: var(--tw-border-style, solid);
+  border-top-width: var(--noctua-border-hairline);
+}
+@utility border-r-hairline {
+  border-right-style: var(--tw-border-style, solid);
+  border-right-width: var(--noctua-border-hairline);
+}
+@utility border-b-hairline {
+  border-bottom-style: var(--tw-border-style, solid);
+  border-bottom-width: var(--noctua-border-hairline);
+}
+@utility border-l-hairline {
+  border-left-style: var(--tw-border-style, solid);
+  border-left-width: var(--noctua-border-hairline);
+}
+@utility border-strong {
+  border-style: var(--tw-border-style, solid);
+  border-width: var(--noctua-border-strong);
+}
+@utility border-x-strong {
+  border-inline-style: var(--tw-border-style, solid);
+  border-inline-width: var(--noctua-border-strong);
+}
+@utility border-y-strong {
+  border-block-style: var(--tw-border-style, solid);
+  border-block-width: var(--noctua-border-strong);
+}
+@utility border-s-strong {
+  border-inline-start-style: var(--tw-border-style, solid);
+  border-inline-start-width: var(--noctua-border-strong);
+}
+@utility border-e-strong {
+  border-inline-end-style: var(--tw-border-style, solid);
+  border-inline-end-width: var(--noctua-border-strong);
+}
+@utility border-t-strong {
+  border-top-style: var(--tw-border-style, solid);
+  border-top-width: var(--noctua-border-strong);
+}
+@utility border-r-strong {
+  border-right-style: var(--tw-border-style, solid);
+  border-right-width: var(--noctua-border-strong);
+}
+@utility border-b-strong {
+  border-bottom-style: var(--tw-border-style, solid);
+  border-bottom-width: var(--noctua-border-strong);
+}
+@utility border-l-strong {
+  border-left-style: var(--tw-border-style, solid);
+  border-left-width: var(--noctua-border-strong);
+}
+@utility border-rule {
+  border-style: var(--tw-border-style, solid);
+  border-width: var(--noctua-border-rule);
+}
+@utility border-x-rule {
+  border-inline-style: var(--tw-border-style, solid);
+  border-inline-width: var(--noctua-border-rule);
+}
+@utility border-y-rule {
+  border-block-style: var(--tw-border-style, solid);
+  border-block-width: var(--noctua-border-rule);
+}
+@utility border-s-rule {
+  border-inline-start-style: var(--tw-border-style, solid);
+  border-inline-start-width: var(--noctua-border-rule);
+}
+@utility border-e-rule {
+  border-inline-end-style: var(--tw-border-style, solid);
+  border-inline-end-width: var(--noctua-border-rule);
+}
+@utility border-t-rule {
+  border-top-style: var(--tw-border-style, solid);
+  border-top-width: var(--noctua-border-rule);
+}
+@utility border-r-rule {
+  border-right-style: var(--tw-border-style, solid);
+  border-right-width: var(--noctua-border-rule);
+}
+@utility border-b-rule {
+  border-bottom-style: var(--tw-border-style, solid);
+  border-bottom-width: var(--noctua-border-rule);
+}
+@utility border-l-rule {
+  border-left-style: var(--tw-border-style, solid);
+  border-left-width: var(--noctua-border-rule);
+}
+@utility outline-focus {
+  outline-width: var(--noctua-focus-width);
+}
+@utility outline-offset-focus {
+  outline-offset: var(--noctua-focus-offset);
 }

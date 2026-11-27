@@ -174,8 +174,8 @@ Nothing here needs Tailwind, and an application built on this system may use it.
 `dist/tailwind/bridge.css` maps Tailwind v4's utilities onto the tokens: every
 colour utility onto its `--nc-*` token, and the spacing scale, the radii, the type
 sizes, line heights, weights, letter spacing and font roles, the shell's lengths,
-the smallest target, the measure and the breakpoints onto their `--noctua-*`
-tokens. It declares no colour and no length of its own. Link the sheets from
+the smallest target, the measure, the easings and the breakpoints onto their
+`--noctua-*` tokens. It declares no colour and no length of its own. Link the sheets from
 `base.html` as above, then import the bridge after Tailwind in the entry
 stylesheet:
 
@@ -187,9 +187,24 @@ stylesheet:
 `bg-surface`, `text-fg` and `border-border` then follow the palette, the mode and
 a theme scope exactly as the components do, and `gap-4`, `p-inset`, `min-w-0`,
 `h-shell-line`, `rounded-control`, `text-body`, `leading-body`, `font-semibold`
-and `font-ui` are the design tokens by name. A step of the spacing scale is a
-name and no bare multiplier is declared, so a number between two steps (`gap-5`)
-is no utility unless Tailwind's own `theme.css` is imported as well.
+and `font-ui` are the design tokens by name.
+
+**A step of the spacing scale is a name, and a number between two steps is no
+utility.** The bridge declares `--spacing-4` and sets the bare `--spacing` to
+`initial`, so `gap-4` is `var(--noctua-space-4)` and `gap-5` emits nothing,
+under either import. That takes out Tailwind's multiplier and nothing else:
+`@import "tailwindcss"` still brings Tailwind's own type sizes, radii and
+palette (`text-sm`, `rounded-md`). Import `tailwindcss/utilities.css` in its
+place where the tokens are meant to be the whole vocabulary.
+
+**A duration, a layer and a border width are utilities by the token's name.**
+Tailwind has no theme variable for them, and its own are bare numbers
+(`duration-150`, `z-10`, `border-2`), which no token stands behind. The bridge
+adds `duration-fast`, `z-dialog`, `border-hairline` with its sides
+(`border-b-hairline`), `outline-focus` and `outline-offset-focus`, and maps
+`ease-out`, `ease-in-out` and `ease-linear`. A `duration-fast` follows
+`prefers-reduced-motion`, as the token does. The breakpoints are written as
+lengths, and the scene tokens have no utility.
 
 ### The typefaces are packages of their own
 
