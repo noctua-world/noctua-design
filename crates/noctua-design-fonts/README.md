@@ -9,8 +9,8 @@ Ethiopic, Georgian, Armenian and Mongolian. About 3 MB, most of it the symbols.
 
 ```toml
 [build-dependencies]
-noctua-design-dist = "0.3.0"
-noctua-design-fonts = "0.3.0"
+noctua-design-dist = "0.3.1"
+noctua-design-fonts = "0.3.1"
 ```
 
 ```rust

@@ -8,8 +8,8 @@ syllable block. About 1.2 MB. A browser fetches only the slices a page draws fro
 
 ```toml
 [build-dependencies]
-noctua-design-dist = "0.3.0"
-noctua-design-fonts-kr = "0.3.0"
+noctua-design-dist = "0.3.1"
+noctua-design-fonts-kr = "0.3.1"
 ```
 
 ```rust

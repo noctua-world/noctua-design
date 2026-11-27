@@ -8,8 +8,8 @@ Extension A. About 8.7 MB. A browser fetches only the slices a page draws from.
 
 ```toml
 [build-dependencies]
-noctua-design-dist = "0.3.0"
-noctua-design-fonts-sc = "0.3.0"
+noctua-design-dist = "0.3.1"
+noctua-design-fonts-sc = "0.3.1"
 ```
 
 ```rust

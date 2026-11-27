@@ -1,6 +1,6 @@
 {
   "name": "@noctua-world/design-fonts",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The typefaces the Noctua design system's stylesheet asks for, with their licences: the files a page serves beside dist/.",
   "license": "OFL-1.1 AND MIT AND Apache-2.0 AND CC-BY-4.0 AND Unlicense",
   "repository": {

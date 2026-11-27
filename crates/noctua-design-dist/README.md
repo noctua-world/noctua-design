@@ -6,7 +6,7 @@ they read — embedded, with one call that writes them out.
 
 ```toml
 [build-dependencies]
-noctua-design-dist = "0.3.0"
+noctua-design-dist = "0.3.1"
 ```
 
 ```rust

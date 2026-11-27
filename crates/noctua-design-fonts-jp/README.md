@@ -8,8 +8,8 @@ unified ideographs. About 3.7 MB. A browser fetches only the slices a page draws
 
 ```toml
 [build-dependencies]
-noctua-design-dist = "0.3.0"
-noctua-design-fonts-jp = "0.3.0"
+noctua-design-dist = "0.3.1"
+noctua-design-fonts-jp = "0.3.1"
 ```
 
 ```rust
