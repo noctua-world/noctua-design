@@ -16492,7 +16492,7 @@ impl Locale {
                     "The box is a `type=\"text\"` input, because `type=\"number\"` drops what it cannot parse. Press Save to see what it posts."
                 }
                 Key::ExampleNumberInputNoteBounds => {
-                    "A value out of range is refused with your sentence and stays exactly as typed. `maxlength` stops a third digit from being typed."
+                    "A value outside the range is refused with the sentence you wrote, and the number stays exactly as it was typed."
                 }
                 Key::ExampleNumberInputNoteMoney => {
                     "`group` draws the separators of the page's language. They go while you type, and the form posts the plain number."
@@ -24219,7 +24219,7 @@ impl Locale {
                     "A caixa é um input `type=\"text\"`, porque `type=\"number\"` descarta o que não consegue ler. Aperte Salvar para ver o que ela envia."
                 }
                 Key::ExampleNumberInputNoteBounds => {
-                    "Um valor fora da faixa é recusado com a sua frase e fica como foi digitado. `maxlength` impede que se digite um terceiro dígito."
+                    "Um valor fora da faixa é recusado com a frase que você escreveu, e o número fica exatamente como foi digitado."
                 }
                 Key::ExampleNumberInputNoteMoney => {
                     "`group` desenha os separadores do idioma da página. Eles somem enquanto você digita, e o formulário envia o número puro."
@@ -32058,7 +32058,7 @@ impl Locale {
                     "⟦Thee boox iis aa `typee=\"teext\"` iinpuut, beecaauusee `typee=\"nuumbeer\"` droops whaat iit caannoot paarsee. Preess Saavee too seeee whaat iit poosts.⟧"
                 }
                 Key::ExampleNumberInputNoteBounds => {
-                    "⟦AA vaaluuee oouut oof raangee iis reefuuseed wiith yoouur seenteencee aand staays eexaactly aas typeed. `maaxleength` stoops aa thiird diigiit froom beeiing typeed.⟧"
+                    "⟦AA vaaluuee oouutsiidee thee raangee iis reefuuseed wiith thee seenteencee yoouu wrootee, aand thee nuumbeer staays eexaactly aas iit waas typeed.⟧"
                 }
                 Key::ExampleNumberInputNoteMoney => {
                     "⟦`groouup` draaws thee seepaaraatoors oof thee paagee's laanguuaagee. Theey goo whiilee yoouu typee, aand thee foorm poosts thee plaaiin nuumbeer.⟧"

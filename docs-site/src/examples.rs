@@ -2919,7 +2919,7 @@ const NUMBER_INPUT: &[Example] = &[
     // sentence under the question is the caller's own. The number stays as it
     // was typed, so a reader can see what was wrong with it.
     example!(
-        r"NumberInput { name, label, value, min, max, maxlength, min_label, max_label, invalid_label, increment_label, decrement_label }",
+        r"NumberInput { name, label, value, min, max, min_label, max_label, invalid_label, increment_label, decrement_label }",
         Key::ExampleNumberInputNoteBounds
     ),
     // MONEY, AND WHAT `group` PROMISES. The separators are the page's own and
@@ -2940,7 +2940,7 @@ const NUMBER_INPUT: &[Example] = &[
     // off. The arrow keys and Page Up still move it, and `big_step` is what
     // makes crossing this range from the keyboard possible at all.
     example!(
-        r"NumberInput { name, label, value, step, big_step, steppers, group }",
+        r"NumberInput { name, label, value, step, big_step, steppers, group, maxlength }",
         Key::ExampleNumberInputNoteLarge
     ),
     // REFUSED, LOCKED AND UNAVAILABLE — three states, each on a question the

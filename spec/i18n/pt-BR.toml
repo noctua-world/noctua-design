@@ -2467,7 +2467,7 @@ dir = "ltr"
 # três campos chamados "Quantidade" na mesma página são três perguntas que a
 # pessoa não consegue distinguir.
 "example.number-input.note-form" = """A caixa é um input `type="text"`, porque `type="number"` descarta o que não consegue ler. Aperte Salvar para ver o que ela envia."""
-"example.number-input.note-bounds" = """Um valor fora da faixa é recusado com a sua frase e fica como foi digitado. `maxlength` impede que se digite um terceiro dígito."""
+"example.number-input.note-bounds" = """Um valor fora da faixa é recusado com a frase que você escreveu, e o número fica exatamente como foi digitado."""
 "example.number-input.note-money" = """`group` desenha os separadores do idioma da página. Eles somem enquanto você digita, e o formulário envia o número puro."""
 "example.number-input.note-unit" = """`suffix` desenha a unidade dentro da caixa. O leitor de tela a ouve junto com o valor, e ela nunca faz parte do que é enviado."""
 "example.number-input.note-large" = """Desligue os botões de passo onde os números são grandes demais para se chegar de passo em passo. As setas e o Page Up ainda movem o valor."""
