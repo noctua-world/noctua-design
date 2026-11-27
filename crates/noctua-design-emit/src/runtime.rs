@@ -53,7 +53,12 @@ use crate::{CommentStyle, EmittedFile, header_from};
 
 /// Emits every shipped-runtime artifact.
 #[must_use]
-pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
+pub fn emit(vendor: &Vendor, theme: &noctua_design_spec::Theme) -> Vec<EmittedFile> {
+    let backdrops = theme
+        .setting
+        .get("backdrop")
+        .map(|setting| setting.resolved_values(vendor))
+        .unwrap_or_default();
     let mut files = vec![
         EmittedFile::new("dist/anchor.js", copied(ANCHOR_SOURCE)),
         EmittedFile::new("dist/color.js", copied(COLOR_SOURCE)),
@@ -93,7 +98,10 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
     ];
     files.extend(vendor.themes.iter().filter_map(|theme| {
         vendor.ramps.get(theme).map(|ramps| {
-            EmittedFile::new(format!("dist/palettes/{theme}.json"), palette(theme, ramps))
+            EmittedFile::new(
+                format!("dist/palettes/{theme}.json"),
+                palette(theme, ramps, vendor, &backdrops),
+            )
         })
     }));
     files
@@ -120,7 +128,20 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
 /// a family list: a list of families written down in this repository would be a
 /// second copy of a fact that lives upstream, and it would go stale the first
 /// time `noctua-colors` added one.
-fn palette(theme: &str, ramps: &noctua_design_spec::vendor::Ramps) -> String {
+///
+/// # `page`: what a page of this palette is painted with
+///
+/// A host that paints its window before its page has a first frame has no
+/// stylesheet to ask, and a light page is a literal in `dist/theme.css` that
+/// no step above holds. `page.light` and `page.dark` name every backdrop and
+/// give its colour as `#rrggbb`, from `appearance::page_colour`, the function
+/// the page's own rules are written beside.
+fn palette(
+    theme: &str,
+    ramps: &noctua_design_spec::vendor::Ramps,
+    vendor: &Vendor,
+    backdrops: &[String],
+) -> String {
     // JSON has no comments, so provenance is a key — the shape
     // `dist/lineage.cases.json` already uses.
     let mut out = String::from("{\n");
@@ -134,7 +155,20 @@ fn palette(theme: &str, ramps: &noctua_design_spec::vendor::Ramps) -> String {
     steps(&mut out, "light", &ramps.light);
     out.push_str(",\n");
     steps(&mut out, "dark", &ramps.dark);
-    out.push_str("\n}\n");
+    // Last, so a reader that looks for the first `"light"` finds the steps.
+    out.push_str(",\n  \"page\": {\n");
+    for (mode, dark) in [("light", false), ("dark", true)] {
+        let _ = write!(out, "    \"{mode}\": {{");
+        for (index, backdrop) in backdrops.iter().enumerate() {
+            let hex = crate::appearance::page_colour(vendor, theme, dark, backdrop)
+                .unwrap_or_else(|error| panic!("{error}"));
+            let comma = if index > 0 { "," } else { "" };
+            let _ = write!(out, "{comma} \"{backdrop}\": \"{hex}\"");
+        }
+        out.push_str(if dark { " }\n" } else { " },\n" });
+    }
+    out.push_str("  }\n}\n");
+
     out
 }
 

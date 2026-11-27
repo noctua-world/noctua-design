@@ -748,6 +748,16 @@ surface transparent is a light island on a dark page. `dist/theme.css` paints
 colour and nothing else. The backdrop is `--noctua-backdrop`, declared on the same selector list;
 it moves one variable, so no measured contrast pair moves with it.
 
+**The page's colour is also data, for a host with no stylesheet to ask.** A native window is
+painted before its page has a first frame, and the light page is paper, a literal no palette step
+holds. `Palette::page(mode, backdrop)` in the theme crate answers in sRGB bytes, and every
+`dist/palettes/<name>.json` carries the same table as `page.light` and `page.dark`, a hex for each
+backdrop. Both are written by `appearance::page_colour`, from the constants and the table the
+backdrop's own rules are written from, so a rule and its datum cannot differ;
+`tests/browser/page-colour.spec.js` holds the table to the pixels a page paints, and
+`examples/consumer-rust` holds the crate to the file. A backdrop added to `spec/theme.toml` with no
+rule in that table fails the build.
+
 **Every theme attribute goes on ONE element.** A theme file's forced-mode rule is compound on one
 element (`[data-palette="blue-vivid"][data-theme="dark"]`); split the palette onto a wrapper and the
 mode onto a child and it matches nothing, so `scope_attributes` always emits the palette when it

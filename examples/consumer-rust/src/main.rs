@@ -140,6 +140,43 @@ fn main() {
         );
     }
 
+    // The page's colour is data, for a host that paints its window before its
+    // page has a first frame: the crate's table and the palette's file in the
+    // package say one thing, and a light page is white. It was a literal in
+    // `theme.css` and nowhere a native host could read it.
+    {
+        use noctua_design::model::{Backdrop, Mode, Palette};
+        assert_eq!(
+            Palette::DEFAULT.page(Mode::Light, Backdrop::Plain),
+            Some([255, 255, 255]),
+            "a light page is paper"
+        );
+        assert_eq!(Palette::DEFAULT.page(Mode::System, Backdrop::Plain), None);
+        for palette in Palette::ALL {
+            let name = format!("palettes/{}.json", palette.as_str());
+            let (_, file) = noctua_design_dist::FILES
+                .iter()
+                .find(|(file, _)| *file == name)
+                .unwrap_or_else(|| panic!("{name} — the palette's values"));
+            for (mode, key) in [(Mode::Light, "\"light\": {"), (Mode::Dark, "\"dark\": {")] {
+                let row = file
+                    .split("\"page\": {")
+                    .nth(1)
+                    .and_then(|page| page.split(key).nth(1))
+                    .and_then(|row| row.split('}').next())
+                    .unwrap_or_else(|| panic!("{name} names no page colour"));
+                for backdrop in Backdrop::ALL {
+                    let [r, g, b] = palette.page(mode, backdrop).expect("an appearance");
+                    let pair = format!("\"{}\": \"#{r:02x}{g:02x}{b:02x}\"", backdrop.as_str());
+                    assert!(
+                        row.contains(&pair),
+                        "{name} and the crate disagree on {pair}: {row}"
+                    );
+                }
+            }
+        }
+    }
+
     // Every ROOT class this markup carries has to be painted by the sheet.
     //
     // Root classes rather than every class, because some are deliberately

@@ -110,6 +110,91 @@ fn rust_model(theme: &Theme, vendor: &Vendor) -> String {
     out
 }
 
+/// The colour each palette's page is painted with, as data.
+///
+/// A table indexed by the three enums in the order their values are declared,
+/// which is the order `rust_enum` writes the variants in: an enum with no
+/// explicit discriminant counts from zero in that order. The colours are
+/// `appearance::page_colour`'s, the function the page's own rules are written
+/// beside.
+///
+/// # Panics
+///
+/// When the theme model has no `palette`, `backdrop` or `mode` setting, or a
+/// backdrop no rule paints: a spec this emitter was not written for.
+fn rust_page(out: &mut String, theme: &Theme, vendor: &Vendor) {
+    let values = |name: &str| {
+        theme
+            .setting
+            .get(name)
+            .unwrap_or_else(|| panic!("the theme model has no `{name}` setting"))
+            .resolved_values(vendor)
+    };
+    let (palettes, backdrops, modes) = (values("palette"), values("backdrop"), values("mode"));
+
+    writeln!(
+        out,
+        "\n/// What each palette's page is painted with: `[palette][backdrop][light, dark]`,\n\
+         /// sRGB bytes. Read through [`Palette::page`].\n\
+         const PAGE: [[[[u8; 3]; 2]; {}]; {}] = [",
+        backdrops.len(),
+        palettes.len()
+    )
+    .expect("write");
+    for palette in &palettes {
+        writeln!(out, "    // {palette}").expect("write");
+        writeln!(out, "    [").expect("write");
+        for backdrop in &backdrops {
+            let cell = |dark: bool| {
+                let hex = crate::appearance::page_colour(vendor, palette, dark, backdrop)
+                    .unwrap_or_else(|error| panic!("{error}"));
+                let byte = |at: usize| {
+                    u8::from_str_radix(&hex[at..at + 2], 16).expect("page_colour returns hex")
+                };
+                format!("[{}, {}, {}]", byte(1), byte(3), byte(5))
+            };
+            writeln!(out, "        [{}, {}],", cell(false), cell(true)).expect("write");
+        }
+        writeln!(out, "    ],").expect("write");
+    }
+    writeln!(out, "];\n").expect("write");
+
+    writeln!(
+        out,
+        "impl Palette {{\n\
+         \x20   /// The colour a page of this palette is painted with, as sRGB bytes.\n\
+         \x20   ///\n\
+         \x20   /// For a host that paints its window before its page has a first\n\
+         \x20   /// frame: the value `dist/theme.css` gives `--noctua-backdrop` on the\n\
+         \x20   /// page, for each mode and backdrop. A light page is white whatever the\n\
+         \x20   /// palette, and `black` has no light meaning.\n\
+         \x20   ///\n\
+         \x20   /// `None` for a mode that is not one appearance: the system preference\n\
+         \x20   /// is the host's to read, and the question is asked again with what it\n\
+         \x20   /// resolved to.\n\
+         \x20   #[must_use]\n\
+         \x20   pub const fn page(self, mode: Mode, backdrop: Backdrop) -> Option<[u8; 3]> {{\n\
+         \x20       let appearance = match mode {{"
+    )
+    .expect("write");
+    for mode in &modes {
+        let arm = match mode.as_str() {
+            "light" => "0",
+            "dark" => "1",
+            _ => "return None",
+        };
+        writeln!(out, "            Mode::{} => {arm},", pascal(mode)).expect("write");
+    }
+    writeln!(
+        out,
+        "        }};\n\
+         \x20       Some(PAGE[self as usize][backdrop as usize][appearance])\n\
+         \x20   }}\n\
+         }}\n"
+    )
+    .expect("write");
+}
+
 /// One setting's enum, with its values, default, key and parser.
 fn rust_enum(
     out: &mut String,
@@ -304,6 +389,7 @@ fn rust_constants(out: &mut String, theme: &Theme, vendor: &Vendor) {
     }
     writeln!(out, "    }}\n}}").expect("write");
 
+    rust_page(out, theme, vendor);
     rust_scope(out, theme);
 }
 

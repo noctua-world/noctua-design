@@ -200,7 +200,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     // `crate::` because `runtime` is also the local holding `Lineage`'s own
     // runtime three lines up, and a reader should not have to know which
     // namespace wins to read this line.
-    files.extend(crate::runtime::emit(vendor));
+    files.extend(crate::runtime::emit(vendor, theme));
     files.push(fonts::preload_fragment(font_layer));
     files.extend(rust::emit(spec));
     files.extend(scope::emit(vendor));
