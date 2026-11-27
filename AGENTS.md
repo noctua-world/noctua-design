@@ -542,6 +542,9 @@ and `tailwindcss/utilities.css` is the import that brings none of them, which th
 layer, a border width and its sides, and the focus ring (`duration-fast`, `z-dialog`,
 `border-b-hairline`, `outline-focus`), because the bare number Tailwind offers for each is a
 literal, and a `duration-150` does not collapse under `prefers-reduced-motion` as the token does.
+**A utility that sets a line's width sets its style beside it**
+(`var(--tw-border-style, solid)`, `var(--tw-outline-style, solid)`), as Tailwind's own do: a width
+alone computed `outline-style: none`, and `outline-focus` drew no ring.
 Tests hold every token the bridge names to the sheets `dist/` declares them in, and **every token
 those sheets declare to a utility or to an entry in `EXCUSED`**, with its reason, so a token added
 to the spec and not to the bridge fails the build, in a group nobody listed as much as in one

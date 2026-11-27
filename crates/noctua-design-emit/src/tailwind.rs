@@ -114,11 +114,17 @@ const BORDER_SIDES: &[(&str, &[&str])] = &[
     ("-l", &["border-left"]),
 ];
 
-/// The utility a focus token is, and the property it sets. A focus token this
-/// table does not name has no utility, and the test that asks for one fails.
-const FOCUS: &[(&str, &str, &str)] = &[
-    ("width", "outline-focus", "outline-width"),
-    ("offset", "outline-offset-focus", "outline-offset"),
+/// The utility a focus token is, the property it sets, and whether it is the
+/// one that draws the ring. A focus token this table does not name has no
+/// utility, and the test that asks for one fails.
+///
+/// **The width draws the ring, so it carries the style.** An outline has no
+/// style until one is declared, and a width alone computed `outline-style:
+/// none` and drew nothing (measured on 4.3.5). Tailwind's own `outline-2`
+/// declares the style beside the width for the same reason.
+const FOCUS: &[(&str, &str, &str, bool)] = &[
+    ("width", "outline-focus", "outline-width", true),
+    ("offset", "outline-offset-focus", "outline-offset", false),
 ];
 
 /// The named utilities for what Tailwind has no theme variable for.
@@ -162,12 +168,15 @@ fn utilities(spec: &Spec, out: &mut String) {
             out.push_str("}\n");
         }
     }
-    for (name, utility, property) in FOCUS {
+    for (name, utility, property, draws) in FOCUS {
         if spec.focus.contains_key(*name) {
-            let _ = writeln!(
-                out,
-                "@utility {utility} {{\n\x20 {property}: var(--{prefix}-focus-{name});\n}}"
-            );
+            let _ = writeln!(out, "@utility {utility} {{");
+            if *draws {
+                // The style Tailwind's own outline utilities keep, and a line
+                // where none of them has declared it.
+                out.push_str("  outline-style: var(--tw-outline-style, solid);\n");
+            }
+            let _ = writeln!(out, "  {property}: var(--{prefix}-focus-{name});\n}}");
         }
     }
 }
@@ -536,7 +545,8 @@ mod tests {
              border-bottom-width: var(--noctua-border-strong);\n}\n",
             "@utility border-s-rule {\n  border-inline-start-style: var(--tw-border-style, solid);\n  \
              border-inline-start-width: var(--noctua-border-rule);\n}\n",
-            "@utility outline-focus {\n  outline-width: var(--noctua-focus-width);\n}\n",
+            "@utility outline-focus {\n  outline-style: var(--tw-outline-style, solid);\n  \
+             outline-width: var(--noctua-focus-width);\n}\n",
             "@utility outline-offset-focus {\n  outline-offset: var(--noctua-focus-offset);\n}\n",
         ] {
             assert!(after.contains(rule), "the bridge lacks:\n{rule}");
@@ -544,7 +554,9 @@ mod tests {
         // And no length, count or time of its own: every declaration is a token.
         for line in after.lines().filter(|line| line.ends_with(';')) {
             assert!(
-                line.contains("var(--noctua-") || line.contains("var(--tw-border-style, solid)"),
+                line.contains("var(--noctua-")
+                    || line.contains("var(--tw-border-style, solid)")
+                    || line.contains("var(--tw-outline-style, solid)"),
                 "`{}` is no token",
                 line.trim()
             );

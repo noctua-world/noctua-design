@@ -2400,6 +2400,7 @@
   border-left-width: var(--noctua-border-rule);
 }
 @utility outline-focus {
+  outline-style: var(--tw-outline-style, solid);
   outline-width: var(--noctua-focus-width);
 }
 @utility outline-offset-focus {

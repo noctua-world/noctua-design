@@ -100,8 +100,10 @@ Tailwind has no theme variable for them, and its own are bare numbers
 (`duration-150`, `z-10`, `border-2`), which no token stands behind. The bridge
 adds `duration-fast`, `z-dialog`, `border-hairline` with its sides
 (`border-b-hairline`), `outline-focus` and `outline-offset-focus`, and maps
-`ease-out`, `ease-in-out` and `ease-linear`. A `duration-fast` follows
-`prefers-reduced-motion`, as the token does. The breakpoints are written as
+`ease-out`, `ease-in-out` and `ease-linear`. A `border-hairline` and an
+`outline-focus` each draw their line with no other class: the style comes with
+the width. A `duration-fast` follows `prefers-reduced-motion`, as the token
+does. The breakpoints are written as
 lengths, and the scene tokens have no utility.
 
 ## The components themselves
