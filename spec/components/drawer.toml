@@ -32,13 +32,15 @@ summary = "Open a panel along one edge of a window, beside the work and never ov
 # 0`). The drawer takes its share as a flex factor against the work's, which is
 # how it is a share of what the footer leaves and not of the whole window.
 #
-# AND WHAT ANY OTHER WINDOW GETS. A box with a height of its own that is no
-# flex column reads no factor, so there the drawer is its share of the whole
-# box, under the same ceiling of its content. A flex column whose work starts
+# AND WHAT ANY OTHER WINDOW GETS. A block box with a height of its own reads no
+# factor, so there the drawer is its share of the whole box, under the same
+# ceiling of its content. A grid gives it that share of its own row and never
+# of the window, since a percentage in a grid item is of the item's row: a
+# grid is no window for a drawer at the bottom, and the reader is told so. A flex column whose work starts
 # from its content (`flex: 1 1 auto`) can leave nothing to hand out, and there
 # an open drawer stands at its floor, `--noctua-target-min`: it was once drawn
 # at no height with the focus inside it. `crates/noctua-design-styles/src/drawer.css`
-# holds both, and `tests/browser/drawer.spec.js` asks for each.
+# holds all three, and `tests/browser/drawer.spec.js` asks for each.
 #
 # WHAT IS IN IT. Up to two `DrawerRail`s and one element of content, in the
 # order the keyboard should reach them. The content is the caller's own
@@ -89,7 +91,7 @@ attribute = "data-nd-side"
 # A drawer opens to a share of the WINDOW around it. A picture of one alone has
 # no window, so no share is taken and the three values draw one box.
 variants = false
-doc = "The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves. That needs a flex column whose work has `flex: 1 1 0`. Any other box gives it that share of the whole box."
+doc = "The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. A block box gives that share of the box, and a grid of its row."
 
 # THE SHARE THE CALLER KEEPS FOR IT. An interface that lets a reader resize its
 # drawer holds a share in its state and draws the drawer at it, whatever is in
@@ -102,7 +104,7 @@ doc = "The edge it opens from: `bottom`, `start` or `end`. At the bottom it grow
 [prop.share]
 type = "text"
 attribute = "data-nd-share"
-doc = "A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In any other box it is of the whole box. Without it the drawer is as large as its content."
+doc = "A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In a block box it is of the box, and in a grid of its row. Without it, the content sizes it."
 
 [prop.collapsed]
 type = "bool"

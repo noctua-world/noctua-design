@@ -15600,7 +15600,7 @@ impl Locale {
                     "Past its share of the room, the content scrolls. The rail stays where it is."
                 }
                 Key::ExampleDrawerShare => {
-                    "`share` keeps a share of the room the footer leaves, whatever is in the drawer. In a box that is no flex column it is of the whole box."
+                    "`share` keeps a share of the room the footer leaves, whatever is in the drawer. In a block box it is of the whole box."
                 }
                 Key::ExampleDrawerRailControls => {
                     "A rail is as wide as a footer's corner and as tall as the drawer. It holds a `Toolbar` drawn as a rail."
@@ -18698,10 +18698,10 @@ impl Locale {
                     "The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required."
                 }
                 Key::ComponentDrawerPropSideDoc => {
-                    "The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves. That needs a flex column whose work has `flex: 1 1 0`. Any other box gives it that share of the whole box."
+                    "The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. A block box gives that share of the box, and a grid of its row."
                 }
                 Key::ComponentDrawerPropShareDoc => {
-                    "A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In any other box it is of the whole box. Without it the drawer is as large as its content."
+                    "A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In a block box it is of the box, and in a grid of its row. Without it, the content sizes it."
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology."
@@ -23321,7 +23321,7 @@ impl Locale {
                     "Além da sua fração do espaço o conteúdo rola. O trilho fica onde está."
                 }
                 Key::ExampleDrawerShare => {
-                    "`share` reserva uma fração do espaço que o rodapé deixa, seja qual for o conteúdo. Numa caixa que não é coluna flex, é da caixa inteira."
+                    "`share` reserva uma fração do espaço que o rodapé deixa, seja qual for o conteúdo. Numa caixa em bloco é da caixa inteira."
                 }
                 Key::ExampleDrawerRailControls => {
                     "Um trilho tem a largura de um canto do rodapé e a altura da gaveta. Ele guarda uma `Toolbar` desenhada como trilho."
@@ -26445,10 +26445,10 @@ impl Locale {
                     "O nome da gaveta, no idioma da pessoa. Vira `aria-label` no `region`. Obrigatório."
                 }
                 Key::ComponentDrawerPropSideDoc => {
-                    "A borda de onde ela abre: `bottom`, `start` ou `end`. Embaixo ela cresce até `--noctua-shell-drawer-max` do espaço que o rodapé deixa. Isso pede uma coluna flex cujo trabalho tem `flex: 1 1 0`. Qualquer outra caixa dá essa fração da caixa inteira."
+                    "A borda de onde ela abre: `bottom`, `start` ou `end`. Embaixo ela cresce até `--noctua-shell-drawer-max` do espaço que o rodapé deixa, numa coluna flex cujo trabalho tem `flex: 1 1 0`. Numa caixa em bloco é da caixa, e numa grade da sua linha."
                 }
                 Key::ComponentDrawerPropShareDoc => {
-                    "Uma porcentagem inteira de `1` a `100`, limitada a `--noctua-shell-drawer-max`. É do espaço que o rodapé deixa, numa coluna flex cujo trabalho tem `flex: 1 1 0`. Em outra caixa é da caixa inteira. Sem ela a gaveta tem o tamanho do conteúdo."
+                    "Uma porcentagem inteira de `1` a `100`, limitada a `--noctua-shell-drawer-max`. É do espaço que o rodapé deixa, numa coluna flex cujo trabalho tem `flex: 1 1 0`. Numa caixa em bloco é da caixa, e numa grade da sua linha. Sem ela, vale o conteúdo."
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "Se a gaveta está fechada. Uma gaveta recolhida mantém o que está nela e não mostra nada. Fica fora da ordem de tabulação e escondida da tecnologia assistiva."
@@ -31114,7 +31114,7 @@ impl Locale {
                     "⟦Paast iits shaaree oof thee roooom, thee coonteent scroolls. Thee raaiil staays wheeree iit iis.⟧"
                 }
                 Key::ExampleDrawerShare => {
-                    "⟦`shaaree` keeeeps aa shaaree oof thee roooom thee fooooteer leeaavees, whaateeveer iis iin thee draaweer. IIn aa boox thaat iis noo fleex cooluumn iit iis oof thee whoolee boox.⟧"
+                    "⟦`shaaree` keeeeps aa shaaree oof thee roooom thee fooooteer leeaavees, whaateeveer iis iin thee draaweer. IIn aa bloock boox iit iis oof thee whoolee boox.⟧"
                 }
                 Key::ExampleDrawerRailControls => {
                     "⟦AA raaiil iis aas wiidee aas aa fooooteer's coorneer aand aas taall aas thee draaweer. IIt hoolds aa `Toooolbaar` draawn aas aa raaiil.⟧"
@@ -34340,10 +34340,10 @@ impl Locale {
                     "⟦Thee naamee oof thee draaweer, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee `reegiioon`. Reequuiireed.⟧"
                 }
                 Key::ComponentDrawerPropSideDoc => {
-                    "⟦Thee eedgee iit oopeens froom: `boottoom`, `staart` oor `eend`. AAt thee boottoom iit groows too `--nooctuuaa-sheell-draaweer-maax` oof thee roooom aa fooooteer leeaavees. Thaat neeeeds aa fleex cooluumn whoosee woork haas `fleex: 1 1 0`. AAny ootheer boox giivees iit thaat shaaree oof thee whoolee boox.⟧"
+                    "⟦Thee eedgee iit oopeens froom: `boottoom`, `staart` oor `eend`. AAt thee boottoom iit groows too `--nooctuuaa-sheell-draaweer-maax` oof thee roooom aa fooooteer leeaavees, iin aa fleex cooluumn whoosee woork haas `fleex: 1 1 0`. AA bloock boox giivees thaat shaaree oof thee boox, aand aa griid oof iits roow.⟧"
                 }
                 Key::ComponentDrawerPropShareDoc => {
-                    "⟦AA whoolee peerceentaagee froom `1` too `100`, heeld too `--nooctuuaa-sheell-draaweer-maax`. IIt iis oof thee roooom aa fooooteer leeaavees, iin aa fleex cooluumn whoosee woork haas `fleex: 1 1 0`. IIn aany ootheer boox iit iis oof thee whoolee boox. Wiithoouut iit thee draaweer iis aas laargee aas iits coonteent.⟧"
+                    "⟦AA whoolee peerceentaagee froom `1` too `100`, heeld too `--nooctuuaa-sheell-draaweer-maax`. IIt iis oof thee roooom aa fooooteer leeaavees, iin aa fleex cooluumn whoosee woork haas `fleex: 1 1 0`. IIn aa bloock boox iit iis oof thee boox, aand iin aa griid oof iits roow. Wiithoouut iit, thee coonteent siizees iit.⟧"
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "⟦Wheetheer thee draaweer iis shuut. AA coollaapseed draaweer keeeeps whaat iis iin iit aand shoows noonee oof iit. IIt iis oouut oof thee taab oordeer aand hiiddeen froom aassiistiivee teechnooloogy.⟧"

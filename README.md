@@ -180,8 +180,10 @@ that grows, from nothing:
 .work   { flex: 1 1 0; min-block-size: 0; overflow: auto; }
 ```
 
-In any other box with a height of its own the drawer takes its share of the
-whole box, footer included. A work that starts from its content
+In a block box with a height of its own the drawer takes its share of the
+whole box, footer included. A grid is no window for it: a percentage in a grid
+item is of the item's own row, so there the drawer is its share of its own row
+and the rest of what is in it scrolls. A work that starts from its content
 (`flex: 1 1 auto`) can leave the drawer no room, and an open drawer then stands
 at its floor, `--noctua-target-min`.
 

@@ -1063,17 +1063,28 @@ drawer at a side has nothing rigid in its row, so there the cap is the percentag
 percentage of the row.
 
 **A window that does not keep the contract gets less, and never nothing.** Two were measured, 240
-tall with forty lines in the drawer. A box with a height of its own that is no flex column reads no
+tall with forty lines in the drawer. A block box with a height of its own reads no
 factor, and with the content as its only ceiling the drawer stood 800 tall, out of the window. So
 the drawer also asks for a size, `block-size` at its share as a percentage, which a flex column
-never reads (`flex-basis: 0` is the size asked for there) and every other box does: there it is a
-share of the whole box, footer included. A flex column whose work starts from its content
+never reads (`flex-basis: 0` is the size asked for there) and every other box does: in a block box
+it is a share of the whole box, footer included. A flex column whose work starts from its content
 (`flex: 1 1 auto`) had nothing left to hand out, and the drawer stood 0 tall while open, in the tab
 order, the focus on a button with no pixel drawn. So an open drawer at the bottom has a floor,
 `--noctua-target-min`, and a share that comes to less is the floor. **The contract is the
 reader's, so it is on the page**: the guidance, the accessibility notes and the `side` and `share`
 docs of `spec/components/drawer.toml` say it in both locales, and `README.md` says it for a
 consumer who never opens the site. `tests/browser/drawer.spec.js` holds both windows.
+
+**A grid is a window no drawer can size itself in, and the reader's text says so.** A percentage
+in a grid item is of the item's own row, never of the grid. In the usual shell rows
+(`minmax(0, 1fr) auto auto`) the drawer's row is as tall as the drawer's content, so the
+percentage is a share of its own content: four lines stood 56 tall in a row of 139, the rest
+scrolled away. Without the percentage the drawer filled its row, and a full one took the row to the
+whole window, 238 of 240, and left the work none. No rule written on the drawer tells a grid from a block box, so no rule
+serves both, and the block box is the one served. The text once promised "that share of the whole
+box" for any box that is no flex column. It now names the block box, and says a grid gives the
+share of the drawer's own row. The same spec holds that, with the floor, in a grid window of its
+own, so a rule that changes what a grid gets has to change what the reader is told.
 
 **A share is drawn by a rule for each whole percentage, with no `style` and no script.**
 `share` is `data-nd-share`, and `crates/noctua-design-styles/src/drawer-share.css` holds one rule

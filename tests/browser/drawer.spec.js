@@ -488,6 +488,76 @@ test("a work that starts from its content leaves an open drawer its floor, and n
   expect(await one.evaluate((el) => getComputedStyle(el).visibility)).toBe("hidden");
 });
 
+// AND THE WINDOW NO DRAWER CAN SIZE ITSELF IN: A GRID. The usual shell rows
+// are the work's `minmax(0, 1fr)` and an `auto` row each for the footer and
+// the drawer. A percentage in a grid item is of the item's own row, and an
+// `auto` row is as tall as what is in it, so the drawer is its share of its
+// own content and never of the window. The reader's text once promised "that
+// share of the whole box" for any box that is no flex column, and this is
+// what holds it to what it now says: the row, the floor, and nothing more.
+test("in a grid window a drawer is its share of its own row, and never of the window", async ({ page }) => {
+  await open(page);
+  const frame = windowOf(page, "drawer-share");
+  const one = drawer(page, "drawer-share");
+  await frame.evaluate((el) => {
+    el.style.display = "grid";
+    el.style.gridTemplateRows = "minmax(0, 1fr) auto auto";
+    el.style.blockSize = "240px"; // allow-literal: the window the defect was measured in
+  });
+  await frame.scrollIntoViewIfNeeded();
+  expect(await frame.evaluate((el) => el.children.length), "the window is not work, footer and drawer").toBe(3);
+  const limit = await share(page);
+  const floor = await token(page, "--noctua-target-min");
+  const edge = await inner(frame);
+  /** The drawer's own row, as the engine resolved it. */
+  const row = () =>
+    frame.evaluate((el) => Number.parseFloat(getComputedStyle(el).gridTemplateRows.split(" ").at(-1)));
+
+  // The four lines the defect was measured with, so that a share of the row
+  // is more than the floor and the two can be told apart.
+  await one.evaluate((el) => {
+    const pane = el.querySelector(".nd-example-pane");
+    for (let at = 0; at < 3; at += 1) pane.append(pane.firstElementChild.cloneNode(true));
+  });
+
+  for (const [given, part] of [
+    ["30", 0.3],
+    [null, limit],
+  ]) {
+    await one.evaluate((el, next) => {
+      if (next === null) el.removeAttribute("data-nd-share");
+      else el.setAttribute("data-nd-share", next);
+    }, given);
+    await settled(one);
+    const track = await row();
+    const drawn = (await box(one)).height;
+    expect(track * part, "the row is too short to tell a share of it from the floor").toBeGreaterThan(floor + 4);
+    expect(drawn, `with share ${given} a drawer in a grid is not its share of its row`).toBeCloseTo(track * part, 0);
+    // And that is no share of the window: the text may not say it is.
+    expect(drawn, `with share ${given} it is a share of the whole box after all`).toBeLessThan(edge.height * part - 4);
+    // What the row does not show, the content scrolls.
+    const scroll = await one
+      .locator(".nd-drawer-panel > :not(.nd-drawer-rail)")
+      .evaluate((el) => el.scrollHeight - el.clientHeight);
+    expect(scroll, "what does not fit does not scroll").toBeGreaterThan(1);
+  }
+
+  // WITH ONE LINE IN IT, the share of the row is under the floor, and the
+  // drawer is the floor: open, it is never drawn at less.
+  await one.evaluate((el) => {
+    const pane = el.querySelector(".nd-example-pane");
+    while (pane.children.length > 1) pane.lastElementChild.remove();
+  });
+  await settled(one);
+  expect((await row()) * limit).toBeLessThan(floor);
+  expect((await box(one)).height, "an open drawer in a grid is under its floor").toBeCloseTo(floor, 0);
+
+  // SHUT, IT IS NOTHING.
+  await one.evaluate((el) => el.setAttribute("data-nd-collapsed", "true"));
+  await settled(one);
+  expect((await box(one)).height, "a shut drawer in a grid keeps a height").toBeLessThanOrEqual(0.5);
+});
+
 test("a drawer given a share slides shut from it and back to it", async ({ page }) => {
   await open(page);
   const one = drawer(page, "drawer-share");
