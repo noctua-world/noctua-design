@@ -109,6 +109,37 @@ fn main() {
         "the bridge maps nothing, so this proves nothing"
     );
 
+    // And every size, radius and type utility it maps points at a token
+    // `tokens.css` or `fonts.css`, written out beside it, declares. The bridge
+    // once mapped colours alone, so `gap-4` and `min-w-0` emitted no rule and
+    // an application's layout was drawn with no gap at all.
+    let tokens = std::fs::read_to_string(out.join("tokens.css")).expect("tokens.css");
+    let faces = std::fs::read_to_string(out.join("fonts.css")).expect("fonts.css");
+    let mut sized = 0usize;
+    for reference in bridge.split("var(--noctua-").skip(1) {
+        let name = reference.split(')').next().expect("a closed reference");
+        let declaration = format!("--noctua-{name}:");
+        assert!(
+            tokens.contains(&declaration) || faces.contains(&declaration),
+            "the bridge maps a utility onto --noctua-{name}, which no shipped sheet declares"
+        );
+        sized += 1;
+    }
+    for utility in [
+        "--spacing-0: var(--noctua-space-0);",
+        "--spacing-4: var(--noctua-space-4);",
+        "--radius-control: var(--noctua-radius-control);",
+        "--text-body: var(--noctua-size-body);",
+        "--font-ui: var(--noctua-font-ui);",
+        "--spacing-shell-line: var(--noctua-shell-line);",
+        "--spacing-target-min: var(--noctua-target-min);",
+    ] {
+        assert!(
+            bridge.contains(utility),
+            "the bridge in the package lacks `{utility}`"
+        );
+    }
+
     // Every ROOT class this markup carries has to be painted by the sheet.
     //
     // Root classes rather than every class, because some are deliberately
@@ -148,7 +179,8 @@ fn main() {
         rendered.len()
     );
     println!(
-        "{linked} sheet(s) linked and present, {mapped} colour(s) bridged to Tailwind, \
+        "{linked} sheet(s) linked and present, {mapped} colour(s) and {sized} design \
+         token(s) bridged to Tailwind, \
          {painted} component(s) rendered, every root class painted, \
          {styled} of {} classes styled by the shipped components.css.",
         rendered.len()

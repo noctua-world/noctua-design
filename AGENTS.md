@@ -305,6 +305,7 @@ of these carries measured rules, not description:
 | an icon, a source, the payload rules | `crates/noctua-design-emit/src/icons.rs` |
 | a `tone` | `crates/noctua-design-emit/src/tones.rs` |
 | glass, the backdrop, any appearance setting | `crates/noctua-design-emit/src/appearance.rs` |
+| the Tailwind bridge, or the name of a utility | `crates/noctua-design-emit/src/tailwind.rs` |
 | a font face or the preload set | `crates/noctua-design-emit/src/fonts.rs` |
 | which page a component is on, a title, the search index | `crates/noctua-design-emit/src/docs.rs` |
 | shipped behaviour — which file does what | `crates/noctua-design-runtime/src/lib.rs` |
@@ -518,10 +519,19 @@ bypass the token layer.
 **What `dist/` carries**: the token layer, the faces, the appearance layer, the scoped semantic
 contract and `components.css`, plus every behaviour module and the palette and theme data they
 read. `ls dist/` is the inventory, and `cargo xtask build` writes it. It also carries
-`dist/tailwind/bridge.css`, the vendored mapping of Tailwind's colour utilities onto the `--nc-*`
-tokens, copied as the colour sheets are: this system writes no Tailwind class, and an application
-that composes its own layout with Tailwind finds the mapping in the package it installed. A test
-holds every token the bridge names to the sheets `dist/` declares them in.
+`dist/tailwind/bridge.css`, the one file an application that composes its own layout with Tailwind
+imports: this system writes no Tailwind class, and such an application finds the mapping in the
+package it installed. **The bridge has two halves and two authors.** The first is the vendored
+mapping of Tailwind's colour utilities onto the `--nc-*` tokens, copied byte for byte as the colour
+sheets are. The second is generated here, from `spec/tokens.toml` and `spec/fonts.toml`, by
+`crates/noctua-design-emit/src/tailwind.rs`: the spacing scale, the radii, the type sizes, line
+heights, weights, letter spacing and font roles, the shell's lengths, the smallest target, the
+measure and the breakpoints, each as the Tailwind v4 theme variable its utilities read. **A step of
+the scale is a name and no bare `--spacing` is declared**, so `gap-4` is the token and `gap-5`,
+which is no step, emits nothing: a multiplier would make every number a utility, which is the token
+literal of invariant 2 under another name. Tests hold every token the bridge names to the sheets
+`dist/` declares them in, and every size and type token those sheets declare to a utility, so a
+token added to the spec and not to the bridge fails the build.
 
 **The component rules are hand-written and copied, never generated.**
 `crates/noctua-design-styles/src/` holds one stylesheet per family, and **`sources()` there is the

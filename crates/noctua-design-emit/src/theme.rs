@@ -42,28 +42,6 @@ pub fn palettes(theme: &Theme, sheets: &[(String, String)]) -> Vec<EmittedFile> 
         .collect()
 }
 
-/// Where the Tailwind bridge ships.
-pub const TAILWIND_BRIDGE: &str = "dist/tailwind/bridge.css";
-
-/// The Tailwind bridge, shipped beside the colour sheets it points at.
-///
-/// **This system styles nothing with Tailwind, and an application built on it
-/// may.** The bridge is `noctua-colors`' own mapping of every `--color-*`
-/// utility name onto a `--nc-*` token, and it declares no colour. Every token
-/// it names is declared by a sheet `base.html` links, so a page that links
-/// those and imports this after `tailwindcss` has utilities that follow the
-/// palette, the mode and a scope exactly as the components do.
-///
-/// The bridge alone and not `theme.css`, the vendor's entry point: that file
-/// imports the whole colour system by a path relative to the vendor's own
-/// tree, and the sheets it would reach are already here under other names.
-///
-/// Copied, never rewritten, as the colour sheets are.
-#[must_use]
-pub fn tailwind_bridge(contents: &str) -> EmittedFile {
-    EmittedFile::new(TAILWIND_BRIDGE, contents)
-}
-
 /// Emits every form of the theme model.
 #[must_use]
 pub fn emit(theme: &Theme, vendor: &Vendor) -> Vec<EmittedFile> {

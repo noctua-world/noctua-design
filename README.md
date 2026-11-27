@@ -170,9 +170,13 @@ client-side router calls the second one before it replaces markup.
 ### With Tailwind
 
 Nothing here needs Tailwind, and an application built on this system may use it.
-`dist/tailwind/bridge.css` maps every Tailwind v4 colour utility onto the token
-behind it and declares no colour. Link the sheets from `base.html` as above, then
-import the bridge after Tailwind in the entry stylesheet:
+`dist/tailwind/bridge.css` maps Tailwind v4's utilities onto the tokens: every
+colour utility onto its `--nc-*` token, and the spacing scale, the radii, the type
+sizes, line heights, weights, letter spacing and font roles, the shell's lengths,
+the smallest target, the measure and the breakpoints onto their `--noctua-*`
+tokens. It declares no colour and no length of its own. Link the sheets from
+`base.html` as above, then import the bridge after Tailwind in the entry
+stylesheet:
 
 ```css
 @import "tailwindcss";
@@ -180,7 +184,11 @@ import the bridge after Tailwind in the entry stylesheet:
 ```
 
 `bg-surface`, `text-fg` and `border-border` then follow the palette, the mode and
-a theme scope exactly as the components do.
+a theme scope exactly as the components do, and `gap-4`, `p-inset`, `min-w-0`,
+`h-shell-line`, `rounded-control`, `text-body`, `leading-body`, `font-semibold`
+and `font-ui` are the design tokens by name. A step of the spacing scale is a
+name and no bare multiplier is declared, so a number between two steps (`gap-5`)
+is no utility unless Tailwind's own `theme.css` is imported as well.
 
 ### The one thing the package does not carry
 

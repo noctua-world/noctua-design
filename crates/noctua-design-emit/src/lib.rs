@@ -42,6 +42,7 @@ pub mod scope;
 pub mod specimens;
 pub mod styles;
 pub mod syntax;
+pub mod tailwind;
 pub mod theme;
 pub mod tones;
 pub mod typescript;
@@ -136,12 +137,13 @@ pub struct Inputs<'a> {
     /// and shipped inside `dist/` because a registry consumer has `dist/` and
     /// nothing else. `(name, contents)`.
     pub palettes: &'a [(String, String)],
-    /// The Tailwind bridge: `noctua-colors`' mapping of every `--color-*`
-    /// utility name onto the token behind it.
+    /// The colour half of the Tailwind bridge: `noctua-colors`' mapping of
+    /// every `--color-*` utility name onto the token behind it.
     ///
     /// Vendored at `packages/tokens/vendor/tailwind/bridge.css` and shipped
     /// inside `dist/` for the reason the colour sheets are: a registry
-    /// consumer has `dist/` and nothing else.
+    /// consumer has `dist/` and nothing else. `tailwind.rs` writes the design
+    /// tokens' half after it.
     pub tailwind: &'a str,
     /// The vendored three.js bundle, and its licence.
     pub three: &'a str,
@@ -207,7 +209,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(syntax::emit(syntax_layer));
     files.extend(theme::emit(theme, vendor));
     files.extend(theme::palettes(theme, palettes));
-    files.push(theme::tailwind_bridge(tailwind));
+    files.push(crate::tailwind::bridge(tailwind, spec, font_layer));
     files.extend(tones::emit(vendor));
     files.extend(typescript::emit(spec));
     // Last, and reading what the others just decided: the two packages that
@@ -450,9 +452,9 @@ mod tests {
         assert_eq!(found, 2, "the vendored set changed without this test");
     }
 
-    /// The Tailwind bridge ships, as the vendor wrote it, in `dist/` and in
-    /// both packages that carry `dist/` to a registry, and the crate's
-    /// `FILES` names it.
+    /// The Tailwind bridge ships in `dist/` and in both packages that carry
+    /// `dist/` to a registry, the vendor's mapping whole and first in each,
+    /// and the crate's `FILES` names it.
     ///
     /// The central application composes its layout with Tailwind and installs
     /// this system from a tag, so the package is the only place it can find
@@ -471,7 +473,19 @@ mod tests {
                 .iter()
                 .find(|file| file.path == path)
                 .unwrap_or_else(|| panic!("{path} is not emitted"));
-            assert_eq!(file.contents, TAILWIND, "{path} is not the vendor's bridge");
+            let (vendor, tokens) = file
+                .contents
+                .split_once(crate::tailwind::SEAM)
+                .unwrap_or_else(|| panic!("{path} holds no design tokens' half"));
+            assert_eq!(
+                vendor,
+                format!("{TAILWIND}\n"),
+                "{path} does not open with the vendor's bridge"
+            );
+            assert!(
+                tokens.contains("--spacing-4: var(--noctua-space-4);"),
+                "{path} maps no spacing utility"
+            );
         }
         let library = files
             .iter()
@@ -542,7 +556,7 @@ mod tests {
             // what it copies. `dist/tokens/` is `noctua-colors`' output.
             if file.path.starts_with(VENDORED)
                 || file.path.starts_with(VENDORED_COLOURS)
-                || file.path == theme::TAILWIND_BRIDGE
+                || file.path == crate::tailwind::BRIDGE
                 || dist::is_mirror(&file.path)
             {
                 continue;
