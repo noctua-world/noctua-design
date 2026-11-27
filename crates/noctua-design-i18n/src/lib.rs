@@ -14425,7 +14425,7 @@ impl Locale {
                     "Open a panel along one edge of a window, beside the work and never over it."
                 }
                 Key::PageDrawerBody => {
-                    "The drawer and the rail down a side of it. A drawer is in the flow of its window and is not modal. It opens as far as its content, up to a share of the window. The caller opens and shuts it."
+                    "The drawer and the rail down a side of it. A drawer is in the flow of its window and is not modal. It opens as far as its content, up to a share of the room it divides with the work. The caller opens and shuts it."
                 }
                 Key::PageSplitSummary => {
                     "Divide a box between two panes, with a line between them a reader can move."
@@ -15588,7 +15588,7 @@ impl Locale {
                     "A drawer under a footer. Its two rails continue the footer's corners, and the control at the end of the modeline shuts and opens it."
                 }
                 Key::ExampleDrawerBasic => {
-                    "A drawer is as tall as what is in it. It takes its room from the work above and covers none of it."
+                    "A drawer is as tall as what is in it. It takes its room from the work, which has `flex: 1 1 0` in a window that is a flex column."
                 }
                 Key::ExampleDrawerCollapsed => {
                     "`collapsed` keeps what is in the drawer and shows none of it. Open it, move the focus inside and press Escape."
@@ -15597,10 +15597,10 @@ impl Locale {
                     "A drawer at a side grows across the window, to the same share of it, and is as tall as its side."
                 }
                 Key::ExampleDrawerScroll => {
-                    "Past its share of the window the content scrolls. The rail stays where it is."
+                    "Past its share of the room, the content scrolls. The rail stays where it is."
                 }
                 Key::ExampleDrawerShare => {
-                    "`share` keeps a share of the room the footer leaves, whatever is in the drawer. The work above is always the taller."
+                    "`share` keeps a share of the room the footer leaves, whatever is in the drawer. In a box that is no flex column it is of the whole box."
                 }
                 Key::ExampleDrawerRailControls => {
                     "A rail is as wide as a footer's corner and as tall as the drawer. It holds a `Toolbar` drawn as a rail."
@@ -18683,10 +18683,10 @@ impl Locale {
                     "Set when a `label` was given, on the `<div>` that stands in for the `<hr>`. The stylesheet hangs the two half-rules and the gap around the word on it."
                 }
                 Key::ComponentDrawerGuidance => {
-                    "Use a drawer for a panel that opens along one edge of a window and stays beside the work. Nothing behind it is inert and the focus is never held in it. For a surface that must be answered first, use `Dialog`."
+                    "Use a drawer for a panel that opens along one edge of a window and stays beside the work. It is not modal. For a surface that must be answered first, use `Dialog`. At the bottom, put it in a flex column whose work has `flex: 1 1 0`."
                 }
                 Key::ComponentDrawerA11yNotes => {
-                    "The drawer is a `role=\"region\"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. It opens in the flow of the window and covers nothing."
+                    "A `role=\"region\"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. Open at the bottom it is at least `--noctua-target-min` tall, so the focus is never in a drawer of no height."
                 }
                 Key::ComponentDrawerPropNameDoc => {
                     "What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required."
@@ -18698,10 +18698,10 @@ impl Locale {
                     "The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required."
                 }
                 Key::ComponentDrawerPropSideDoc => {
-                    "Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in."
+                    "The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves. That needs a flex column whose work has `flex: 1 1 0`. Any other box gives it that share of the whole box."
                 }
                 Key::ComponentDrawerPropShareDoc => {
-                    "The share of the room the drawer takes, a whole percentage from `1` to `100`, whatever is in it. It is held to `--noctua-shell-drawer-max`. Without it the drawer is as large as its content."
+                    "A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In any other box it is of the whole box. Without it the drawer is as large as its content."
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology."
@@ -22124,7 +22124,7 @@ impl Locale {
                     "Abra um painel junto a uma borda da janela, ao lado do trabalho e nunca sobre ele."
                 }
                 Key::PageDrawerBody => {
-                    "A gaveta e o trilho que desce por um lado dela. A gaveta fica no fluxo da janela e não é modal. Ela abre até o tamanho do conteúdo, no máximo uma fração da janela. Quem chama a abre e a fecha."
+                    "A gaveta e o trilho que desce por um lado dela. A gaveta fica no fluxo da janela e não é modal. Ela abre até o tamanho do conteúdo, no máximo uma fração do espaço que divide com o trabalho. Quem chama a abre e a fecha."
                 }
                 Key::PageSplitSummary => {
                     "Divida uma caixa entre dois painéis, com uma linha entre eles que a pessoa pode mover."
@@ -23309,7 +23309,7 @@ impl Locale {
                     "Uma gaveta sob um rodapé. Os dois trilhos continuam os cantos do rodapé, e o controle no fim da linha de modo a fecha e a abre."
                 }
                 Key::ExampleDrawerBasic => {
-                    "Uma gaveta tem a altura do que está nela. Ela tira o espaço do trabalho acima e não cobre nada dele."
+                    "Uma gaveta tem a altura do que está nela. Ela tira o espaço do trabalho, que tem `flex: 1 1 0` numa janela que é uma coluna flex."
                 }
                 Key::ExampleDrawerCollapsed => {
                     "`collapsed` mantém o que está na gaveta e não mostra nada. Abra, leve o foco para dentro e pressione Escape."
@@ -23318,10 +23318,10 @@ impl Locale {
                     "Uma gaveta num lado cresce ao longo da janela, até a mesma fração dela, e tem a altura do lado."
                 }
                 Key::ExampleDrawerScroll => {
-                    "Além da fração da janela o conteúdo rola. O trilho fica onde está."
+                    "Além da sua fração do espaço o conteúdo rola. O trilho fica onde está."
                 }
                 Key::ExampleDrawerShare => {
-                    "`share` reserva uma fração do espaço que o rodapé deixa, seja qual for o conteúdo. A área de trabalho acima é sempre a mais alta."
+                    "`share` reserva uma fração do espaço que o rodapé deixa, seja qual for o conteúdo. Numa caixa que não é coluna flex, é da caixa inteira."
                 }
                 Key::ExampleDrawerRailControls => {
                     "Um trilho tem a largura de um canto do rodapé e a altura da gaveta. Ele guarda uma `Toolbar` desenhada como trilho."
@@ -26430,10 +26430,10 @@ impl Locale {
                     "Definido quando um `label` foi dado, no `<div>` que entra no lugar do `<hr>`. A folha de estilo pendura nele as duas meias-linhas e o espaço em volta da palavra."
                 }
                 Key::ComponentDrawerGuidance => {
-                    "Use uma gaveta para um painel que abre junto a uma borda da janela e fica ao lado do trabalho. Nada atrás dela fica inerte e o foco nunca fica preso nela. Para uma superfície que precisa ser respondida antes, use `Dialog`."
+                    "Use uma gaveta para um painel que abre junto a uma borda da janela e fica ao lado do trabalho. Ela não é modal. Para uma superfície que precisa ser respondida antes, use `Dialog`. Embaixo, coloque-a numa coluna flex cujo trabalho tem `flex: 1 1 0`."
                 }
                 Key::ComponentDrawerA11yNotes => {
-                    "A gaveta é um `role=\"region\"`, nomeada por `label`. Ela não é modal: nada atrás dela fica inerte e o Tab sai dela. Recolhida, fica escondida e `inert`. Ela abre no fluxo da janela e não cobre nada."
+                    "Um `role=\"region\"`, nomeado por `label`. Não é modal: nada atrás fica inerte e o Tab sai dela. Recolhida, fica escondida e `inert`. Aberta embaixo tem pelo menos `--noctua-target-min` de altura, então o foco nunca fica numa gaveta sem altura."
                 }
                 Key::ComponentDrawerPropNameDoc => {
                     "O que é esta gaveta, como um script a encontra. É o `name` em `nd-drawer-dismiss`. Obrigatório."
@@ -26445,10 +26445,10 @@ impl Locale {
                     "O nome da gaveta, no idioma da pessoa. Vira `aria-label` no `region`. Obrigatório."
                 }
                 Key::ComponentDrawerPropSideDoc => {
-                    "De qual borda da janela a gaveta abre: `bottom`, `start` ou `end`. Ela cresce no eixo dessa borda, até `--noctua-shell-drawer-max` e não mais. Num lado, fica nesse lado da fileira em que está."
+                    "A borda de onde ela abre: `bottom`, `start` ou `end`. Embaixo ela cresce até `--noctua-shell-drawer-max` do espaço que o rodapé deixa. Isso pede uma coluna flex cujo trabalho tem `flex: 1 1 0`. Qualquer outra caixa dá essa fração da caixa inteira."
                 }
                 Key::ComponentDrawerPropShareDoc => {
-                    "A fração do espaço que a gaveta ocupa, uma porcentagem inteira de `1` a `100`, seja qual for o conteúdo. Ela é limitada a `--noctua-shell-drawer-max`. Sem ela a gaveta tem o tamanho do conteúdo."
+                    "Uma porcentagem inteira de `1` a `100`, limitada a `--noctua-shell-drawer-max`. É do espaço que o rodapé deixa, numa coluna flex cujo trabalho tem `flex: 1 1 0`. Em outra caixa é da caixa inteira. Sem ela a gaveta tem o tamanho do conteúdo."
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "Se a gaveta está fechada. Uma gaveta recolhida mantém o que está nela e não mostra nada. Fica fora da ordem de tabulação e escondida da tecnologia assistiva."
@@ -29883,7 +29883,7 @@ impl Locale {
                     "⟦OOpeen aa paaneel aaloong oonee eedgee oof aa wiindoow, beesiidee thee woork aand neeveer ooveer iit.⟧"
                 }
                 Key::PageDrawerBody => {
-                    "⟦Thee draaweer aand thee raaiil doown aa siidee oof iit. AA draaweer iis iin thee floow oof iits wiindoow aand iis noot moodaal. IIt oopeens aas faar aas iits coonteent, uup too aa shaaree oof thee wiindoow. Thee caalleer oopeens aand shuuts iit.⟧"
+                    "⟦Thee draaweer aand thee raaiil doown aa siidee oof iit. AA draaweer iis iin thee floow oof iits wiindoow aand iis noot moodaal. IIt oopeens aas faar aas iits coonteent, uup too aa shaaree oof thee roooom iit diiviidees wiith thee woork. Thee caalleer oopeens aand shuuts iit.⟧"
                 }
                 Key::PageSplitSummary => {
                     "⟦Diiviidee aa boox beetweeeen twoo paanees, wiith aa liinee beetweeeen theem aa reeaadeer caan moovee.⟧"
@@ -31102,7 +31102,7 @@ impl Locale {
                     "⟦AA draaweer uundeer aa fooooteer. IIts twoo raaiils coontiinuuee thee fooooteer's coorneers, aand thee coontrool aat thee eend oof thee moodeeliinee shuuts aand oopeens iit.⟧"
                 }
                 Key::ExampleDrawerBasic => {
-                    "⟦AA draaweer iis aas taall aas whaat iis iin iit. IIt taakees iits roooom froom thee woork aaboovee aand cooveers noonee oof iit.⟧"
+                    "⟦AA draaweer iis aas taall aas whaat iis iin iit. IIt taakees iits roooom froom thee woork, whiich haas `fleex: 1 1 0` iin aa wiindoow thaat iis aa fleex cooluumn.⟧"
                 }
                 Key::ExampleDrawerCollapsed => {
                     "⟦`coollaapseed` keeeeps whaat iis iin thee draaweer aand shoows noonee oof iit. OOpeen iit, moovee thee foocuus iinsiidee aand preess EEscaapee.⟧"
@@ -31111,10 +31111,10 @@ impl Locale {
                     "⟦AA draaweer aat aa siidee groows aacrooss thee wiindoow, too thee saamee shaaree oof iit, aand iis aas taall aas iits siidee.⟧"
                 }
                 Key::ExampleDrawerScroll => {
-                    "⟦Paast iits shaaree oof thee wiindoow thee coonteent scroolls. Thee raaiil staays wheeree iit iis.⟧"
+                    "⟦Paast iits shaaree oof thee roooom, thee coonteent scroolls. Thee raaiil staays wheeree iit iis.⟧"
                 }
                 Key::ExampleDrawerShare => {
-                    "⟦`shaaree` keeeeps aa shaaree oof thee roooom thee fooooteer leeaavees, whaateeveer iis iin thee draaweer. Thee woork aaboovee iis aalwaays thee taalleer.⟧"
+                    "⟦`shaaree` keeeeps aa shaaree oof thee roooom thee fooooteer leeaavees, whaateeveer iis iin thee draaweer. IIn aa boox thaat iis noo fleex cooluumn iit iis oof thee whoolee boox.⟧"
                 }
                 Key::ExampleDrawerRailControls => {
                     "⟦AA raaiil iis aas wiidee aas aa fooooteer's coorneer aand aas taall aas thee draaweer. IIt hoolds aa `Toooolbaar` draawn aas aa raaiil.⟧"
@@ -34325,10 +34325,10 @@ impl Locale {
                     "⟦Seet wheen aa `laabeel` waas giiveen, oon thee `<diiv>` thaat staands iin foor thee `<hr>`. Thee styleesheeeet haangs thee twoo haalf-ruulees aand thee gaap aaroouund thee woord oon iit.⟧"
                 }
                 Key::ComponentDrawerGuidance => {
-                    "⟦UUsee aa draaweer foor aa paaneel thaat oopeens aaloong oonee eedgee oof aa wiindoow aand staays beesiidee thee woork. Noothiing beehiind iit iis iineert aand thee foocuus iis neeveer heeld iin iit. Foor aa suurfaacee thaat muust bee aansweereed fiirst, uusee `Diiaaloog`.⟧"
+                    "⟦UUsee aa draaweer foor aa paaneel thaat oopeens aaloong oonee eedgee oof aa wiindoow aand staays beesiidee thee woork. IIt iis noot moodaal. Foor aa suurfaacee thaat muust bee aansweereed fiirst, uusee `Diiaaloog`. AAt thee boottoom, puut iit iin aa fleex cooluumn whoosee woork haas `fleex: 1 1 0`.⟧"
                 }
                 Key::ComponentDrawerA11yNotes => {
-                    "⟦Thee draaweer iis aa `roolee=\"reegiioon\"`, naameed by `laabeel`. IIt iis noot moodaal: noothiing beehiind iit iis iineert aand Taab leeaavees iit. Coollaapseed, iit iis hiiddeen aand `iineert`. IIt oopeens iin thee floow oof thee wiindoow aand cooveers noothiing.⟧"
+                    "⟦AA `roolee=\"reegiioon\"`, naameed by `laabeel`. IIt iis noot moodaal: noothiing beehiind iit iis iineert aand Taab leeaavees iit. Coollaapseed, iit iis hiiddeen aand `iineert`. OOpeen aat thee boottoom iit iis aat leeaast `--nooctuuaa-taargeet-miin` taall, soo thee foocuus iis neeveer iin aa draaweer oof noo heeiight.⟧"
                 }
                 Key::ComponentDrawerPropNameDoc => {
                     "⟦Whaat thiis draaweer iis, aas aa scriipt fiinds iit. IIt iis thee `naamee` iin `nd-draaweer-diismiiss`. Reequuiireed.⟧"
@@ -34340,10 +34340,10 @@ impl Locale {
                     "⟦Thee naamee oof thee draaweer, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee `reegiioon`. Reequuiireed.⟧"
                 }
                 Key::ComponentDrawerPropSideDoc => {
-                    "⟦Whiich eedgee oof thee wiindoow thee draaweer oopeens froom: `boottoom`, `staart` oor `eend`. IIt groows aaloong thaat eedgee's aaxiis, too `--nooctuuaa-sheell-draaweer-maax` aand noo fuurtheer. AAt aa siidee, iit staands aat thaat siidee oof thee roow iit iis iin.⟧"
+                    "⟦Thee eedgee iit oopeens froom: `boottoom`, `staart` oor `eend`. AAt thee boottoom iit groows too `--nooctuuaa-sheell-draaweer-maax` oof thee roooom aa fooooteer leeaavees. Thaat neeeeds aa fleex cooluumn whoosee woork haas `fleex: 1 1 0`. AAny ootheer boox giivees iit thaat shaaree oof thee whoolee boox.⟧"
                 }
                 Key::ComponentDrawerPropShareDoc => {
-                    "⟦Thee shaaree oof thee roooom thee draaweer taakees, aa whoolee peerceentaagee froom `1` too `100`, whaateeveer iis iin iit. IIt iis heeld too `--nooctuuaa-sheell-draaweer-maax`. Wiithoouut iit thee draaweer iis aas laargee aas iits coonteent.⟧"
+                    "⟦AA whoolee peerceentaagee froom `1` too `100`, heeld too `--nooctuuaa-sheell-draaweer-maax`. IIt iis oof thee roooom aa fooooteer leeaavees, iin aa fleex cooluumn whoosee woork haas `fleex: 1 1 0`. IIn aany ootheer boox iit iis oof thee whoolee boox. Wiithoouut iit thee draaweer iis aas laargee aas iits coonteent.⟧"
                 }
                 Key::ComponentDrawerPropCollapsedDoc => {
                     "⟦Wheetheer thee draaweer iis shuut. AA coollaapseed draaweer keeeeps whaat iis iin iit aand shoows noonee oof iit. IIt iis oouut oof thee taab oordeer aand hiiddeen froom aassiistiivee teechnooloogy.⟧"

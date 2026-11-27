@@ -12802,8 +12802,29 @@ because a specimen of a `needs_name` component must not render a
  *
  * WHAT THAT ASKS OF THE WINDOW: a column laid out by flex with a height of its
  * own, in which the work is the one other part that grows, from nothing
- * (`flex: 1 1 0`). A work that starts from its content's height can leave no
- * room to share, and the drawer is then drawn as nothing. */
+ * (`flex: 1 1 0`).
+ *
+ * AND WHAT A WINDOW THAT IS NOT THAT GETS, which is less and never nothing.
+ * Two windows were measured, 240 tall, with forty lines in the drawer:
+ *
+ *   - A box with a height of its own that is no flex column. No factor is read
+ *     there, and with the content as the only ceiling the drawer stood 800
+ *     tall and out of the window. So the drawer also asks for a size, its
+ *     share as a percentage of that box, which a flex column never reads
+ *     (`flex-basis` is `0`, and a basis other than `auto` is the size asked
+ *     for) and every other box does. There it is a share of the whole box,
+ *     footer included, since nothing there can subtract the footer.
+ *   - A flex column whose work starts from its content's height
+ *     (`flex: 1 1 auto`) with more in it than the window holds. Nothing is
+ *     left to hand out, and the drawer stood 0 tall while open: visible to the
+ *     accessibility tree, in the tab order, the focus on a button with no
+ *     pixel drawn. So an open drawer has a floor, the smallest target
+ *     (`--noctua-target-min`), which the work gives up as any flex item gives
+ *     up room. A share that comes to less than the floor is the floor.
+ *
+ * The floor is a floor in a window that keeps the contract too. A drawer is
+ * then as tall as the work or taller only where the room they divide is under
+ * two targets, and no window that small holds a line of work. */
 .nd-drawer {
   /* The share asked for: the cap, until `share` names one
      (`drawer-share.css`). */
@@ -12818,16 +12839,23 @@ because a specimen of a `needs_name` component must not render a
   flex-shrink: 1;
   flex-basis: 0;
   box-sizing: border-box;
+  /* Read wherever the factor above is not: in a box that is no flex column
+     the drawer is this share of the box, under the same ceiling. */
+  block-size: calc(min(var(--nd-drawer-share), var(--noctua-shell-drawer-share-max)) * 1%);
   min-inline-size: 0;
   /* A flex item is otherwise never smaller than what is in it, and a drawer
-     with more in it than its share would take the work's room. */
-  min-block-size: 0;
+     with more in it than its share would take the work's room. The floor is
+     the smallest target and not nothing: an open drawer is never drawn at no
+     height, whatever the window around it hands out. */
+  min-block-size: var(--noctua-target-min);
   max-block-size: max-content;
   color: var(--nc-color-fg);
   background: var(--nc-color-surface);
   transition:
     flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
     inline-size var(--noctua-duration-base) var(--noctua-easing-out),
+    block-size var(--noctua-duration-base) var(--noctua-easing-out),
+    min-block-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-start;
@@ -12853,6 +12881,9 @@ because a specimen of a `needs_name` component must not render a
   /* Nothing rigid stands in the row beside it, so its share of the row is a
      percentage and it asks the row for no factor. */
   flex: none;
+  /* As tall as its side: no share of the height, and no floor on it. */
+  block-size: auto;
+  min-block-size: 0;
   max-block-size: none;
   max-inline-size: var(--noctua-shell-drawer-max);
   background: var(--nc-color-surface-subtle);
@@ -12884,17 +12915,25 @@ because a specimen of a `needs_name` component must not render a
      drawer as tall as its content slides by the track, and one at its share
      by the factor. */
   flex-grow: 0;
+  /* And outside a flex column, where the size asked for is what is read, it
+     asks for none. The floor is an open drawer's, and goes with it. */
+  block-size: 0;
+  min-block-size: 0;
   grid-template-rows: 0fr;
   visibility: hidden;
   transition:
     flex-grow var(--noctua-duration-base) var(--noctua-easing-out),
     inline-size var(--noctua-duration-base) var(--noctua-easing-out),
+    block-size var(--noctua-duration-base) var(--noctua-easing-out),
+    min-block-size var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
     grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
     visibility var(--noctua-duration-base) step-end;
 }
 
 .nd-drawer[data-nd-collapsed="true"]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  /* Shut, a drawer at a side is still as tall as its side. */
+  block-size: auto;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: 0fr;
 }

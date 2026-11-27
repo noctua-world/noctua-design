@@ -1055,10 +1055,22 @@ for no size and for a factor, its share over what is left of a hundred, against 
 and its content is its ceiling (`max-block-size: max-content`), which `share` takes away. **That is
 a contract with the window**: a column laid out by flex, with a height of its own, in which the
 work is the one other part that grows, and grows from nothing (`flex: 1 1 0`). The work's own
-padding and border are rigid, as the footer is, so the room is the window less all of them. A work
-that starts from its content's height can leave no room to share, and the drawer is drawn as
-nothing. A drawer at a side has nothing rigid in its row, so there the cap is the percentage and a
-share is a percentage of the row.
+padding and border are rigid, as the footer is, so the room is the window less all of them. A
+drawer at a side has nothing rigid in its row, so there the cap is the percentage and a share is a
+percentage of the row.
+
+**A window that does not keep the contract gets less, and never nothing.** Two were measured, 240
+tall with forty lines in the drawer. A box with a height of its own that is no flex column reads no
+factor, and with the content as its only ceiling the drawer stood 800 tall, out of the window. So
+the drawer also asks for a size, `block-size` at its share as a percentage, which a flex column
+never reads (`flex-basis: 0` is the size asked for there) and every other box does: there it is a
+share of the whole box, footer included. A flex column whose work starts from its content
+(`flex: 1 1 auto`) had nothing left to hand out, and the drawer stood 0 tall while open, in the tab
+order, the focus on a button with no pixel drawn. So an open drawer at the bottom has a floor,
+`--noctua-target-min`, and a share that comes to less is the floor. **The contract is the
+reader's, so it is on the page**: the guidance, the accessibility notes and the `side` and `share`
+docs of `spec/components/drawer.toml` say it in both locales, and `README.md` says it for a
+consumer who never opens the site. `tests/browser/drawer.spec.js` holds both windows.
 
 **A share is drawn by a rule for each whole percentage, with no `style` and no script.**
 `share` is `data-nd-share`, and `crates/noctua-design-styles/src/drawer-share.css` holds one rule

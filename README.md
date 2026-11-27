@@ -168,6 +168,23 @@ is one import, and nothing pulls in the rest:
 Each module exports `enhanceX(root)` and `releaseX(root)`. An app with a
 client-side router calls the second one before it replaces markup.
 
+### A drawer, and the window it stands in
+
+A `Drawer` at the bottom of a window takes a share of the room the footer
+leaves, and only a flex container can hand that out. Lay the window out as a
+flex column with a height of its own, and let the work be the one other part
+that grows, from nothing:
+
+```css
+.window { display: flex; flex-direction: column; block-size: 100vh; } /* allow-literal: an example of a consumer's own stylesheet */
+.work   { flex: 1 1 0; min-block-size: 0; overflow: auto; }
+```
+
+In any other box with a height of its own the drawer takes its share of the
+whole box, footer included. A work that starts from its content
+(`flex: 1 1 auto`) can leave the drawer no room, and an open drawer then stands
+at its floor, `--noctua-target-min`.
+
 ### With Tailwind
 
 Nothing here needs Tailwind, and an application built on this system may use it.

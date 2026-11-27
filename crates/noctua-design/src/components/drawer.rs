@@ -8,7 +8,7 @@
 
 use dioxus::prelude::*;
 
-/// Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in.
+/// The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves. That needs a flex column whose work has `flex: 1 1 0`. Any other box gives it that share of the whole box.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DrawerSide {
     #[default]
@@ -39,7 +39,7 @@ impl DrawerSide {
 ///
 /// # Accessibility
 ///
-/// The drawer is a `role="region"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. It opens in the flow of the window and covers nothing.
+/// A `role="region"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. Open at the bottom it is at least `--noctua-target-min` tall, so the focus is never in a drawer of no height.
 #[component]
 pub fn Drawer(
     /// What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required.
@@ -48,10 +48,10 @@ pub fn Drawer(
     id: Option<String>,
     /// The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required.
     label: String,
-    /// Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in.
+    /// The edge it opens from: `bottom`, `start` or `end`. At the bottom it grows to `--noctua-shell-drawer-max` of the room a footer leaves. That needs a flex column whose work has `flex: 1 1 0`. Any other box gives it that share of the whole box.
     #[props(default)]
     side: DrawerSide,
-    /// The share of the room the drawer takes, a whole percentage from `1` to `100`, whatever is in it. It is held to `--noctua-shell-drawer-max`. Without it the drawer is as large as its content.
+    /// A whole percentage from `1` to `100`, held to `--noctua-shell-drawer-max`. It is of the room a footer leaves, in a flex column whose work has `flex: 1 1 0`. In any other box it is of the whole box. Without it the drawer is as large as its content.
     share: Option<String>,
     /// Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology.
     #[props(default = false)]

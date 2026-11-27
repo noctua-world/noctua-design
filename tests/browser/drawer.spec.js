@@ -340,7 +340,11 @@ test("a drawer given a share is that share of the room, whatever is in it", asyn
     return (await box(one)).height;
   };
   expect(await give("10"), "a share of 10 is not a tenth of the room").toBeCloseTo(room * 0.1, 0);
-  expect(await give("1")).toBeCloseTo(room * 0.01, 0);
+  // A SHARE THAT COMES TO LESS THAN THE FLOOR IS THE FLOOR: an open drawer is
+  // never shorter than the smallest target, whatever it is asked to be.
+  const floor = await token(page, "--noctua-target-min");
+  expect(room * 0.01).toBeLessThan(floor);
+  expect(await give("1"), "a share under the floor is not the floor").toBeCloseTo(floor, 0);
   expect(await give("40")).toBeCloseTo(room * limit, 0);
   expect(await give("75"), "a share past the cap is not held to it").toBeCloseTo(room * limit, 0);
   expect(await give("100")).toBeCloseTo(room * limit, 0);
@@ -358,6 +362,130 @@ test("a drawer given a share is that share of the room, whatever is in it", asyn
     .locator(".nd-drawer-panel > :not(.nd-drawer-rail)")
     .evaluate((el) => el.scrollHeight - el.clientHeight);
   expect(scroll).toBeGreaterThan(1);
+});
+
+// THE TWO WINDOWS THAT DO NOT KEEP THE CONTRACT. A drawer at the bottom takes
+// its share as a flex factor, which asks the window to be a flex column whose
+// work grows from nothing. Every example is that window, so every test above
+// passed while a window that was not got 800 pixels of drawer in a box 240
+// tall, or none at all. Each is built here out of an example's own window,
+// with forty lines in the drawer.
+const fill = (one) =>
+  one.evaluate((el) => {
+    const pane = el.querySelector(".nd-example-pane");
+    for (let at = 0; at < 40; at += 1) pane.append(pane.firstElementChild.cloneNode(true));
+  });
+
+test("in a box that is no flex column a drawer is its share of the box, and never taller", async ({ page }) => {
+  await open(page);
+  const frame = windowOf(page, "drawer-share");
+  const one = drawer(page, "drawer-share");
+  await frame.evaluate((el) => {
+    el.style.display = "block";
+    el.style.blockSize = "240px"; // allow-literal: the window the defect was measured in
+  });
+  await frame.scrollIntoViewIfNeeded();
+  const limit = await share(page);
+  const edge = await inner(frame);
+  expect(edge.height).toBeCloseTo(238, 0);
+
+  // GIVEN A SHARE, it is that share of the box, with little in it.
+  await expect(one).toHaveAttribute("data-nd-share", "30");
+  await settled(one);
+  expect((await box(one)).height, "a share is not that share of the box").toBeCloseTo(edge.height * 0.3, 0);
+
+  // WITH NO SHARE AND LITTLE IN IT, it is as tall as its content.
+  await one.evaluate((el) => el.removeAttribute("data-nd-share"));
+  await settled(one);
+  const little = (await box(one)).height;
+  const content = await box(one.locator(".nd-example-pane").first());
+  expect(little).toBeGreaterThan(8);
+  expect(little, "a drawer with little in it is taller than its content").toBeCloseTo(content.height, 0);
+  expect(little).toBeLessThan(edge.height * limit);
+
+  // WITH MORE IN IT THAN ANY SHARE HOLDS, it is the cap and the content
+  // scrolls. Measured 800 with the content as the only ceiling.
+  await fill(one);
+  await settled(one);
+  const full = (await box(one)).height;
+  expect(full, "a full drawer is not held to its cap of the box").toBeCloseTo(edge.height * limit, 0);
+  const scroll = await one
+    .locator(".nd-drawer-panel > :not(.nd-drawer-rail)")
+    .evaluate((el) => el.scrollHeight - el.clientHeight);
+  expect(scroll, "what does not fit does not scroll").toBeGreaterThan(1);
+  await one.evaluate((el) => el.setAttribute("data-nd-share", "75"));
+  await settled(one);
+  expect((await box(one)).height, "a share past the cap is not held to it").toBeCloseTo(edge.height * limit, 0);
+
+  // SHUT, IT IS NOTHING, with a share and without one.
+  for (const given of ["20", null]) {
+    await one.evaluate((el, next) => {
+      if (next === null) el.removeAttribute("data-nd-share");
+      else el.setAttribute("data-nd-share", next);
+      el.setAttribute("data-nd-collapsed", "true");
+    }, given);
+    await settled(one);
+    expect((await box(one)).height, `shut, a drawer with share ${given} keeps a height`).toBeLessThanOrEqual(0.5);
+    await one.evaluate((el) => el.setAttribute("data-nd-collapsed", "false"));
+    await settled(one);
+    expect((await box(one)).height).toBeGreaterThan(8);
+  }
+});
+
+test("a work that starts from its content leaves an open drawer its floor, and never nothing", async ({ page }) => {
+  await open(page);
+  const frame = windowOf(page, "drawer-share");
+  const one = drawer(page, "drawer-share");
+  // The window keeps its column. The work asks for its content's height, and
+  // holds more than the window does.
+  await frame.evaluate((el) => {
+    el.style.blockSize = "240px"; // allow-literal: the window the defect was measured in
+    const work = el.querySelector(".nd-example-work");
+    work.style.flex = "1 1 auto";
+    for (let at = 0; at < 40; at += 1) work.append(work.firstElementChild.cloneNode(true));
+  });
+  await fill(one);
+  // Something in the drawer the keyboard stops at.
+  await one.evaluate((el) => {
+    const stop = document.createElement("button");
+    stop.type = "button";
+    stop.textContent = "stop";
+    stop.setAttribute("data-test-stop", "");
+    el.querySelector(".nd-example-pane").prepend(stop);
+  });
+  await frame.scrollIntoViewIfNeeded();
+  const floor = await token(page, "--noctua-target-min");
+  expect(floor).toBeGreaterThan(8);
+
+  for (const given of ["30", null]) {
+    await one.evaluate((el, next) => {
+      if (next === null) el.removeAttribute("data-nd-share");
+      else el.setAttribute("data-nd-share", next);
+    }, given);
+    await settled(one);
+    const drawn = await box(one);
+    // Measured 0 with a floor of nothing: open, in the tab order, not drawn.
+    expect(drawn.height, `an open drawer with share ${given} is drawn at no height`).toBeCloseTo(floor, 0);
+    expect(await one.evaluate((el) => getComputedStyle(el).visibility)).toBe("visible");
+    // The window is still its own height, and the drawer is inside it.
+    const edge = await inner(frame);
+    expect(drawn.bottom).toBeCloseTo(edge.bottom, 1);
+    const spill = await frame.evaluate((el) => el.scrollHeight - el.clientHeight);
+    expect(spill, "the window grew taller than itself").toBeLessThanOrEqual(0);
+    // AND WHERE THE FOCUS GOES, THERE ARE PIXELS: the stop inside it is drawn
+    // inside the drawer's own box once the keyboard is on it.
+    const stop = one.locator("[data-test-stop]");
+    await stop.focus();
+    const at = await box(stop);
+    const seen = Math.min(at.bottom, drawn.bottom) - Math.max(at.top, drawn.top);
+    expect(seen, "the focus is on a control with nothing of it drawn").toBeGreaterThan(8);
+  }
+
+  // SHUT, THE FLOOR GOES WITH IT.
+  await one.evaluate((el) => el.setAttribute("data-nd-collapsed", "true"));
+  await settled(one);
+  expect((await box(one)).height, "a shut drawer keeps its floor").toBeLessThanOrEqual(0.5);
+  expect(await one.evaluate((el) => getComputedStyle(el).visibility)).toBe("hidden");
 });
 
 test("a drawer given a share slides shut from it and back to it", async ({ page }) => {
