@@ -35,7 +35,7 @@ impl ParagraphSize {
     }
 }
 
-/// How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it.
+/// The colour of the text: `default`, `muted` for text that supports the text around it, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ParagraphTone {
     #[default]
@@ -43,11 +43,15 @@ pub enum ParagraphTone {
     Default,
     /// `muted`
     Muted,
+    /// `danger`
+    Danger,
+    /// `success`
+    Success,
 }
 
 impl ParagraphTone {
     /// Every value, in the order the spec declares them.
-    pub const ALL: [Self; 2] = [Self::Default, Self::Muted];
+    pub const ALL: [Self; 4] = [Self::Default, Self::Muted, Self::Danger, Self::Success];
 
     /// The value as it appears in the DOM.
     #[must_use]
@@ -55,6 +59,8 @@ impl ParagraphTone {
         match self {
             Self::Default => "default",
             Self::Muted => "muted",
+            Self::Danger => "danger",
+            Self::Success => "success",
         }
     }
 }
@@ -65,7 +71,7 @@ pub fn Paragraph(
     /// The text size, from the type scale: `small`, `body` or `lead`. `body` is the default.
     #[props(default)]
     size: ParagraphSize,
-    /// How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it.
+    /// The colour of the text: `default`, `muted` for text that supports the text around it, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing.
     #[props(default)]
     tone: ParagraphTone,
     /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.

@@ -68,7 +68,7 @@ impl TextWeight {
     }
 }
 
-/// How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`.
+/// The colour of the text: `default`, `muted` for secondary text, `accent`, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing. Defaults to `default`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TextTone {
     #[default]
@@ -78,11 +78,21 @@ pub enum TextTone {
     Muted,
     /// `accent`
     Accent,
+    /// `danger`
+    Danger,
+    /// `success`
+    Success,
 }
 
 impl TextTone {
     /// Every value, in the order the spec declares them.
-    pub const ALL: [Self; 3] = [Self::Default, Self::Muted, Self::Accent];
+    pub const ALL: [Self; 5] = [
+        Self::Default,
+        Self::Muted,
+        Self::Accent,
+        Self::Danger,
+        Self::Success,
+    ];
 
     /// The value as it appears in the DOM.
     #[must_use]
@@ -91,6 +101,8 @@ impl TextTone {
             Self::Default => "default",
             Self::Muted => "muted",
             Self::Accent => "accent",
+            Self::Danger => "danger",
+            Self::Success => "success",
         }
     }
 }
@@ -104,7 +116,7 @@ pub fn Text(
     /// The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regular`.
     #[props(default)]
     weight: TextWeight,
-    /// How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`.
+    /// The colour of the text: `default`, `muted` for secondary text, `accent`, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing. Defaults to `default`.
     #[props(default)]
     tone: TextTone,
     /// Whether the figures are tabular, so digits line up in a column. Off by default.

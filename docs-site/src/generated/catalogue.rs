@@ -9922,7 +9922,7 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
             DocProp {
                 name: "tone",
                 kind: "enum",
-                values: &["default", "muted"],
+                values: &["default", "muted", "danger", "success"],
                 elements: &[],
                 default: Some("default"),
                 attribute: Some("data-nd-tone"),
@@ -15489,7 +15489,7 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
             DocProp {
                 name: "tone",
                 kind: "enum",
-                values: &["default", "muted", "accent"],
+                values: &["default", "muted", "accent", "danger", "success"],
                 elements: &[],
                 default: Some("default"),
                 attribute: Some("data-nd-tone"),

@@ -8,14 +8,14 @@ import type { ReactNode } from "react";
 
 export type TextSize = "caption" | "small" | "body" | "lead";
 export type TextWeight = "regular" | "medium" | "semibold" | "bold";
-export type TextTone = "default" | "muted" | "accent";
+export type TextTone = "default" | "muted" | "accent" | "danger" | "success";
 
 export interface TextProps {
   /** The size, from the type scale: `caption`, `small`, `body` or `lead`. Defaults to `body`. */
   size?: TextSize;
   /** The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regular`. */
   weight?: TextWeight;
-  /** How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`. */
+  /** The colour of the text: `default`, `muted` for secondary text, `accent`, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing. Defaults to `default`. */
   tone?: TextTone;
   /** Whether the figures are tabular, so digits line up in a column. Off by default. */
   numeric?: boolean;

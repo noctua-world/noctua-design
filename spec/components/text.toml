@@ -23,10 +23,10 @@ doc = "The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regul
 
 [prop.tone]
 type = "enum"
-values = ["default", "muted", "accent"]
+values = ["default", "muted", "accent", "danger", "success"]
 default = "default"
 attribute = "data-nd-tone"
-doc = "How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`."
+doc = "The colour of the text: `default`, `muted` for secondary text, `accent`, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing. Defaults to `default`."
 
 [prop.numeric]
 type = "bool"

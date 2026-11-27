@@ -20099,7 +20099,7 @@ impl Locale {
                     "The text size, from the type scale: `small`, `body` or `lead`. `body` is the default."
                 }
                 Key::ComponentParagraphPropToneDoc => {
-                    "How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it."
+                    "The colour of the text: `default`, `muted` for text that supports the text around it, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing."
                 }
                 Key::ComponentParagraphPropChildrenDoc => "The text.",
                 Key::ComponentPopoverGuidance => {
@@ -21585,7 +21585,7 @@ impl Locale {
                     "The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regular`."
                 }
                 Key::ComponentTextPropToneDoc => {
-                    "How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`."
+                    "The colour of the text: `default`, `muted` for secondary text, `accent`, `danger` or `success`. The words say what went wrong or right, because a colour alone tells some readers nothing. Defaults to `default`."
                 }
                 Key::ComponentTextPropNumericDoc => {
                     "Whether the figures are tabular, so digits line up in a column. Off by default."
@@ -27845,7 +27845,7 @@ impl Locale {
                     "O tamanho do texto, vindo da escala tipográfica: `small`, `body` ou `lead`. `body` é o padrão."
                 }
                 Key::ComponentParagraphPropToneDoc => {
-                    "A intensidade da cor do texto. `muted` é mais discreto que `default`, para um texto que apoia o texto ao redor."
+                    "A cor do texto: `default`, `muted` para um texto que apoia o texto ao redor, `danger` ou `success`. As palavras dizem o que deu errado ou certo, porque a cor sozinha não diz nada a alguns leitores."
                 }
                 Key::ComponentParagraphPropChildrenDoc => "O texto.",
                 Key::ComponentPopoverGuidance => {
@@ -29329,7 +29329,7 @@ impl Locale {
                     "O peso: `regular`, `medium`, `semibold` ou `bold`. Padrão `regular`."
                 }
                 Key::ComponentTextPropToneDoc => {
-                    "Quanto o texto se destaca: `default`, `muted` para texto secundário, ou `accent`. Padrão `default`."
+                    "A cor do texto: `default`, `muted` para texto secundário, `accent`, `danger` ou `success`. As palavras dizem o que deu errado ou certo, porque a cor sozinha não diz nada a alguns leitores. Padrão `default`."
                 }
                 Key::ComponentTextPropNumericDoc => {
                     "Se os algarismos são tabulares, para os dígitos se alinharem em coluna. Desligado por padrão."
@@ -35745,7 +35745,7 @@ impl Locale {
                     "⟦Thee teext siizee, froom thee typee scaalee: `smaall`, `boody` oor `leeaad`. `boody` iis thee deefaauult.⟧"
                 }
                 Key::ComponentParagraphPropToneDoc => {
-                    "⟦Hoow stroong thee teext cooloouur iis. `muuteed` iis quuiieeteer thaan `deefaauult`, foor teext thaat suuppoorts thee teext aaroouund iit.⟧"
+                    "⟦Thee cooloouur oof thee teext: `deefaauult`, `muuteed` foor teext thaat suuppoorts thee teext aaroouund iit, `daangeer` oor `suucceess`. Thee woords saay whaat weent wroong oor riight, beecaauusee aa cooloouur aaloonee teells soomee reeaadeers noothiing.⟧"
                 }
                 Key::ComponentParagraphPropChildrenDoc => "⟦Thee teext.⟧",
                 Key::ComponentPopoverGuidance => {
@@ -37245,7 +37245,7 @@ impl Locale {
                     "⟦Thee weeiight: `reeguulaar`, `meediiuum`, `seemiiboold` oor `boold`. Deefaauults too `reeguulaar`.⟧"
                 }
                 Key::ComponentTextPropToneDoc => {
-                    "⟦Hoow muuch thee teext staands oouut: `deefaauult`, `muuteed` foor seecoondaary teext, oor `aacceent`. Deefaauults too `deefaauult`.⟧"
+                    "⟦Thee cooloouur oof thee teext: `deefaauult`, `muuteed` foor seecoondaary teext, `aacceent`, `daangeer` oor `suucceess`. Thee woords saay whaat weent wroong oor riight, beecaauusee aa cooloouur aaloonee teells soomee reeaadeers noothiing. Deefaauults too `deefaauult`.⟧"
                 }
                 Key::ComponentTextPropNumericDoc => {
                     "⟦Wheetheer thee fiiguurees aaree taabuulaar, soo diigiits liinee uup iin aa cooluumn. OOff by deefaauult.⟧"
