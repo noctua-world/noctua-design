@@ -79,11 +79,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # Tokens first: the React package names it as a dependency, and a version
-      # that is not on the registry yet is a package nobody can install.
+      # that is not on the registry yet is a package nobody can install. The
+      # faces go last, as they do on crates.io: nothing here depends on them, so
+      # a refusal of their name holds up nothing a consumer installs.
       - name: Pack and publish
         run: |
           mkdir -p packed
-          for pkg in tokens dist fonts react; do
+          for pkg in tokens dist react fonts; do
             echo "::group::@noctua-world/design-$pkg"
             (cd "packages/$pkg" && pnpm pack --pack-destination ../../packed)
             # `./` is load-bearing. A bare `packed/x.tgz` has a slash and no
