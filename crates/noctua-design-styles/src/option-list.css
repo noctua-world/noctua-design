@@ -82,8 +82,13 @@
  * to stay legible on it (`NOCTUA.md §12.4`). The bar is the half that is not a
  * colour.
  *
- * After the hover rule, so a row that is both reads as active. */
-.nd-option-item[data-nd-active="true"] {
+ * After the hover rule, so a row that is both reads as active.
+ *
+ * AND A SECOND SEAT'S PLACE IN THE LIST IS DRAWN BY THE SAME RULE. The mark is
+ * one attribute on one option, so another seat's keyboard has nowhere to be
+ * written but its own attribute, `data-nd-seat-option` (`dist/seats.js`), and
+ * `seat_twin` refuses the mark written without it. */
+.nd-option-item:is([data-nd-active="true"], [data-nd-seat-option]) {
   background: var(--nc-color-surface-raised);
   border-inline-start-color: var(--nc-color-selected);
 }
@@ -99,7 +104,7 @@
     border-inline-start-color: Canvas;
   }
 
-  .nd-option-item[data-nd-active="true"] {
+  .nd-option-item:is([data-nd-active="true"], [data-nd-seat-option]) {
     border-inline-start-color: Highlight;
   }
 }

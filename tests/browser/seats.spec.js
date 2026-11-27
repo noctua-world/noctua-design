@@ -1208,6 +1208,12 @@ test("a seat's state moves with it, and is stamped where the pseudo-class would 
     out.active = [read(label, "active"), read(choice, "active"), read(label.control, "active")];
     seats.seatDrag("2", label);
     out.drag = [read(label, "drag"), read(choice, "drag")];
+    // Where a seat's keyboard is in a list is one option, as the mark it
+    // stands for is, and it moves as the others do.
+    seats.seatOption("2", label);
+    out.option = [read(label, "option"), read(choice, "option")];
+    seats.seatOption("2", other);
+    out.moved = [read(label, "option"), read(other, "option")];
 
     // A second seat sorts into the list, and a seat that leaves takes
     // everything of its own and nothing else.
@@ -1218,7 +1224,7 @@ test("a seat's state moves with it, and is stamped where the pseudo-class would 
     out.cleared = [
       read(label.control, "focus"),
       document.querySelectorAll(
-        '[data-nd-seat-hover], [data-nd-seat-active], [data-nd-seat-drag]',
+        '[data-nd-seat-hover], [data-nd-seat-active], [data-nd-seat-drag], [data-nd-seat-option]',
       ).length,
     ];
     seats.clearSeat("1");
@@ -1262,6 +1268,8 @@ test("a seat's state moves with it, and is stamped where the pseudo-class would 
   expect(state.focus).toEqual(["2", null, null]);
   expect(state.active).toEqual(["2", "2", "2"]);
   expect(state.drag).toEqual(["2", null]);
+  expect(state.option).toEqual(["2", null]);
+  expect(state.moved).toEqual([null, "2"]);
   expect(state.sorted).toBe("1 10 2");
   expect(state.cleared).toEqual(["1 10", 0]);
   expect(state.empty).toBe(0);
@@ -1294,7 +1302,8 @@ test("a host with no script of its own moves a seat by dispatching an event", as
     say(button, { seat: "7", state: "focus" });
     say(button, { seat: "7", state: "active" });
     say(button, { seat: "7", state: "drag" });
-    out.on = ["hover", "focus", "active", "drag"].map(read);
+    say(button, { seat: "7", state: "option" });
+    out.on = ["hover", "focus", "active", "drag", "option"].map(read);
 
     say(button, { seat: "7", state: "active", on: false });
     out.released = read("active");
@@ -1303,7 +1312,7 @@ test("a host with no script of its own moves a seat by dispatching an event", as
     out.away = read("hover");
     // And a seat that left takes the rest.
     say(document, { seat: "7", on: false });
-    out.gone = ["hover", "focus", "active", "drag"].map(read);
+    out.gone = ["hover", "focus", "active", "drag", "option"].map(read);
 
     // A detail that names no seat, or no state there is, is refused out loud:
     // a listener's throw reaches the window as an `error` event. And one event
@@ -1339,10 +1348,10 @@ test("a host with no script of its own moves a seat by dispatching an event", as
   });
 
   expect(state.before).toBeNull();
-  expect(state.on).toEqual(["7", "7", "7", "7"]);
+  expect(state.on).toEqual(["7", "7", "7", "7", "7"]);
   expect(state.released).toBeNull();
   expect(state.away).toBeNull();
-  expect(state.gone).toEqual([null, null, null, null]);
+  expect(state.gone).toEqual([null, null, null, null, null]);
   expect(state.errors).toEqual(Array(6).fill("TypeError"));
   expect(state.guessed).toBe(0);
   expect(state.after).toBeNull();

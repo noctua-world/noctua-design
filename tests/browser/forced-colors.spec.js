@@ -53,6 +53,31 @@ test("the active option of a list is told from its neighbour, where the keyboard
   ).toBeGreaterThan(0);
 });
 
+test("a second seat's option is told from its neighbour too", async ({ page }) => {
+  await page.goto(url(PAGE.optionList));
+  await forceColours(page);
+  await showParts(page);
+  const root = page.locator('[data-nd-option-list="walk"][data-nd-enhanced]');
+  await expect(root).toBeAttached();
+  await page.mouse.move(0, 0);
+  // No keyboard of the window's own is in the list: the seat's is all there is.
+  await expect(root.locator('.nd-option-item[data-nd-active="true"]')).toHaveCount(0);
+  const seated = root.locator('.nd-option-item[data-nd-value="help"]');
+  await seated.evaluate(async (element) => {
+    const tag = document.querySelector('script[type="module"][src*="shell.js"]');
+    const seats = await import(new URL("seats.js", tag.src).href);
+    seats.seatOption("2", element);
+  });
+  await expect(seated).toHaveAttribute("data-nd-seat-option", "2");
+  // Nothing focused the list, so nothing brought it into the picture.
+  await root.locator(".nd-option-list-items").scrollIntoViewIfNeeded();
+  const other = root.locator(".nd-option-item:not([data-nd-seat-option])").first();
+  expect(
+    await differing(page, await strip(page, seated, "left", 6), await strip(page, other, "left", 6)),
+    "a second seat's option looks like every other row",
+  ).toBeGreaterThan(0);
+});
+
 test("the line between two panes is still drawn", async ({ page }) => {
   await page.goto(url(PAGE.split));
   await forceColours(page);

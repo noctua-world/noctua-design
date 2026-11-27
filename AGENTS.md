@@ -600,6 +600,7 @@ styled exactly like the pseudo-class (`NOCTUA.md §9.7`, §12.18):
 | `data-nd-seat-focus` | `:focus-visible`, and `:focus` | the element alone |
 | `data-nd-seat-active` | `:active` | the element, every ancestor, and the control of a `<label>` among them |
 | `data-nd-seat-drag` | what that seat is dragging | the element alone |
+| `data-nd-seat-option` | `data-nd-active="true"`, the option a list's keyboard is on | the element alone |
 
 The value is the ids of the seats in that state there, separated by spaces and sorted, and a rule
 asks only whether the attribute is present. In a component stylesheet a state pseudo-class is
@@ -628,6 +629,19 @@ other way, a seat attribute inside `@media (hover: hover)`, any state but `:hove
 states asked for together, a sibling that is not where its native rule puts it, and a seat attribute
 outside the twin form with no native rule before it.
 `data-nd-seat-drag` stands for no pseudo-class and owes no native rule.
+
+**A mark a caller writes has a twin as a state does.** A list walked by the keyboard moves a mark
+and never the focus, so where the system's own keyboard is in one is `data-nd-active="true"` on
+the option, which `OptionItem`'s `active` writes. It is one attribute on one option, so a second
+seat's place in the same list is `data-nd-seat-option` (`seatOption`), and a rule writes the two
+together and no other way: `:is([data-nd-active="true"], [data-nd-seat-option])`. `seat_twin`
+refuses the mark with a value outside that form, in any case or quoting, and the seat's attribute
+outside it. There is no sibling form, because a mark stands behind no hover query. A valueless
+`[data-nd-active]` is a script's own toggle on a list it alone walks (`Select`, `Search`,
+`DateInput`): no caller writes it and no seat can be put there, so the gate reads only the mark
+written with its value. It draws and announces nothing: `aria-activedescendant` is the system's
+own seat's. `tests/browser/option-list.spec.js` holds the two to one picture, and
+`tests/browser/forced-colors.spec.js` holds the seat's row apart from its neighbours there.
 
 **A state drawn in colour is drawn again under forced colours.** There the system paints every
 fill as the window and every border, a transparent one included, in the text colour, so a state
@@ -687,7 +701,7 @@ back every timer and frame callback a page has waiting once it is prepared and r
 an example may count, and no page is left out of the sweep for it.
 
 **Nothing writes the attributes by hand**: `dist/seats.js` stamps them where the pseudo-class
-would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat`
+would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag`, `seatOption` and `clearSeat`, or an `nd-seat`
 event for a host with no script of its own — and how a system delivers a second seat is the
 host's to know (`NOCTUA.md §5.12`). A seat id is a string or a number with no space in it, and
 anything else is refused.

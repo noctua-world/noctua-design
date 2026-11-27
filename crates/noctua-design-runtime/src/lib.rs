@@ -35,7 +35,7 @@
 //! | `date-input.js` | `enhanceDateInputs()` — the three boxes: stepping, paste, the locale's own order |
 //! | `choice.js` | `enhanceChoices()` — a switch turns on, an item in a group becomes the chosen one, and a `change` says so |
 //! | `search.js`, `search-match.js` | `enhanceSearches()` — the listbox, the hotkey, the recent queries, and the ranking behind them |
-//! | `seats.js` | `seatHover()`, `seatFocus()`, `seatPress()`, `seatDrag()` — a second seat's state, written as the attributes every state rule is twinned with |
+//! | `seats.js` | `seatHover()`, `seatFocus()`, `seatPress()`, `seatDrag()`, `seatOption()` — a second seat's state, written as the attributes every state rule is twinned with |
 //!
 //! # Why a crate holds JavaScript
 //!

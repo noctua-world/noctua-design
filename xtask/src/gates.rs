@@ -734,6 +734,53 @@ const SEAT_TWINS: [(&str, &str, &str); 5] = [
     ),
 ];
 
+/// A mark a caller writes where the system's own keyboard is, and the form a
+/// selector writes it in beside the seat attribute that stands for it.
+///
+/// NOT A PSEUDO-CLASS, AND HELD TO THE SAME RULE. A list walked by the
+/// keyboard moves a mark and never the focus, so where the keyboard is in one
+/// is `data-nd-active="true"` on the option, which `OptionItem`'s `active`
+/// prop writes. It is one attribute on one option, as `:hover` is one
+/// pointer's, so a second seat's place in the list is `data-nd-seat-option`
+/// and the rule that draws the one draws the other. There is no sibling form:
+/// a mark is behind no hover query, so the twin form is always writable.
+///
+/// THE VALUE IS WHAT TELLS THIS MARK FROM A SCRIPT'S OWN. `Select`, `Search`
+/// and `DateInput` toggle a valueless `data-nd-active` on a row of a list
+/// their script alone walks. No caller writes it and no seat can be put
+/// there, so [`seat_mark`] reads only the attribute written with a value.
+const SEAT_MARKS: [(&str, &str); 1] = [(
+    "[data-nd-active=\"true\"]",
+    ":is([data-nd-active=\"true\"], [data-nd-seat-option])",
+)];
+
+/// What is wrong with a selector that names a caller's mark outside its twin
+/// form, if it does: with the twin forms of [`SEAT_MARKS`] taken out, no
+/// `data-nd-active` written with a value is left, in any case or quoting.
+fn seat_mark(selector: &str) -> Option<String> {
+    let mut rest = selector.to_owned();
+    for (_, twinned) in SEAT_MARKS {
+        rest = rest.replace(twinned, "");
+    }
+    let lower: String = rest
+        .to_ascii_lowercase()
+        .chars()
+        .filter(|here| !here.is_whitespace())
+        .collect();
+    let valued = lower
+        .match_indices("data-nd-active")
+        .any(|(at, name)| !lower[at + name.len()..].starts_with(']'));
+    if !valued {
+        return None;
+    }
+    let (native, twinned) = SEAT_MARKS[0];
+    Some(format!(
+        "`{selector}` names where the keyboard is in a list by the system's own mark alone, so \
+         a second seat's place in that list cannot be shown (NOCTUA.md §9.7). Write the twin \
+         form `{twinned}` where it writes `{native}`, with the value quoted exactly so"
+    ))
+}
+
 /// One style rule, as [`seat_twin`] compares it.
 #[derive(Debug)]
 struct StyleRule {
@@ -1000,6 +1047,14 @@ fn seat_sibling(selector: &str) -> (usize, Vec<Together>, String) {
     let mut rest = selector;
     'scan: while let Some(here) = rest.chars().next() {
         if here == ':' {
+            // A mark's twin holds no state: it is itself in a sibling.
+            for (_, twinned) in SEAT_MARKS {
+                if rest.starts_with(twinned) {
+                    sibling.push_str(twinned);
+                    rest = &rest[twinned.len()..];
+                    continue 'scan;
+                }
+            }
             for (name, twinned, attribute) in SEAT_TWINS {
                 if rest.starts_with(twinned) {
                     written += 1;
@@ -1077,7 +1132,11 @@ fn seat_native(selector: &str) -> (usize, Vec<String>) {
     let mut rest = selector;
     'scan: while let Some(here) = rest.chars().next() {
         if here == ':' {
-            for (_, twinned, _) in SEAT_TWINS {
+            for twinned in SEAT_TWINS
+                .iter()
+                .map(|(_, twinned, _)| *twinned)
+                .chain(SEAT_MARKS.iter().map(|(_, twinned)| *twinned))
+            {
                 if rest.starts_with(twinned) {
                     for native in &mut natives {
                         native.push_str(twinned);
@@ -1345,7 +1404,8 @@ fn seat_orphan(
     let remedy = match natives {
         [] => "A rule asks only whether a seat attribute is present, written \
                `[data-nd-seat-hover]`, `[data-nd-seat-focus]`, `[data-nd-seat-active]` or \
-               `[data-nd-seat-drag]`"
+               `[data-nd-seat-drag]`, and `[data-nd-seat-option]` only inside \
+               `:is([data-nd-active=\"true\"], [data-nd-seat-option])`"
             .to_owned(),
         [one, ..] => format!(
             "Write the twin form, or keep the native rule `{one}` with the same declarations \
@@ -1560,6 +1620,10 @@ fn seat_prelude(prelude: &str) -> Option<String> {
 /// refused by name ([`seat_misplaced`]): `:focus-within` inside `:has(`, and a
 /// bare state inside `:not(`.
 ///
+/// A MARK A CALLER WRITES IS HELD AS A STATE IS ([`SEAT_MARKS`], [`seat_mark`]):
+/// where the keyboard is in a list is an attribute on one option, so it is
+/// written with the seat attribute that stands for it and no other way.
+///
 /// Returns how many state pseudo-classes it read, so a caller can tell a pass
 /// from a sweep that looked at nothing.
 fn seat_twin(file: &str, text: &str, findings: &mut Vec<Finding>) -> usize {
@@ -1602,7 +1666,8 @@ fn seat_twin(file: &str, text: &str, findings: &mut Vec<Finding>) -> usize {
         let (states, attributes) = seat_mentions(&rule.selector);
         checked += states;
         let (loose, natives) = seat_native(&rule.selector);
-        if states == 0 && attributes == 0 && !has_escape(&rule.selector) {
+        let mark = seat_mark(&rule.selector);
+        if states == 0 && attributes == 0 && mark.is_none() && !has_escape(&rule.selector) {
             continue;
         }
         let (first, last) = rule.lines;
@@ -1610,6 +1675,10 @@ fn seat_twin(file: &str, text: &str, findings: &mut Vec<Finding>) -> usize {
             .get(first - 1..last)
             .is_some_and(|prelude| prelude.iter().any(|line| line.contains(ALLOW)))
         {
+            continue;
+        }
+        if let Some(message) = mark {
+            report(first, message);
             continue;
         }
         if let Some(message) = seat_unread(rule, written, (states, attributes)) {
@@ -2212,6 +2281,58 @@ mod tests {
             assert_eq!(findings.len(), 1, "{bare}");
             assert_eq!(checked, 1, "{bare}");
         }
+    }
+
+    /// The mark a caller writes where the keyboard is in a list has its twin
+    /// too, and no other way to be written.
+    ///
+    /// The first consumer drew a second seat's place in a list as a focus on
+    /// the option, which the stylesheet draws round the list: the active
+    /// option was `.nd-option-item[data-nd-active="true"]` and nothing a seat
+    /// could be written as.
+    #[test]
+    fn a_callers_mark_is_written_with_its_seat_twin() {
+        const TWIN: &str = ".a:is([data-nd-active=\"true\"], [data-nd-seat-option])";
+        let (findings, _) = seats(&format!(
+            "{TWIN} {{ color: inherit; }}\n\
+             @media (forced-colors: active) {{\n  {TWIN} > .b {{ color: inherit; }}\n}}\n\
+             {TWIN}:is(:hover, [data-nd-seat-hover]) {{ color: inherit; }}"
+        ));
+        assert!(findings.is_empty(), "{findings:?}");
+
+        for bare in [
+            ".a[data-nd-active=\"true\"] { color: inherit; }",
+            ".a[data-nd-active='true'] { color: inherit; }",
+            ".a[data-nd-active=true] { color: inherit; }",
+            ".a[DATA-ND-ACTIVE=\"true\"] { color: inherit; }",
+            ".a[ data-nd-active = \"true\" ] { color: inherit; }",
+            ".a[data-nd-active=\"false\"] { color: inherit; }",
+            ".a:not([data-nd-active=\"true\"]) { color: inherit; }",
+            ".a[data-nd-active=\"true\"], .a[data-nd-seat-option] { color: inherit; }",
+            ".a:is([data-nd-active=\"true\"], [data-nd-seat-hover]) { color: inherit; }",
+        ] {
+            let (findings, _) = seats(bare);
+            assert_eq!(findings.len(), 1, "{bare}: {findings:?}");
+            assert!(
+                findings[0].message.contains("the system's own mark alone"),
+                "{bare}"
+            );
+        }
+
+        // The seat's attribute alone draws a seat as the keyboard never is.
+        let (findings, _) = seats(".a[data-nd-seat-option] { color: inherit; }");
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert!(findings[0].message.contains("seat attribute alone"));
+
+        // Behind the hover query it would wait on the window's own pointer.
+        let (findings, _) = seats(&format!(
+            "@media (hover: hover) {{\n  {TWIN} {{ color: inherit; }}\n}}"
+        ));
+        assert_eq!(findings.len(), 1, "{findings:?}");
+
+        // A script's own toggle has no value, and is no caller's mark.
+        let (findings, _) = seats(".a[data-nd-active] > .b { color: inherit; }");
+        assert!(findings.is_empty(), "{findings:?}");
     }
 
     #[test]
